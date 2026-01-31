@@ -25,11 +25,12 @@ class ChooseServerViewModel
             constructor(
                 private val plexLoginService: PlexLoginService,
                 private val plexLoginRepo: PlexLoginRepo,
+                private val exceptionHandler: CoroutineExceptionHandler,
             ) : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(ChooseServerViewModel::class.java)) {
-                        return ChooseServerViewModel(plexLoginService, plexLoginRepo) as T
+                        return ChooseServerViewModel(plexLoginService, plexLoginRepo, exceptionHandler) as T
                     }
                     throw IllegalArgumentException("Unknown ViewHolder class")
                 }

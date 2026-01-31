@@ -138,7 +138,7 @@ class CachedFileManager
                         ).show()
                     }
                     if (errors.isEmpty()) {
-                        DownloadNotificationWorker.start()
+                        DownloadNotificationWorker.start(applicationContext)
                     }
                 }
             }
@@ -314,7 +314,7 @@ class CachedFileManager
                         totalBlocks: Int,
                     ) {
                         Timber.i("Starting download!")
-                        DownloadNotificationWorker.start()
+                        DownloadNotificationWorker.start(applicationContext)
                         super.onResumed(download)
                     }
 

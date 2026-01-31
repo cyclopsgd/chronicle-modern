@@ -50,9 +50,8 @@ class CurrentlyPlayingFragment : Fragment() {
     }
 
     override fun onAttach(context: Context) {
+        super.onAttach(context)
         currentlyPlayingInterface = (context as MainActivity).getCurrentlyPlayingInterface()
-        context.activityComponent!!.inject(this)
-        super.onAttach(context as Context)
     }
 
     override fun onStart() {

@@ -2,7 +2,6 @@ package local.oss.chronicle.data.local
 
 import android.content.SharedPreferences
 import local.oss.chronicle.BuildConfig
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_ALLOW_AUTO
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_AUTO_REWIND_ENABLED
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_BOOK_COVER_STYLE

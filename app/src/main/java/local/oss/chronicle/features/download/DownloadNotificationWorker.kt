@@ -12,13 +12,16 @@ import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import androidx.work.NetworkType
 import com.tonyodev.fetch2.*
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.application.MainActivity.Companion.FLAG_OPEN_ACTIVITY_TO_AUDIOBOOK_WITH_ID
+import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.application.MainActivity.Companion.REQUEST_CODE_PREFIX_OPEN_ACTIVITY_TO_AUDIOBOOK_WITH_ID
 import local.oss.chronicle.data.model.Audiobook
 import local.oss.chronicle.data.model.NO_AUDIOBOOK_FOUND_ID
@@ -32,13 +35,16 @@ import kotlin.math.min
  *
  * TODO: write extension functions to turn fetch calls into suspend functions
  */
-class DownloadNotificationWorker(
-    context: Context,
-    parameters: WorkerParameters,
-) : CoroutineWorker(context, parameters) {
-    private val fetch: Fetch = Injector.get().fetch()
+@HiltWorker
+class DownloadNotificationWorker
+    @AssistedInject
+    constructor(
+        @Assisted context: Context,
+        @Assisted parameters: WorkerParameters,
+        private val fetch: Fetch,
+        private val bookRepository: IBookRepository,
+    ) : CoroutineWorker(context, parameters) {
     private val notificationManager = NotificationManagerCompat.from(applicationContext)
-    private val bookRepository = Injector.get().bookRepo()
 
     private val cancelAllDesc =
         applicationContext.getString(R.string.download_notification_cancel_all)
@@ -504,7 +510,7 @@ class DownloadNotificationWorker(
         const val ACTION_CANCEL_ALL_DOWNLOADS_ID = 9212
 
         /** Start [DownloadNotificationWorker] if it is not already running */
-        fun start() {
+        fun start(context: Context) {
             val syncWorkerConstraints =
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -514,7 +520,7 @@ class DownloadNotificationWorker(
                     .setConstraints(syncWorkerConstraints)
                     .build()
 
-            Injector.get().workManager().beginUniqueWork(
+            WorkManager.getInstance(context).beginUniqueWork(
                 DOWNLOAD_WORKER_ID,
                 ExistingWorkPolicy.KEEP,
                 worker,

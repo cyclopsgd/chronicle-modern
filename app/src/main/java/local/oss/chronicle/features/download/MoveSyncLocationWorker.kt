@@ -8,23 +8,31 @@ import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.work.HiltWorker
 import androidx.work.*
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
+import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.data.model.MediaItemTrack
+import javax.inject.Named
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import kotlin.math.roundToInt
 
-class MoveSyncLocationWorker(
-    context: Context,
-    parameters: WorkerParameters,
-) : CoroutineWorker(context, parameters) {
+@HiltWorker
+class MoveSyncLocationWorker
+    @AssistedInject
+    constructor(
+        @Assisted context: Context,
+        @Assisted parameters: WorkerParameters,
+        private val prefsRepo: PrefsRepo,
+        @Named("externalDeviceDirs") private val externalDeviceDirs: List<File>,
+    ) : CoroutineWorker(context, parameters) {
     private val notificationManager = NotificationManagerCompat.from(applicationContext)
-    private val prefsRepo = Injector.get().prefsRepo()
 
     /** Moves all previously downloaded files to [PrefsRepo.cachedMediaDir] */
     override suspend fun doWork() =
@@ -34,7 +42,7 @@ class MoveSyncLocationWorker(
 
             val activeDownloadDir = prefsRepo.cachedMediaDir
             val inactiveSyncLocations =
-                Injector.get().externalDeviceDirs().filter {
+                externalDeviceDirs.filter {
                     it.path != activeDownloadDir.path
                 }
 

@@ -35,7 +35,6 @@ import kotlinx.coroutines.*
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.R
 import local.oss.chronicle.application.ChronicleApplication
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.ITrackRepository.Companion.TRACK_NOT_FOUND
