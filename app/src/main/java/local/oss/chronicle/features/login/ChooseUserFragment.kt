@@ -18,9 +18,11 @@ import local.oss.chronicle.data.sources.plex.IPlexLoginRepo
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.data.sources.plex.model.PlexUser
 import local.oss.chronicle.databinding.OnboardingPlexChooseUserBinding
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /** Handles the picking of user profiles. */
+@AndroidEntryPoint
 class ChooseUserFragment : Fragment() {
     companion object {
         @JvmStatic
@@ -75,10 +77,6 @@ class ChooseUserFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        ((activity as Activity).application as ChronicleApplication)
-            .appComponent
-            .inject(this)
-        super.onCreate(savedInstanceState)
 
         val tempBinding = OnboardingPlexChooseUserBinding.inflate(inflater, container, false)
         tempBinding.lifecycleOwner = viewLifecycleOwner

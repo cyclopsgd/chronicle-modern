@@ -1,6 +1,5 @@
 package local.oss.chronicle.features.collections
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +10,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.data.model.Audiobook
@@ -24,6 +23,7 @@ import local.oss.chronicle.navigation.Navigator
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class CollectionDetailsFragment : Fragment() {
     companion object {
@@ -57,12 +57,6 @@ class CollectionDetailsFragment : Fragment() {
     lateinit var viewModelFactory: CollectionDetailsViewModel.Factory
 
     var adapter: AudiobookAdapter? = null
-
-    override fun onAttach(context: Context) {
-        (requireActivity() as MainActivity).activityComponent!!.inject(this)
-        Timber.i("CollectionDetailsFragment onAttach()")
-        super.onAttach(context)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

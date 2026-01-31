@@ -20,9 +20,11 @@ import kotlinx.coroutines.launch
 import local.oss.chronicle.R
 import local.oss.chronicle.application.ChronicleApplication
 import local.oss.chronicle.databinding.FragmentPlexOauthBinding
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class PlexOAuthDialogFragment : DialogFragment() {
     companion object {
         private const val ARG_OAUTH_URL = "oauth_url"
@@ -54,12 +56,6 @@ class PlexOAuthDialogFragment : DialogFragment() {
     private var onAuthSuccessListener: (() -> Unit)? = null
     private var onAuthCancelledListener: (() -> Unit)? = null
 
-    override fun onAttach(context: Context) {
-        (requireActivity().application as ChronicleApplication)
-            .appComponent
-            .inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

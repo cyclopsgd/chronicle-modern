@@ -12,9 +12,11 @@ import androidx.lifecycle.ViewModelProvider
 import local.oss.chronicle.application.ChronicleApplication
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.databinding.OnboardingLoginBinding
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
     companion object {
         @JvmStatic
@@ -31,12 +33,6 @@ class LoginFragment : Fragment() {
 
     private lateinit var loginViewModel: LoginViewModel
 
-    override fun onAttach(context: Context) {
-        ((activity as Activity).application as ChronicleApplication)
-            .appComponent
-            .inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

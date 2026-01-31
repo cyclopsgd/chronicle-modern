@@ -38,9 +38,11 @@ import local.oss.chronicle.databinding.FragmentLibraryBinding
 import local.oss.chronicle.navigation.Navigator
 import local.oss.chronicle.views.checkRadioButtonWithTag
 import timber.log.Timber
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /** TODO: refactor search to reuse code from Library + Home fragments */
+@AndroidEntryPoint
 class LibraryFragment : Fragment() {
     companion object {
         fun newInstance() = LibraryFragment()
@@ -303,12 +305,6 @@ class LibraryFragment : Fragment() {
 
     private fun openAudiobookDetails(audiobook: Audiobook) {
         navigator.showDetails(audiobook.id, audiobook.title, audiobook.isCached)
-    }
-
-    override fun onAttach(context: Context) {
-        (activity as MainActivity).activityComponent!!.inject(this)
-        super.onAttach(context)
-        Timber.i("Reattached!")
     }
 
     override fun onDestroyView() {

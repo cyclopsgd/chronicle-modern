@@ -14,8 +14,10 @@ import androidx.lifecycle.ViewModelProvider
 import local.oss.chronicle.application.ChronicleApplication
 import local.oss.chronicle.data.model.ServerModel
 import local.oss.chronicle.databinding.OnboardingPlexChooseServerBinding
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class ChooseServerFragment : Fragment() {
     companion object {
         @JvmStatic
@@ -30,12 +32,6 @@ class ChooseServerFragment : Fragment() {
 
     private lateinit var serverAdapter: ServerListAdapter
 
-    override fun onAttach(context: Context) {
-        ((activity as Activity).application as ChronicleApplication)
-            .appComponent
-            .inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

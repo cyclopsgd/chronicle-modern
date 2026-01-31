@@ -23,8 +23,10 @@ import local.oss.chronicle.features.library.AudiobookAdapter
 import local.oss.chronicle.features.library.AudiobookSearchAdapter
 import local.oss.chronicle.features.library.LibraryFragment.AudiobookClick
 import local.oss.chronicle.navigation.Navigator
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: HomeViewModel.Factory
@@ -41,7 +43,6 @@ class HomeFragment : Fragment() {
     lateinit var plexConfig: PlexConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        (requireActivity() as MainActivity).activityComponent!!.inject(this)
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this, viewModelFactory).get(HomeViewModel::class.java)
     }

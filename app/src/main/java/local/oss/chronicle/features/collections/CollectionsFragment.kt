@@ -1,6 +1,6 @@
 package local.oss.chronicle.features.collections
 
-import android.content.Context
+import dagger.hilt.android.AndroidEntryPoint
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -37,6 +37,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /** TODO: refactor search to reuse code from Library + Home fragments */
+@AndroidEntryPoint
 class CollectionsFragment : Fragment() {
     companion object {
         fun newInstance() = CollectionsFragment()
@@ -237,12 +238,6 @@ class CollectionsFragment : Fragment() {
 
     private fun openAudiobookDetails(audiobook: Audiobook) {
         navigator.showDetails(audiobook.id, audiobook.title, audiobook.isCached)
-    }
-
-    override fun onAttach(context: Context) {
-        (activity as MainActivity).activityComponent!!.inject(this)
-        super.onAttach(context)
-        Timber.i("Reattached!")
     }
 
     override fun onDestroyView() {

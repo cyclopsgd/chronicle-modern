@@ -16,9 +16,11 @@ import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.data.sources.plex.PlexPrefsRepo
 import local.oss.chronicle.databinding.OnboardingPlexChooseLibraryBinding
 import local.oss.chronicle.util.Event
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class ChooseLibraryFragment : Fragment() {
     companion object {
         @JvmStatic
@@ -48,9 +50,6 @@ class ChooseLibraryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        ((activity as Activity).application as ChronicleApplication).appComponent.inject(this)
-        super.onCreate(savedInstanceState)
-
         val binding = OnboardingPlexChooseLibraryBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
 
