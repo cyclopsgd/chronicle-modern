@@ -4,6 +4,83 @@
 >
 > **IMPORTANT**: See `MIGRATION_CHANGELOG.md` for ongoing Hilt migration progress tracking and complete todo list.
 
+---
+
+## 🚧 CURRENT WORK IN PROGRESS 🚧
+
+**Phase 1.2: Hilt Migration** - IN PROGRESS (estimated 60-70% complete)
+
+**Last Session Completed:**
+- ✅ Deleted Injector.kt (old Dagger singleton pattern)
+- ✅ Migrated entire data layer (repositories, PlexConfig, CachedFileManager)
+- ✅ Migrated MainActivity and MainActivityViewModel
+- ✅ Converted PlexSyncScrobbleWorker to @HiltWorker
+- ✅ Migrated AudiobookDetailsFragment and AudiobookDetailsViewModel
+- ✅ Created EntryPoints for non-injectable contexts
+
+**Next Tasks - Continue Systematic Migration:**
+
+1. **ViewModels** (~7 files) - Inject `CoroutineExceptionHandler`:
+   - CollectionsViewModel
+   - CurrentlyPlayingViewModel
+   - HomeViewModel
+   - LibraryViewModel
+   - ChooseServerViewModel
+   - ChooseUserViewModel
+   - LoginViewModel
+
+   **Pattern:**
+   ```kotlin
+   class SomeViewModel @Inject constructor(
+       // ... other deps
+       private val exceptionHandler: CoroutineExceptionHandler,
+   ) : ViewModel() {
+       // Replace: Injector.get().unhandledExceptionHandler()
+       // With: exceptionHandler
+   }
+   ```
+
+2. **Remaining Fragments** (~18+ files) - Add `@AndroidEntryPoint`:
+   - Remove `onAttach()` with manual `.inject()` calls
+   - Add `@AndroidEntryPoint` annotation to class
+
+   **Pattern:**
+   ```kotlin
+   @AndroidEntryPoint
+   class SomeFragment : Fragment() {
+       @Inject lateinit var someDependency: SomeDep
+       // Remove onAttach() override that calls inject()
+   }
+   ```
+
+3. **Remaining Workers** (~2-4 files) - Convert to `@HiltWorker`:
+   - DownloadNotificationWorker
+   - MoveSyncLocationWorker
+
+   **Pattern:**
+   ```kotlin
+   @HiltWorker
+   class SomeWorker @AssistedInject constructor(
+       @Assisted context: Context,
+       @Assisted workerParameters: WorkerParameters,
+       private val someDep: SomeDep,
+   ) : Worker(context, workerParameters)
+   ```
+
+**Approach:**
+- Fix all files of one type before moving to next (all ViewModels → all Fragments → Workers)
+- Update `MIGRATION_CHANGELOG.md` after completing each category
+- Commit logical chunks (e.g., "feat: migrate all ViewModels to Hilt")
+- Run build periodically to track remaining errors (~120-140 estimated)
+
+**Environment Variables:**
+- JAVA_HOME: `/c/Users/cyclo/.jdks/jdk-17.0.17+10`
+- SDK Path: `C:/Users/cyclo/AppData/Local/Android/Sdk`
+
+**To Continue:** Start by migrating the 7 ViewModels listed above, then move to Fragments.
+
+---
+
 ## Project Context
 
 You are modernising Chronicle Epilogue (https://github.com/fabiogermann/chronicle), an open-source Plex audiobook player for Android. The goal is to create a premium audiobook experience matching Audible's polish and Prologue's Plex integration.
