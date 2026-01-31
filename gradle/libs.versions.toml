@@ -12,6 +12,7 @@ coreTesting = "2.2.0"
 coroutines = "1.9.0" # 1.10.1 causes KSP/Dagger compatibility issues
 dagger = "2.52" # 2.54 causes KSP/Dagger compatibility issues
 hilt = "2.52"
+hiltExt = "1.2.0"
 hiltNavigationCompose = "1.2.0"
 espresso = "3.6.2"
 screengrab = "2.1.1"
@@ -67,6 +68,8 @@ dagger = { group = "com.google.dagger", name = "dagger", version.ref = "dagger" 
 dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }
+hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltExt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espresso" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }

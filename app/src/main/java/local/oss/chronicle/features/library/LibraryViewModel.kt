@@ -256,7 +256,7 @@ class LibraryViewModel
         val bytesAvailable = prefsRepo.cachedMediaDir.bytesAvailable()
 
         // Calculate space required
-        viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+        viewModelScope.launch(exceptionHandler) {
             val tracks =
                 try {
                     trackRepository.loadAllTracksAsync()

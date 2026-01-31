@@ -55,6 +55,7 @@ class AudiobookMediaSessionCallback
         private val playbackUrlResolver: local.oss.chronicle.data.sources.plex.PlaybackUrlResolver,
         private val playbackStateController: PlaybackStateController,
         private val exceptionHandler: CoroutineExceptionHandler,
+        private val plexMediaService: local.oss.chronicle.data.sources.plex.PlexMediaService,
         defaultPlayer: ExoPlayer,
     ) : MediaSessionCompat.Callback() {
         // Default to ExoPlayer to prevent having a nullable field
@@ -475,7 +476,7 @@ class AudiobookMediaSessionCallback
                     )
                 } else {
                     try {
-                        Injector.get().plexMediaService().startMediaSession(
+                        plexMediaService.startMediaSession(
                             getMediaItemUri(serverId, bookId),
                         )
                     } catch (e: Throwable) {
