@@ -4,15 +4,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.play.publisher)
     id("kotlin-parcelize")
-    id("kotlin-kapt") // Still needed for data binding
+    id("kotlin-kapt") // Still needed for data binding during migration
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
     namespace = "local.oss.chronicle"
-    compileSdk = 36
+    compileSdk = 35
 
     lint {
         abortOnError = false
@@ -23,8 +24,8 @@ android {
 
     defaultConfig {
         applicationId = "local.oss.chronicle"
-        minSdk = 33
-        targetSdk = 36
+        minSdk = 26
+        targetSdk = 35
         versionCode = 43
         versionName = "0.60.18-SNAPSHOT"
 
@@ -90,6 +91,11 @@ android {
     buildFeatures {
         dataBinding = true
         buildConfig = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 }
 
@@ -126,6 +132,34 @@ kapt {
 }
 
 dependencies {
+    // Feature modules
+    implementation(project(":feature:library"))
+    implementation(project(":feature:player"))
+    implementation(project(":feature:downloads"))
+    implementation(project(":feature:settings"))
+
+    // Core modules
+    implementation(project(":core:common"))
+    implementation(project(":core:network"))
+    implementation(project(":core:database"))
+    implementation(project(":core:media"))
+    implementation(project(":core:sync"))
+
+    // Compose
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.activity)
+    implementation(libs.compose.lifecycle.viewmodel)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
 
     implementation(libs.material)
     implementation(libs.glide)
