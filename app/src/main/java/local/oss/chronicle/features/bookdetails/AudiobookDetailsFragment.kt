@@ -1,6 +1,5 @@
 package local.oss.chronicle.features.bookdetails
 
-import android.content.Context
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
 import android.view.*
@@ -12,9 +11,9 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import local.oss.chronicle.R
-import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.PrefsRepo
@@ -29,6 +28,7 @@ import local.oss.chronicle.util.observeEvent
 import timber.log.Timber
 import javax.inject.Inject
 
+@AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class AudiobookDetailsFragment : Fragment() {
     companion object {
@@ -62,12 +62,6 @@ class AudiobookDetailsFragment : Fragment() {
     lateinit var viewModelFactory: AudiobookDetailsViewModel.Factory
 
     lateinit var viewModel: AudiobookDetailsViewModel
-
-    override fun onAttach(context: Context) {
-        (requireActivity() as MainActivity).activityComponent!!.inject(this)
-        Timber.i("AudiobookDetailsFragment onAttach()")
-        super.onAttach(context)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

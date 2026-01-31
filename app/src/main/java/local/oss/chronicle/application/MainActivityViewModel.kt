@@ -34,6 +34,7 @@ class MainActivityViewModel(
     private val mediaServiceConnection: MediaServiceConnection,
     collectionsRepository: CollectionsRepository,
     private val currentlyPlaying: CurrentlyPlaying,
+    private val exceptionHandler: kotlinx.coroutines.CoroutineExceptionHandler,
 ) : ViewModel(), MainActivity.CurrentlyPlayingInterface {
     @Suppress("UNCHECKED_CAST")
     class Factory
@@ -45,6 +46,7 @@ class MainActivityViewModel(
             private val mediaServiceConnection: MediaServiceConnection,
             private val collectionsRepository: CollectionsRepository,
             private val currentlyPlaying: CurrentlyPlaying,
+            private val exceptionHandler: kotlinx.coroutines.CoroutineExceptionHandler,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
@@ -55,6 +57,7 @@ class MainActivityViewModel(
                         mediaServiceConnection,
                         collectionsRepository,
                         currentlyPlaying,
+                        exceptionHandler,
                     ) as T
                 } else {
                     throw IllegalArgumentException(
@@ -141,7 +144,7 @@ class MainActivityViewModel(
         Observer<MediaMetadataCompat> { metadata ->
             metadata.id?.let { trackId ->
                 if (trackId.isNotEmpty()) {
-                    viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+                    viewModelScope.launch(exceptionHandler) {
                         setAudiobook(trackId.toInt())
                     }
                 }
@@ -168,7 +171,7 @@ class MainActivityViewModel(
 
     private fun setAudiobook(trackId: Int) {
         val previousAudiobookId = audiobook.value?.id ?: NO_AUDIOBOOK_FOUND_ID
-        viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+        viewModelScope.launch(exceptionHandler) {
             val bookId = trackRepository.getBookIdForTrack(trackId)
             // Only change the active audiobook if it differs from the one currently in metadata
             if (previousAudiobookId != bookId && bookId != NO_AUDIOBOOK_FOUND_ID) {

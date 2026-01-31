@@ -1,66 +1,53 @@
 package local.oss.chronicle.injection.modules
 
+import android.app.Activity
 import android.content.ComponentName
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.lifecycleScope
+import android.content.Context
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
-import kotlinx.coroutines.CoroutineScope
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.ActivityScoped
 import local.oss.chronicle.features.player.MediaPlayerService
 import local.oss.chronicle.features.player.MediaServiceConnection
 import local.oss.chronicle.features.player.ProgressUpdater
 import local.oss.chronicle.features.player.SimpleProgressUpdater
-import local.oss.chronicle.injection.scopes.ActivityScope
 import local.oss.chronicle.util.ServiceUtils
 import timber.log.Timber
 
 @Module
 @InstallIn(ActivityComponent::class)
-class ActivityModule(private val activity: AppCompatActivity) {
-    @Provides
-    @ActivityScope
-    fun activity(): AppCompatActivity = activity
+abstract class ActivityModule {
 
-    @Provides
-    @ActivityScope
-    fun coroutineScope(): CoroutineScope = activity.lifecycleScope
+    @Binds
+    @ActivityScoped
+    abstract fun bindProgressUpdater(impl: SimpleProgressUpdater): ProgressUpdater
 
-    @Provides
-    @ActivityScope
-    fun fragmentManager(): FragmentManager = activity.supportFragmentManager
+    companion object {
+        @Provides
+        @ActivityScoped
+        fun provideBroadcastManager(@ActivityContext context: Context): LocalBroadcastManager =
+            LocalBroadcastManager.getInstance(context)
 
-    @Provides
-    @ActivityScope
-    fun provideProgressUpdater(progressUpdater: SimpleProgressUpdater): ProgressUpdater = progressUpdater
-
-    @Provides
-    @ActivityScope
-    fun provideBroadcastManager(): LocalBroadcastManager =
-        LocalBroadcastManager.getInstance(
-            activity,
-        )
-
-    @Provides
-    @ActivityScope
-    fun mediaServiceConnection(): MediaServiceConnection {
-        val conn =
-            MediaServiceConnection(
-                activity.applicationContext,
-                ComponentName(activity.applicationContext, MediaPlayerService::class.java),
+        @Provides
+        @ActivityScoped
+        fun provideMediaServiceConnection(@ActivityContext context: Context): MediaServiceConnection {
+            val conn = MediaServiceConnection(
+                context.applicationContext,
+                ComponentName(context.applicationContext, MediaPlayerService::class.java),
             )
-        val doesServiceExist =
-            ServiceUtils.isServiceRunning(
-                activity.applicationContext,
+            val doesServiceExist = ServiceUtils.isServiceRunning(
+                context.applicationContext,
                 MediaPlayerService::class.java,
             )
-        Timber.i("Connecting to existing service? $doesServiceExist")
-        if (doesServiceExist) {
-            conn.connect()
+            Timber.i("Connecting to existing service? $doesServiceExist")
+            if (doesServiceExist) {
+                conn.connect()
+            }
+            return conn
         }
-        return conn
     }
 }

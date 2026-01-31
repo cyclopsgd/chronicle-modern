@@ -19,6 +19,7 @@ import com.tonyodev.fetch2.FetchConfiguration
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import local.oss.chronicle.application.LOG_NETWORK_REQUESTS
@@ -41,19 +42,14 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule(private val app: Application) {
-    companion object {
-        const val OKHTTP_CLIENT_MEDIA = "Media"
-        const val OKHTTP_CLIENT_LOGIN = "Login"
-    }
+object AppModule {
+    const val OKHTTP_CLIENT_MEDIA = "Media"
+    const val OKHTTP_CLIENT_LOGIN = "Login"
 
     @Provides
     @Singleton
-    fun provideContext(): Context = app.applicationContext
-
-    @Provides
-    @Singleton
-    fun provideSharedPrefs(): SharedPreferences = app.getSharedPreferences(APP_NAME, MODE_PRIVATE)
+    fun provideSharedPrefs(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences(APP_NAME, MODE_PRIVATE)
 
     @Provides
     @Singleton
@@ -65,7 +61,8 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    fun provideTrackDao(): TrackDao = getTrackDatabase(app.applicationContext).trackDao
+    fun provideTrackDao(@ApplicationContext context: Context): TrackDao =
+        getTrackDatabase(context).trackDao
 
     @Provides
     @Singleton
@@ -73,7 +70,8 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    fun provideBookDao(): BookDao = getBookDatabase(app.applicationContext).bookDao
+    fun provideBookDao(@ApplicationContext context: Context): BookDao =
+        getBookDatabase(context).bookDao
 
     @Provides
     @Singleton
@@ -81,22 +79,18 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    fun provideCollectionsDao(): CollectionsDao =
-        getCollectionsDatabase(
-            app.applicationContext,
-        ).collectionsDao
+    fun provideCollectionsDao(@ApplicationContext context: Context): CollectionsDao =
+        getCollectionsDatabase(context).collectionsDao
 
     @Provides
     @Singleton
-    fun provideInternalDeviceDirs(): File = app.applicationContext.filesDir
+    fun provideInternalDeviceDirs(@ApplicationContext context: Context): File =
+        context.filesDir
 
     @Provides
     @Singleton
-    fun provideExternalDeviceDirs(): List<File> =
-        ContextCompat.getExternalFilesDirs(
-            app.applicationContext,
-            null,
-        ).toList()
+    fun provideExternalDeviceDirs(@ApplicationContext context: Context): List<File> =
+        ContextCompat.getExternalFilesDirs(context, null).toList()
 
     @Provides
     @Singleton
@@ -104,15 +98,16 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    fun workManager(): WorkManager = WorkManager.getInstance(app)
+    fun workManager(@ApplicationContext context: Context): WorkManager =
+        WorkManager.getInstance(context)
 
     @Provides
     @Singleton
     fun fetchConfig(
-        appContext: Context,
+        @ApplicationContext context: Context,
         @Named(OKHTTP_CLIENT_MEDIA) okHttpClient: OkHttpClient,
     ): FetchConfiguration =
-        FetchConfiguration.Builder(appContext)
+        FetchConfiguration.Builder(context)
             .setDownloadConcurrentLimit(3)
             .createDownloadFileOnEnqueue(false)
             .enableAutoStart(false)
@@ -234,10 +229,10 @@ class AppModule(private val app: Application) {
     @Provides
     @Singleton
     fun frescoConfig(
-        @Named(OKHTTP_CLIENT_MEDIA)
-        okHttpClient: OkHttpClient,
+        @ApplicationContext context: Context,
+        @Named(OKHTTP_CLIENT_MEDIA) okHttpClient: OkHttpClient,
     ) = OkHttpImagePipelineConfigFactory
-        .newBuilder(app, okHttpClient)
+        .newBuilder(context, okHttpClient)
         .setCacheKeyFactory(
             object : DefaultCacheKeyFactory() {
                 override fun getEncodedCacheKey(

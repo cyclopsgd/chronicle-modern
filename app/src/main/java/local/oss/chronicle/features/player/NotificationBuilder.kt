@@ -32,7 +32,6 @@ import local.oss.chronicle.data.model.EMPTY_CHAPTER
 import local.oss.chronicle.data.model.NO_AUDIOBOOK_FOUND_ID
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
-import local.oss.chronicle.injection.scopes.ServiceScope
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -42,7 +41,6 @@ const val NOW_PLAYING_NOTIFICATION: Int = 0xb32229
 
 /** Helper class to encapsulate code for building notifications. */
 @ExperimentalCoroutinesApi
-@ServiceScope
 class NotificationBuilder
     @Inject
     constructor(

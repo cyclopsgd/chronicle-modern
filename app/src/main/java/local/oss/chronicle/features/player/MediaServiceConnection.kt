@@ -9,11 +9,9 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.Builder
 import android.support.v4.media.session.PlaybackStateCompat.STATE_NONE
 import androidx.lifecycle.MutableLiveData
-import local.oss.chronicle.injection.scopes.ActivityScope
 import timber.log.Timber
 import javax.inject.Inject
 
-@ActivityScope
 class MediaServiceConnection
     @Inject
     constructor(

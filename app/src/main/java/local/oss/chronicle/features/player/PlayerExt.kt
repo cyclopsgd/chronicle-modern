@@ -1,10 +1,10 @@
 package local.oss.chronicle.features.player
 
+import android.content.Context
 import android.view.Gravity
 import android.widget.Toast
 import androidx.media3.common.Player
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.application.MILLIS_PER_SECOND
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
 import timber.log.Timber
@@ -39,6 +39,7 @@ fun Player.seekRelative(
 
 /** Skip to next chapter */
 fun Player.skipToNext(
+    context: Context,
     trackListStateManager: TrackListStateManager,
     currentlyPlaying: CurrentlyPlaying,
     progressUpdater: ProgressUpdater,
@@ -65,7 +66,7 @@ fun Player.skipToNext(
     } else {
         val toast =
             Toast.makeText(
-                Injector.get().applicationContext(),
+                context,
                 R.string.skip_forwards_reached_last_chapter,
                 Toast.LENGTH_LONG,
             )
@@ -76,6 +77,7 @@ fun Player.skipToNext(
 
 /** Skip to previous chapter */
 fun Player.skipToPrevious(
+    context: Context,
     trackListStateManager: TrackListStateManager,
     currentlyPlaying: CurrentlyPlaying,
     progressUpdater: ProgressUpdater,

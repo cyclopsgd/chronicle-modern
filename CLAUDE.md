@@ -1,6 +1,8 @@
 # Plex Audiobook Client
 
 > See `DESIGN_SPEC.md` for full design specification, UI/UX research (Audible/Prologue analysis), feature tiers, and architecture rationale.
+>
+> **IMPORTANT**: See `MIGRATION_CHANGELOG.md` for ongoing Hilt migration progress tracking and complete todo list.
 
 ## Project Context
 

@@ -10,24 +10,20 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.slider.Slider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.databinding.ModalBottomSheetSpeedChooserBinding
 import timber.log.Timber
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
+@AndroidEntryPoint
 class ModalBottomSheetSpeedChooser : BottomSheetDialogFragment() {
     private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     @Inject
     lateinit var prefs: PrefsRepo
-
-    override fun onAttach(context: Context) {
-        (requireActivity() as MainActivity).activityComponent!!.inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

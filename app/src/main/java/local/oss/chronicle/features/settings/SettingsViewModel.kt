@@ -1,5 +1,6 @@
 package local.oss.chronicle.features.settings
 
+import android.content.Context
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.text.format.Formatter
 import androidx.lifecycle.*
@@ -7,13 +8,14 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.facebook.drawee.backends.pipeline.Fresco
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.R
 import local.oss.chronicle.application.FEATURE_FLAG_IS_AUTO_ENABLED
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.CollectionsRepository
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
@@ -45,6 +47,7 @@ import javax.inject.Inject
  *       Might be worthwhile to look into alternatives used by other apps?
  */
 class SettingsViewModel(
+    @ApplicationContext private val context: Context,
     private val bookRepository: IBookRepository,
     private val trackRepository: ITrackRepository,
     private val mediaServiceConnection: MediaServiceConnection,
@@ -55,11 +58,14 @@ class SettingsViewModel(
     private val workManager: WorkManager,
     private val plexPrefs: PlexPrefsRepo,
     private val collectionsRepository: CollectionsRepository,
+    private val exceptionHandler: CoroutineExceptionHandler,
+    private val externalDeviceDirs: List<File>,
 ) : ViewModel() {
     @Suppress("UNCHECKED_CAST")
     class Factory
         @Inject
         constructor(
+            @ApplicationContext private val context: Context,
             private val bookRepository: IBookRepository,
             private val trackRepository: ITrackRepository,
             private val prefsRepo: PrefsRepo,
@@ -70,10 +76,13 @@ class SettingsViewModel(
             private val workManager: WorkManager,
             private val plexPrefs: PlexPrefsRepo,
             private val collectionsRepository: CollectionsRepository,
+            private val exceptionHandler: CoroutineExceptionHandler,
+            private val externalDeviceDirs: List<File>,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
                     return SettingsViewModel(
+                        context = context,
                         bookRepository = bookRepository,
                         trackRepository = trackRepository,
                         mediaServiceConnection = mediaServiceConnection,
@@ -84,6 +93,8 @@ class SettingsViewModel(
                         workManager = workManager,
                         plexPrefs = plexPrefs,
                         collectionsRepository = collectionsRepository,
+                        exceptionHandler = exceptionHandler,
+                        externalDeviceDirs = externalDeviceDirs,
                     ) as T
                 } else {
                     throw IllegalArgumentException(
@@ -271,29 +282,24 @@ class SettingsViewModel(
                                 listOf(
                                     when {
                                         prefsRepo.refreshRateMinutes == 0L -> {
-                                            Injector.get()
-                                                .applicationContext().resources.getString(
+                                            context.resources.getString(
                                                     R.string.settings_refresh_rate_always,
                                                 )
                                         }
                                         prefsRepo.refreshRateMinutes < 60 -> {
                                             "${prefsRepo.refreshRateMinutes} " +
-                                                Injector.get()
-                                                    .applicationContext().resources.getString(R.string.minutes)
+                                                context.resources.getString(R.string.minutes)
                                         }
                                         prefsRepo.refreshRateMinutes < 60 * 24 -> {
                                             "${prefsRepo.refreshRateMinutes / 60} " +
-                                                Injector.get()
-                                                    .applicationContext().resources.getString(R.string.hours)
+                                                context.resources.getString(R.string.hours)
                                         }
                                         prefsRepo.refreshRateMinutes <= 60 * 24 * 7 -> {
                                             "${prefsRepo.refreshRateMinutes / (60 * 24)} " +
-                                                Injector.get()
-                                                    .applicationContext().resources.getString(R.string.days)
+                                                context.resources.getString(R.string.days)
                                         }
                                         prefsRepo.refreshRateMinutes > 60 * 24 * 7 -> {
-                                            Injector.get()
-                                                .applicationContext().resources.getString(
+                                            context.resources.getString(
                                                     R.string.settings_refresh_rate_manual,
                                                 )
                                         }
@@ -396,7 +402,7 @@ class SettingsViewModel(
                             placeHolderStrings =
                                 listOf(
                                     Formatter.formatFileSize(
-                                        Injector.get().applicationContext(),
+                                        context,
                                         prefsRepo.cachedMediaDir.bytesAvailable(),
                                     ),
                                 ),
@@ -410,14 +416,14 @@ class SettingsViewModel(
                             override fun onClick() {
                                 showOptionsMenu(
                                     options =
-                                        Injector.get().externalDeviceDirs().map {
+                                        externalDeviceDirs.map {
                                             FormattableString.ResourceString(
                                                 stringRes = R.string.settings_sync_space_available,
                                                 placeHolderStrings =
                                                     listOf(
                                                         it.path,
                                                         Formatter.formatFileSize(
-                                                            Injector.get().applicationContext(),
+                                                            context,
                                                             it.bytesAvailable(),
                                                         ),
                                                     ),
@@ -436,7 +442,7 @@ class SettingsViewModel(
 
                                                 val chosen = formattableString.placeHolderStrings[0]
                                                 val syncLoc =
-                                                    Injector.get().externalDeviceDirs().firstOrNull {
+                                                    externalDeviceDirs.firstOrNull {
                                                         chosen.contains(it.path)
                                                     }
                                                 if (syncLoc != null) {
@@ -546,8 +552,7 @@ class SettingsViewModel(
                             placeHolderStrings =
                                 listOf(
                                     "${prefsRepo.jumpForwardSeconds} " +
-                                        Injector.get()
-                                            .applicationContext().resources.getString(R.string.seconds),
+                                        context.resources.getString(R.string.seconds),
                                 ),
                         ),
                     explanation =
@@ -615,8 +620,7 @@ class SettingsViewModel(
                             placeHolderStrings =
                                 listOf(
                                     "${prefsRepo.jumpBackwardSeconds} " +
-                                        Injector.get()
-                                            .applicationContext().resources.getString(R.string.seconds),
+                                        context.resources.getString(R.string.seconds),
                                 ),
                         ),
                     explanation =
@@ -1011,7 +1015,7 @@ class SettingsViewModel(
         navigateTo: NavigationDestination = DO_NOT_NAVIGATE,
         clearDownloads: Boolean = true,
     ) {
-        viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+        viewModelScope.launch(exceptionHandler) {
             if (clearDownloads) {
                 cachedFileManager.uncacheAllInLibrary()
             }

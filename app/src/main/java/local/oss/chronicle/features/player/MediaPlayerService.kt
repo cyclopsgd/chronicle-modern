@@ -51,8 +51,7 @@ import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
 import local.oss.chronicle.features.player.SleepTimer.Companion.ARG_SLEEP_TIMER_ACTION
 import local.oss.chronicle.features.player.SleepTimer.Companion.ARG_SLEEP_TIMER_DURATION_MILLIS
 import local.oss.chronicle.features.player.SleepTimer.SleepTimerAction
-import local.oss.chronicle.injection.components.DaggerServiceComponent
-import local.oss.chronicle.injection.modules.ServiceModule
+import dagger.hilt.android.AndroidEntryPoint
 import local.oss.chronicle.util.PackageValidator
 import local.oss.chronicle.util.ServiceUtils
 import timber.log.Timber
@@ -61,6 +60,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 /** The service responsible for media playback, notification */
+@AndroidEntryPoint
 @ExperimentalCoroutinesApi
 @OptIn(ExperimentalTime::class)
 class MediaPlayerService :
@@ -207,6 +207,9 @@ class MediaPlayerService :
     @Inject
     lateinit var localBroadcastManager: LocalBroadcastManager
 
+    @Inject
+    lateinit var exceptionHandler: kotlinx.coroutines.CoroutineExceptionHandler
+
     var currentPlayer: Player? = null
 
     private var sessionErrorMessage: String? = null
@@ -215,12 +218,7 @@ class MediaPlayerService :
 
     override fun onCreate() {
         super.onCreate()
-
-        DaggerServiceComponent.builder()
-            .appComponent((application as ChronicleApplication).appComponent)
-            .serviceModule(ServiceModule(this))
-            .build()
-            .inject(this)
+        // Hilt handles injection automatically via @AndroidEntryPoint
 
         ServiceUtils.notifyServiceStarted(this)
 
@@ -230,7 +228,7 @@ class MediaPlayerService :
 
         prefsRepo.registerPrefsListener(prefsListener)
 
-        serviceScope.launch(Injector.get().unhandledExceptionHandler()) { mediaSource.load() }
+        serviceScope.launch(exceptionHandler) { mediaSource.load() }
 
         mediaSession.setPlaybackState(PlaybackStateCompat.Builder().build())
         mediaSession.setCallback(mediaSessionCallback)
@@ -245,7 +243,7 @@ class MediaPlayerService :
 
         // Observe PlaybackStateController to keep MediaSession in sync
         // This ensures Android Auto and other media clients always have current state
-        serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+        serviceScope.launch(exceptionHandler) {
             playbackStateController.state.collect { state ->
                 Timber.d(
                     "[AndroidAuto] PlaybackStateController state changed: hasMedia=${state.hasMedia}, " +
@@ -258,7 +256,7 @@ class MediaPlayerService :
 
         // startForeground has to be called within 5 seconds of starting the service or the app
         // will ANR (on Android 9.0 and above, maybe earlier).
-        serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+        serviceScope.launch(exceptionHandler) {
             val notification = notificationBuilder.buildNotification(mediaSession.sessionToken)
             startForeground(NOW_PLAYING_NOTIFICATION, notification)
         }
@@ -645,7 +643,7 @@ class MediaPlayerService :
         // we should launch with whatever it is we have, assuming the event isn't the notification
         // itself being removed (KEYCODE_MEDIA_STOP)
         if (ke?.keyCode != KEYCODE_MEDIA_STOP) {
-            serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+            serviceScope.launch(exceptionHandler) {
                 val notification = notificationBuilder.buildNotification(mediaSession.sessionToken)
                 startForeground(NOW_PLAYING_NOTIFICATION, notification)
             }
@@ -679,7 +677,7 @@ class MediaPlayerService :
         }
 
         result.detach()
-        serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+        serviceScope.launch(exceptionHandler) {
             try {
                 withContext(Dispatchers.IO) {
                     when (parentId) {
@@ -838,7 +836,7 @@ class MediaPlayerService :
         }
 
         result.detach()
-        serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+        serviceScope.launch(exceptionHandler) {
             try {
                 withContext(Dispatchers.IO) {
                     val books = bookRepository.searchAsync(query)
@@ -954,7 +952,7 @@ class MediaPlayerService :
                 newPosition: Player.PositionInfo,
                 reason: Int,
             ) {
-                serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+                serviceScope.launch(exceptionHandler) {
                     if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION) {
                         Timber.i("Playing next track")
                         // Update track progress
@@ -991,7 +989,7 @@ class MediaPlayerService :
                     return
                 }
                 Timber.i("Player STATE ENDED")
-                serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+                serviceScope.launch(exceptionHandler) {
                     withContext(Dispatchers.IO) {
                         // get track through tracklistmanager b/c metadata will be empty
                         val activeTrack = trackListManager.trackList.getActiveTrack()
@@ -1076,7 +1074,7 @@ class MediaPlayerService :
     override fun onChapterChange(chapter: local.oss.chronicle.data.model.Chapter) {
         Timber.i("Chapter changed to: ${chapter.title}")
         // Dispatch to main thread since we're accessing the player (ExoPlayer requires main thread access)
-        serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+        serviceScope.launch(exceptionHandler) {
             currentPlayer?.let { player ->
                 // [ChapterDebug] Log the chapter change with player context (must be on main thread)
                 val playerPosition = player.currentPosition

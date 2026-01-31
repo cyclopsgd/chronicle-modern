@@ -7,9 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.request.ImageRequest
 import com.tonyodev.fetch2.Request
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.sources.plex.PlexConfig.ConnectionResult.Failure
 import local.oss.chronicle.data.sources.plex.PlexConfig.ConnectionResult.Success
 import local.oss.chronicle.data.sources.plex.PlexConfig.ConnectionState.*
@@ -38,7 +39,10 @@ import kotlin.random.Random
 @Singleton
 class PlexConfig
     @Inject
-    constructor(private val plexPrefsRepo: PlexPrefsRepo) {
+    constructor(
+        @ApplicationContext private val context: Context,
+        private val plexPrefsRepo: PlexPrefsRepo,
+    ) {
         companion object {
             /** Timeout for individual connection attempt (reduced from 15s) */
             const val CONNECTION_TIMEOUT_MS = 10_000L // 10 seconds per attempt
@@ -119,7 +123,7 @@ class PlexConfig
             }
 
             // Retrieve cached album art from Glide if available
-            val appContext = Injector.get().applicationContext()
+            val appContext = context
             val imageSize = appContext.resources.getDimension(R.dimen.audiobook_image_width).toInt()
             val uri =
                 if (thumb.startsWith("http")) {
@@ -163,7 +167,7 @@ class PlexConfig
         }
 
         fun makeThumbUri(part: String): Uri {
-            val appContext = Injector.get().applicationContext()
+            val appContext = context
             val imageSize = appContext.resources.getDimension(R.dimen.audiobook_image_width).toInt()
             val plexThumbPart = "photo/:/transcode?width=$imageSize&height=$imageSize&url=$part"
             val uri = Uri.parse(toServerString(plexThumbPart))

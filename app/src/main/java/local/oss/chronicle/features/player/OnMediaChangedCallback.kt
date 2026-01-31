@@ -7,7 +7,6 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.*
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.model.Chapter
@@ -32,6 +31,7 @@ class OnMediaChangedCallback
         private val currentlyPlaying: CurrentlyPlaying,
         private val trackRepo: ITrackRepository,
         private val bookRepo: IBookRepository,
+        private val exceptionHandler: CoroutineExceptionHandler,
     ) : MediaControllerCompat.Callback(), OnChapterChangeListener {
         init {
             currentlyPlaying.setOnChapterChangeListener(this)
@@ -42,7 +42,7 @@ class OnMediaChangedCallback
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             Timber.i("METADATA CHANGE")
             mediaController.playbackState?.let { state ->
-                serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+                serviceScope.launch(exceptionHandler) {
                     withContext(Dispatchers.IO) {
                         // OnMediaChangedCallback should NOT update currentlyPlaying
                         // ProgressUpdater is the single source of truth for progress updates
@@ -58,7 +58,7 @@ class OnMediaChangedCallback
             if (state == null) {
                 return
             }
-            serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+            serviceScope.launch(exceptionHandler) {
                 updateNotification(state.state)
             }
         }
@@ -69,7 +69,7 @@ class OnMediaChangedCallback
             )
 
             mediaController.playbackState?.let { state ->
-                serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+                serviceScope.launch(exceptionHandler) {
                     updateNotification(state.state)
                 }
             }

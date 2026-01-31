@@ -14,7 +14,6 @@ import com.tonyodev.fetch2core.DownloadBlock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import local.oss.chronicle.BuildConfig
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.PrefsRepo
@@ -71,8 +70,8 @@ class CachedFileManager
         private val bookRepository: IBookRepository,
         private val plexConfig: PlexConfig,
         private val applicationContext: Context,
+        private val externalFileDirs: List<File>,
     ) : ICachedFileManager {
-        private val externalFileDirs = Injector.get().externalDeviceDirs()
 
         private val scopeManager = ScopedCoroutineManager()
 
@@ -84,7 +83,7 @@ class CachedFileManager
                 ) {
                     when (intent?.action) {
                         DownloadNotificationWorker.ACTION_CANCEL_ALL_DOWNLOADS ->
-                            Injector.get().fetch()
+                            fetch
                                 .cancelAll()
                         DownloadNotificationWorker.ACTION_CANCEL_BOOK_DOWNLOAD -> {
                             val bookId =
@@ -94,7 +93,7 @@ class CachedFileManager
                                 )
                             if (bookId != -1) {
                                 Timber.i("Cancelling book: $bookId")
-                                Injector.get().fetch().cancelGroup(bookId)
+                                fetch.cancelGroup(bookId)
                             }
                         }
                     }

@@ -1,5 +1,6 @@
 package local.oss.chronicle.features.bookdetails
 
+import android.content.Context
 import android.media.session.MediaController
 import android.media.session.PlaybackState.*
 import android.os.Bundle
@@ -9,10 +10,10 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.lifecycle.*
 import com.github.michaelbull.result.Ok
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.combine
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.ITrackRepository.Companion.TRACK_NOT_FOUND
@@ -53,6 +54,7 @@ class AudiobookDetailsViewModel(
     private val prefsRepo: PrefsRepo,
     private val plexMediaService: PlexMediaService,
     currentlyPlaying: CurrentlyPlaying,
+    @ApplicationContext private val applicationContext: Context,
 ) : ViewModel() {
     @Suppress("UNCHECKED_CAST")
     class Factory
@@ -67,6 +69,7 @@ class AudiobookDetailsViewModel(
             private val prefsRepo: PrefsRepo,
             private val plexMediaService: PlexMediaService,
             private val currentlyPlaying: CurrentlyPlaying,
+            @ApplicationContext private val applicationContext: Context,
         ) : ViewModelProvider.Factory {
             lateinit var inputAudiobook: Audiobook
 
@@ -84,6 +87,7 @@ class AudiobookDetailsViewModel(
                         prefsRepo,
                         plexMediaService,
                         currentlyPlaying,
+                        applicationContext,
                     ) as T
                 } else {
                     throw IllegalStateException("Wrong class provided to ${this.javaClass.name}")
@@ -584,7 +588,7 @@ class AudiobookDetailsViewModel(
         }
         val toast =
             Toast.makeText(
-                Injector.get().applicationContext(),
+                applicationContext,
                 R.string.marked_as_played,
                 Toast.LENGTH_LONG,
             )
@@ -599,7 +603,7 @@ class AudiobookDetailsViewModel(
         }
         val toast =
             Toast.makeText(
-                Injector.get().applicationContext(),
+                applicationContext,
                 R.string.marked_as_unplayed,
                 Toast.LENGTH_LONG,
             )

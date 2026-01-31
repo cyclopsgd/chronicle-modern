@@ -1,14 +1,15 @@
 package local.oss.chronicle.data.local
 
+import android.content.Context
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.model.getProgress
 import local.oss.chronicle.data.sources.plex.model.getDuration
 import javax.inject.Inject
@@ -18,6 +19,7 @@ import javax.inject.Singleton
 class LibrarySyncRepository
     @Inject
     constructor(
+        @ApplicationContext private val context: Context,
         private val bookRepository: BookRepository,
         private val trackRepository: TrackRepository,
         private val collectionsRepository: CollectionsRepository,
@@ -37,7 +39,7 @@ class LibrarySyncRepository
                     trackRepository.refreshDataPaginated()
                 } catch (e: Throwable) {
                     val msg = "Failed to refresh data: ${e.message}"
-                    Toast.makeText(Injector.get().applicationContext(), msg, LENGTH_LONG).show()
+                    Toast.makeText(context, msg, LENGTH_LONG).show()
                 } finally {
                     _isRefreshing.postValue(false)
                 }

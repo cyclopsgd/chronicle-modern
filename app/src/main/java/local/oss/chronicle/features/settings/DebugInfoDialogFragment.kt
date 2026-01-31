@@ -10,12 +10,13 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.AndroidEntryPoint
 import local.oss.chronicle.R
-import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.databinding.DialogDebugInfoBinding
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class DebugInfoDialogFragment : DialogFragment() {
     companion object {
         const val TAG = "DebugInfoDialogFragment"
@@ -34,11 +35,6 @@ class DebugInfoDialogFragment : DialogFragment() {
     private val binding get() = _binding!!
 
     private val connectionsAdapter = ConnectionsAdapter()
-
-    override fun onAttach(context: Context) {
-        (requireActivity() as MainActivity).activityComponent!!.inject(this)
-        super.onAttach(context)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

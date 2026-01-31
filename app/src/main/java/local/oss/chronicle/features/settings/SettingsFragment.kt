@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import dagger.hilt.android.AndroidEntryPoint
 import local.oss.chronicle.application.ChronicleBillingManager
-import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.PrefsRepo
@@ -28,6 +28,7 @@ import local.oss.chronicle.util.observeEvent
 import local.oss.chronicle.views.getString
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: SettingsViewModel.Factory
@@ -65,11 +66,6 @@ class SettingsFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance() = SettingsFragment()
-    }
-
-    override fun onAttach(context: Context) {
-        (requireActivity() as MainActivity).activityComponent!!.inject(this)
-        super.onAttach(context)
     }
 
     override fun onCreateView(

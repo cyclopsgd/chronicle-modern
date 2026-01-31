@@ -30,7 +30,6 @@ import local.oss.chronicle.data.local.PrefsRepo.Companion.VIEW_STYLE_COVER_GRID
 import local.oss.chronicle.data.model.Audiobook
 import local.oss.chronicle.data.sources.plex.model.MediaType
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingViewModel.Companion.PLAYBACK_SPEED_DEFAULT
-import local.oss.chronicle.injection.components.AppComponent
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
@@ -173,22 +172,24 @@ interface PrefsRepo {
  */
 class SharedPreferencesPrefsRepo
     @Inject
-    constructor(private val sharedPreferences: SharedPreferences) :
-    PrefsRepo {
+    constructor(
+        private val sharedPreferences: SharedPreferences,
+        private val externalDeviceDirs: List<File>,
+    ) : PrefsRepo {
         override var cachedMediaDir: File
             get() {
                 val syncLoc = sharedPreferences.getString(KEY_SYNC_DIR_PATH, "")
                 return if (syncLoc.isNullOrEmpty()) {
                     /** Set default location to first location in [AppComponent.externalDeviceDirs] */
-                    val deviceStorage = Injector.get().externalDeviceDirs().first()
+                    val deviceStorage = externalDeviceDirs.first()
                     sharedPreferences.edit()
                         .putString(KEY_SYNC_DIR_PATH, deviceStorage.absolutePath)
                         .apply()
                     deviceStorage
                 } else {
-                    Injector.get().externalDeviceDirs()
+                    externalDeviceDirs
                         .firstOrNull { it.absolutePath == syncLoc }
-                        ?: Injector.get().externalDeviceDirs().first()
+                        ?: externalDeviceDirs.first()
                 }
             }
             set(value) =

@@ -21,6 +21,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,16 +41,12 @@ import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingFragment
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.ACTION_PLAYBACK_ERROR
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.PLAYBACK_ERROR_MESSAGE
 import local.oss.chronicle.features.player.MediaServiceConnection
-import local.oss.chronicle.injection.components.ActivityComponent
-import local.oss.chronicle.injection.components.DaggerActivityComponent
-import local.oss.chronicle.injection.modules.ActivityModule
-import local.oss.chronicle.injection.scopes.ActivityScope
 import local.oss.chronicle.navigation.Navigator
 import local.oss.chronicle.util.observeEvent
 import timber.log.Timber
 import javax.inject.Inject
 
-@ActivityScope
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var localBroadcastManager: LocalBroadcastManager
@@ -82,22 +79,8 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var mediaServiceConnection: MediaServiceConnection
 
-    var activityComponent: ActivityComponent? = null
-
-    override fun onDestroy() {
-        activityComponent = null
-        super.onDestroy()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         Timber.i("MainActivity onCreate()")
-        activityComponent =
-            DaggerActivityComponent.builder()
-                .appComponent((application as ChronicleApplication).appComponent)
-                .activityModule(ActivityModule(this))
-                .build()
-        activityComponent!!.inject(this)
-
         super.onCreate(savedInstanceState)
 
         // Enable edge-to-edge display for MD3
@@ -245,7 +228,7 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleNotificationIntent(intent)
     }

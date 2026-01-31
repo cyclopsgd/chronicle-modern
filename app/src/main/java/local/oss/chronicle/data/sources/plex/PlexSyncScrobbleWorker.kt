@@ -2,12 +2,18 @@ package local.oss.chronicle.data.sources.plex
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import androidx.hilt.work.HiltWorker
 import androidx.work.*
+import com.squareup.moshi.Moshi
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import local.oss.chronicle.application.Injector
+import local.oss.chronicle.data.local.IBookRepository
+import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.ITrackRepository.Companion.TRACK_NOT_FOUND
 import local.oss.chronicle.data.model.MediaItemTrack
 import local.oss.chronicle.data.model.NO_AUDIOBOOK_FOUND_ID
@@ -17,23 +23,28 @@ import local.oss.chronicle.features.player.MediaPlayerService.Companion.PLEX_STA
 import local.oss.chronicle.features.player.ProgressUpdater.Companion.BOOK_FINISHED_END_OFFSET_MILLIS
 import timber.log.Timber
 
-class PlexSyncScrobbleWorker(
-    context: Context,
-    workerParameters: WorkerParameters,
-) : Worker(context, workerParameters) {
+@HiltWorker
+class PlexSyncScrobbleWorker
+    @AssistedInject
+    constructor(
+        @Assisted context: Context,
+        @Assisted workerParameters: WorkerParameters,
+        private val trackRepository: ITrackRepository,
+        private val bookRepository: IBookRepository,
+        private val plexConfig: PlexConfig,
+        private val plexPrefs: PlexPrefsRepo,
+        private val plexMediaService: PlexMediaService,
+        private val exceptionHandler: CoroutineExceptionHandler,
+        private val moshi: Moshi,
+    ) : Worker(context, workerParameters) {
     val library =
         SharedPreferencesPlexPrefsRepo(
             context.getSharedPreferences(
                 APP_NAME,
                 MODE_PRIVATE,
             ),
-            Injector.get().moshi(),
+            moshi,
         ).library
-    val trackRepository = Injector.get().trackRepo()
-    val bookRepository = Injector.get().bookRepo()
-    val plexConfig = Injector.get().plexConfig()
-    val plexPrefs = Injector.get().plexPrefs()
-    val plexMediaService = Injector.get().plexMediaService()
 
     private var workerJob = Job()
     private val workerScope = CoroutineScope(workerJob + Dispatchers.IO)
@@ -49,7 +60,7 @@ class PlexSyncScrobbleWorker(
         val trackProgress = inputData.requireLong(TRACK_POSITION_ARG)
         val bookProgress = inputData.requireLong(BOOK_PROGRESS)
         try {
-            workerScope.launch(Injector.get().unhandledExceptionHandler()) {
+            workerScope.launch(exceptionHandler) {
                 val track = trackRepository.getTrackAsync(trackId)
                 val bookId = track?.parentKey ?: NO_AUDIOBOOK_FOUND_ID
                 val book = bookRepository.getAudiobookAsync(bookId)
@@ -59,7 +70,7 @@ class PlexSyncScrobbleWorker(
                 check(trackId != TRACK_NOT_FOUND && track != null)
 
                 try {
-                    Injector.get().plexMediaService().progress(
+                    plexMediaService.progress(
                         ratingKey = trackId.toString(),
                         offset = trackProgress.toString(),
                         playbackTime = trackProgress,

@@ -3,8 +3,11 @@ package local.oss.chronicle.data.model
 import android.support.v4.media.MediaMetadataCompat
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import local.oss.chronicle.application.Injector
+import dagger.hilt.EntryPoints
+import local.oss.chronicle.application.ChronicleApplication
 import local.oss.chronicle.data.local.ITrackRepository.Companion.TRACK_NOT_FOUND
+import local.oss.chronicle.injection.PlexConfigEntryPoint
+import local.oss.chronicle.injection.PrefsRepoEntryPoint
 import local.oss.chronicle.data.model.MediaItemTrack.Companion.EMPTY_TRACK
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.data.sources.plex.model.PlexDirectory
@@ -156,7 +159,11 @@ data class MediaItemTrack(
     fun getTrackSource(): String {
         return if (cached) {
             // Use local file if downloaded
-            File(Injector.get().prefsRepo().cachedMediaDir, getCachedFileName()).absolutePath
+            File(
+                EntryPoints.get(ChronicleApplication.get(), PrefsRepoEntryPoint::class.java)
+                    .prefsRepo().cachedMediaDir,
+                getCachedFileName()
+            ).absolutePath
         } else {
             // Check for pre-resolved streaming URL (bandwidth-aware)
             streamingUrlCache[id]?.let { resolvedUrl ->
@@ -167,7 +174,8 @@ data class MediaItemTrack(
             // Fall back to direct file URL
             // Note: This may trigger bandwidth errors if server has limits
             Timber.d("No pre-resolved URL for track $id, using direct file path")
-            Injector.get().plexConfig().toServerString(media)
+            EntryPoints.get(ChronicleApplication.get(), PlexConfigEntryPoint::class.java)
+                .plexConfig().toServerString(media)
         }
     }
 

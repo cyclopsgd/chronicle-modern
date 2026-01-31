@@ -96,7 +96,7 @@ open class ChronicleApplication : Application() {
         // TODO: remove in a future version
         applicationScope.launch {
             withContext(Dispatchers.IO) {
-                Glide.get(Injector.get().applicationContext()).clearDiskCache()
+                Glide.get(this@ChronicleApplication).clearDiskCache()
             }
         }
     }

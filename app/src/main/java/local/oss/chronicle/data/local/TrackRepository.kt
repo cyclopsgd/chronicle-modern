@@ -6,7 +6,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.model.MediaItemTrack
 import local.oss.chronicle.data.model.NO_AUDIOBOOK_FOUND_ID
 import local.oss.chronicle.data.sources.MediaSource
@@ -349,7 +348,7 @@ class TrackRepository
                 try {
                     val networkTracks =
                         plexMediaService.retrieveAllTracksInLibrary(
-                            Injector.get().plexPrefs().library!!.id,
+                            plexPrefs.library!!.id,
                         ).plexMediaContainer.asTrackList()
                     val mergedTracks = mergeNetworkTracks(networkTracks, localTracks)
                     trackDao.insertAll(mergedTracks)

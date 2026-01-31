@@ -4,8 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
-import local.oss.chronicle.application.Injector
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import local.oss.chronicle.data.sources.MediaSource
 import local.oss.chronicle.data.sources.SourceManager
 import local.oss.chronicle.data.sources.plex.PlexMediaSource
@@ -61,8 +62,9 @@ data class Collection(
 }
 
 class CollectionIdConverter {
+    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
     private val stringType = Types.newParameterizedType(List::class.java, String::class.java)
-    private val stringsAdapter = Injector.get().moshi().adapter<List<String>>(stringType)
+    private val stringsAdapter = moshi.adapter<List<String>>(stringType)
 
     @TypeConverter
     fun fromList(value: List<Long>): String {

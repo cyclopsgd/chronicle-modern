@@ -21,7 +21,6 @@ import local.oss.chronicle.features.login.ChooseServerFragment
 import local.oss.chronicle.features.login.ChooseUserFragment
 import local.oss.chronicle.features.login.LoginFragment
 import local.oss.chronicle.features.settings.SettingsFragment
-import local.oss.chronicle.injection.scopes.ActivityScope
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -33,7 +32,6 @@ import javax.inject.Inject
  *
  * TODO: handle multiple back stacks for the different bottom nav items?
  */
-@ActivityScope
 class Navigator
     @Inject
     constructor(

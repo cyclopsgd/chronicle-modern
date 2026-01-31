@@ -16,7 +16,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.github.michaelbull.result.Ok
 import kotlinx.coroutines.*
 import local.oss.chronicle.BuildConfig
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.application.MILLIS_PER_SECOND
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
@@ -31,12 +30,10 @@ import local.oss.chronicle.features.player.MediaPlayerService.Companion.ACTIVE_T
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_SEEK_TO_TRACK_WITH_ID
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_START_TIME_TRACK_OFFSET
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.USE_SAVED_TRACK_PROGRESS
-import local.oss.chronicle.injection.scopes.ServiceScope
 import timber.log.Timber
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
-@ServiceScope
 class AudiobookMediaSessionCallback
     @Inject
     constructor(
@@ -57,6 +54,7 @@ class AudiobookMediaSessionCallback
         private val progressUpdater: ProgressUpdater,
         private val playbackUrlResolver: local.oss.chronicle.data.sources.plex.PlaybackUrlResolver,
         private val playbackStateController: PlaybackStateController,
+        private val exceptionHandler: CoroutineExceptionHandler,
         defaultPlayer: ExoPlayer,
     ) : MediaSessionCompat.Callback() {
         // Default to ExoPlayer to prevent having a nullable field
@@ -97,7 +95,7 @@ class AudiobookMediaSessionCallback
         ) {
             if (query.isNullOrEmpty()) {
                 // take most recently played book, start that
-                serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+                serviceScope.launch(exceptionHandler) {
                     try {
                         val mostRecentlyPlayed = bookRepository.getMostRecentlyPlayed()
                         val bookToPlay =
@@ -123,7 +121,7 @@ class AudiobookMediaSessionCallback
                 }
                 return
             }
-            serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+            serviceScope.launch(exceptionHandler) {
                 try {
                     val matchingBooks = bookRepository.searchAsync(query)
                     if (matchingBooks.isNotEmpty()) {
@@ -160,11 +158,11 @@ class AudiobookMediaSessionCallback
         }
 
         private fun skipToNext() {
-            currentPlayer.skipToNext(trackListStateManager, currentlyPlaying, progressUpdater)
+            currentPlayer.skipToNext(appContext, trackListStateManager, currentlyPlaying, progressUpdater)
         }
 
         private fun skipToPrevious() {
-            currentPlayer.skipToPrevious(trackListStateManager, currentlyPlaying, progressUpdater)
+            currentPlayer.skipToPrevious(appContext, trackListStateManager, currentlyPlaying, progressUpdater)
         }
 
         private fun skipForwards() {
@@ -543,7 +541,7 @@ class AudiobookMediaSessionCallback
                         // Only run these resume methods once after reconnecting
                         plexConfig.isConnected.removeObserver(this)
 
-                        serviceScope.launch(Injector.get().unhandledExceptionHandler()) {
+                        serviceScope.launch(exceptionHandler) {
                             val mostRecentBook = bookRepository.getMostRecentlyPlayed()
                             if (mostRecentBook == EMPTY_AUDIOBOOK) {
                                 return@launch

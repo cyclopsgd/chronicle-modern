@@ -17,11 +17,17 @@ import androidx.media3.common.util.Util
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.R
 import local.oss.chronicle.application.MainActivity
@@ -34,44 +40,36 @@ import local.oss.chronicle.features.player.*
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.EXOPLAYER_BACK_BUFFER_DURATION_MILLIS
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.EXOPLAYER_MAX_BUFFER_DURATION_MILLIS
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.EXOPLAYER_MIN_BUFFER_DURATION_MILLIS
-import local.oss.chronicle.injection.scopes.ServiceScope
 import local.oss.chronicle.util.PackageValidator
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @Module
 @InstallIn(ServiceComponent::class)
-class ServiceModule(private val service: MediaPlayerService) {
+abstract class ServiceModule {
+
+    @Binds
+    @ServiceScoped
+    abstract fun bindSleepTimer(impl: SimpleSleepTimer): SleepTimer
+
+    @Binds
+    @ServiceScoped
+    abstract fun bindMediaSessionCallback(impl: AudiobookMediaSessionCallback): Callback
+
     companion object {
         // Attribution tag for audio operations (must match manifest declaration)
         private const val ATTRIBUTION_TAG_MEDIA_PLAYBACK = "chronicle_media_playback"
-    }
 
-    // Create attributed context for audio operations (required for API 31+/Android 12+)
-    private val attributedContext: Context by lazy {
-        service.createAttributionContext(ATTRIBUTION_TAG_MEDIA_PLAYBACK)
-    }
+        @Provides
+        @ServiceScoped
+        fun provideServiceScope(): CoroutineScope =
+            CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    @Provides
-    @ServiceScope
-    fun service(): Service = service
-
-    @Provides
-    @ServiceScope
-    fun serviceController(): ServiceController = service
-
-    @Provides
-    @ServiceScope
-    fun serviceJob(): CompletableJob = service.serviceJob
-
-    @Provides
-    @ServiceScope
-    fun serviceScope() = service.serviceScope
-
-    @Provides
-    @ServiceScope
-    fun exoPlayer(): ExoPlayer =
-        ExoPlayer.Builder(attributedContext).setLoadControl(
+        @Provides
+        @ServiceScoped
+        fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
+            val attributedContext = context.createAttributionContext(ATTRIBUTION_TAG_MEDIA_PLAYBACK)
+            return ExoPlayer.Builder(attributedContext).setLoadControl(
             // increase buffer size across the board as ExoPlayer defaults are set for video
             DefaultLoadControl.Builder().setBackBuffer(EXOPLAYER_BACK_BUFFER_DURATION_MILLIS, true)
                 .setBufferDurationsMs(
@@ -80,74 +78,83 @@ class ServiceModule(private val service: MediaPlayerService) {
                     DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
                     DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
                 )
-                .build(),
-        ).build()
-
-    @Provides
-    @ServiceScope
-    fun pendingIntent(): PendingIntent =
-        service.packageManager.getLaunchIntentForPackage(service.packageName).let { sessionIntent ->
-            sessionIntent?.putExtra(MainActivity.FLAG_OPEN_ACTIVITY_TO_CURRENTLY_PLAYING, true)
-            PendingIntent.getActivity(
-                service,
-                MainActivity.REQUEST_CODE_OPEN_APP_TO_CURRENTLY_PLAYING,
-                sessionIntent,
-                PendingIntent.FLAG_IMMUTABLE,
-            )
+                    .build(),
+            ).build()
         }
 
-    @Provides
-    @ServiceScope
-    fun mediaSession(launchActivityPendingIntent: PendingIntent): MediaSessionCompat =
-        MediaSessionCompat(attributedContext, APP_NAME).apply {
+        @Provides
+        @ServiceScoped
+        fun providePendingIntent(@ApplicationContext context: Context): PendingIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName).let { sessionIntent ->
+                sessionIntent?.putExtra(MainActivity.FLAG_OPEN_ACTIVITY_TO_CURRENTLY_PLAYING, true)
+                PendingIntent.getActivity(
+                    context,
+                    MainActivity.REQUEST_CODE_OPEN_APP_TO_CURRENTLY_PLAYING,
+                    sessionIntent,
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+            }
+
+        @Provides
+        @ServiceScoped
+        fun provideMediaSession(
+            @ApplicationContext context: Context,
+            launchActivityPendingIntent: PendingIntent
+        ): MediaSessionCompat {
+            val attributedContext = context.createAttributionContext(ATTRIBUTION_TAG_MEDIA_PLAYBACK)
+            return MediaSessionCompat(attributedContext, APP_NAME).apply {
             // Enable queue management; media buttons handled automatically on recent APIs
-            setFlags(
-                FLAG_HANDLES_QUEUE_COMMANDS,
-            )
-            service.sessionToken = sessionToken
-            setSessionActivity(launchActivityPendingIntent)
-            setRatingType(RATING_NONE)
-            isActive = true
+                setFlags(FLAG_HANDLES_QUEUE_COMMANDS)
+                setSessionActivity(launchActivityPendingIntent)
+                setRatingType(RATING_NONE)
+                isActive = true
+            }
         }
 
-    @Provides
-    @ServiceScope
-    fun localBroadcastManager() = LocalBroadcastManager.getInstance(service)
+        @Provides
+        @ServiceScoped
+        fun provideLocalBroadcastManager(@ApplicationContext context: Context): LocalBroadcastManager =
+            LocalBroadcastManager.getInstance(context)
 
-    @Provides
-    @ServiceScope
-    fun sleepTimerBroadcaster(): SleepTimer.SleepTimerBroadcaster = service
+        @Provides
+        @ServiceScoped
+        fun provideProgressUpdater(
+            updater: SimpleProgressUpdater,
+            mediaControllerCompat: MediaControllerCompat,
+        ): ProgressUpdater =
+            updater.apply {
+                mediaController = mediaControllerCompat
+            }
 
-    @Provides
-    @ServiceScope
-    fun sleepTimer(simpleSleepTimer: SimpleSleepTimer): SleepTimer = simpleSleepTimer
+        @Provides
+        @ServiceScoped
+        fun provideNotificationManager(@ApplicationContext context: Context): NotificationManagerCompat =
+            NotificationManagerCompat.from(context)
 
-    @Provides
-    fun provideProgressUpdater(
-        updater: SimpleProgressUpdater,
-        mediaControllerCompat: MediaControllerCompat,
-    ): ProgressUpdater =
-        updater.apply {
-            mediaController = mediaControllerCompat
-        }
+        @Provides
+        @ServiceScoped
+        fun provideMediaController(
+            @ApplicationContext context: Context,
+            session: MediaSessionCompat
+        ): MediaControllerCompat =
+            MediaControllerCompat(context, session.sessionToken)
 
-    @Provides
-    @ServiceScope
-    fun notificationManager(): NotificationManagerCompat = NotificationManagerCompat.from(service)
+        @Provides
+        @ServiceScoped
+        fun provideBecomingNoisyReceiver(
+            @ApplicationContext context: Context,
+            session: MediaSessionCompat
+        ): BecomingNoisyReceiver =
+            BecomingNoisyReceiver(context, session.sessionToken)
 
-    @Provides
-    @ServiceScope
-    fun mediaController(session: MediaSessionCompat) = MediaControllerCompat(service, session.sessionToken)
-
-    @Provides
-    @ServiceScope
-    fun becomingNoisyReceiver(session: MediaSessionCompat) = BecomingNoisyReceiver(service, session.sessionToken)
-
-    @Provides
-    @ServiceScope
-    fun plexDataSourceFactory(plexPrefs: PlexPrefsRepo): DefaultHttpDataSource.Factory {
-        val dataSourceFactory = DefaultHttpDataSource.Factory()
-        dataSourceFactory.setUserAgent(Util.getUserAgent(service, APP_NAME))
+        @Provides
+        @ServiceScoped
+        fun providePlexDataSourceFactory(
+            @ApplicationContext context: Context,
+            plexPrefs: PlexPrefsRepo
+        ): DefaultHttpDataSource.Factory {
+            val dataSourceFactory = DefaultHttpDataSource.Factory()
+            dataSourceFactory.setUserAgent(Util.getUserAgent(context, APP_NAME))
 
         dataSourceFactory.setDefaultRequestProperties(
             mapOf(
@@ -174,44 +181,36 @@ class ServiceModule(private val service: MediaPlayerService) {
             ),
         )
 
-        return dataSourceFactory
+            return dataSourceFactory
+        }
+
+        @Provides
+        @ServiceScoped
+        fun providePackageValidator(@ApplicationContext context: Context): PackageValidator =
+            PackageValidator(context, R.xml.auto_allowed_callers)
+
+        @Provides
+        @ServiceScoped
+        fun provideTrackListManager(): TrackListStateManager = TrackListStateManager()
+
+        @Provides
+        @ServiceScoped
+        fun provideSensorManager(@ApplicationContext context: Context): SensorManager =
+            context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        @Provides
+        @ServiceScoped
+        fun provideToneManager(@ApplicationContext context: Context): ToneGenerator {
+            val attributedContext = context.createAttributionContext(ATTRIBUTION_TAG_MEDIA_PLAYBACK)
+            val audioManager = attributedContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            return ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+        }
+
+        @Provides
+        @ServiceScoped
+        fun providePlaybackUrlResolver(
+            plexMediaService: PlexMediaService,
+            plexConfig: PlexConfig,
+        ): PlaybackUrlResolver = PlaybackUrlResolver(plexMediaService, plexConfig)
     }
-
-    @Provides
-    @ServiceScope
-    fun packageValidator() = PackageValidator(service, R.xml.auto_allowed_callers)
-
-    @Provides
-    @ServiceScope
-    fun foregroundServiceController(): ForegroundServiceController = service
-
-    @Provides
-    @ServiceScope
-    fun mediaSessionCallback(callback: AudiobookMediaSessionCallback): Callback = callback
-
-    @Provides
-    @ServiceScope
-    fun trackListManager(): TrackListStateManager = TrackListStateManager()
-
-    @Provides
-    @ServiceScope
-    fun sensorManager(): SensorManager =
-        service.getSystemService(
-            Context.SENSOR_SERVICE,
-        ) as SensorManager
-
-    @Provides
-    @ServiceScope
-    fun toneManager(): ToneGenerator {
-        // Use attributed context for audio operations
-        val audioManager = attributedContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        return ToneGenerator(AudioManager.STREAM_MUSIC, 100)
-    }
-
-    @Provides
-    @ServiceScope
-    fun playbackUrlResolver(
-        plexMediaService: PlexMediaService,
-        plexConfig: PlexConfig,
-    ): PlaybackUrlResolver = PlaybackUrlResolver(plexMediaService, plexConfig)
 }

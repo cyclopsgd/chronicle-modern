@@ -11,9 +11,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import local.oss.chronicle.application.Injector
+import dagger.hilt.android.EntryPointAccessors
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.databinding.PreferenceItemClickableBinding
+import local.oss.chronicle.injection.PrefsRepoEntryPoint
 import local.oss.chronicle.databinding.PreferenceItemSwitchBinding
 import local.oss.chronicle.databinding.PreferenceItemTitleBinding
 
@@ -29,7 +30,10 @@ class SettingsList : FrameLayout {
         defStyle,
     )
 
-    private val prefsRepo = Injector.get().prefsRepo()
+    private val prefsRepo = EntryPointAccessors.fromApplication(
+        context.applicationContext,
+        PrefsRepoEntryPoint::class.java
+    ).prefsRepo()
     private val prefAdapter = PreferencesListAdapter(prefsRepo)
 
     private var list: RecyclerView =

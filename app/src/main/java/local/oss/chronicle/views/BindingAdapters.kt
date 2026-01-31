@@ -14,8 +14,10 @@ import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.generic.GenericDraweeHierarchy
 import com.facebook.drawee.view.DraweeView
 import com.facebook.imagepipeline.request.ImageRequest
+import dagger.hilt.android.EntryPointAccessors
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
+import local.oss.chronicle.data.sources.plex.PlexConfig
+import local.oss.chronicle.injection.PlexConfigEntryPoint
 import timber.log.Timber
 
 @BindingAdapter(value = ["srcRounded", "serverConnected"], requireAll = true)
@@ -30,7 +32,11 @@ fun bindImageRounded(
 
     val imageSize =
         draweeView.resources.getDimension(R.dimen.currently_playing_artwork_max_size).toInt()
-    val config = Injector.get().plexConfig()
+    val entryPoint = EntryPointAccessors.fromApplication(
+        draweeView.context.applicationContext,
+        PlexConfigEntryPoint::class.java
+    )
+    val config = entryPoint.plexConfig()
     val url =
         config.toServerString("photo/:/transcode?width=$imageSize&height=$imageSize&url=$src")
             .toUri()
