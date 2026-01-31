@@ -7,6 +7,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.CoroutineScope
 import local.oss.chronicle.features.player.MediaPlayerService
 import local.oss.chronicle.features.player.MediaServiceConnection
@@ -17,6 +19,7 @@ import local.oss.chronicle.util.ServiceUtils
 import timber.log.Timber
 
 @Module
+@InstallIn(ActivityComponent::class)
 class ActivityModule(private val activity: AppCompatActivity) {
     @Provides
     @ActivityScope

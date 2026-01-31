@@ -13,29 +13,21 @@ import android.os.StrictMode.VmPolicy
 import com.bumptech.glide.Glide
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.core.ImagePipelineConfig
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.data.model.asServer
 import local.oss.chronicle.data.sources.plex.*
 import local.oss.chronicle.data.sources.plex.model.Connection
-import local.oss.chronicle.injection.components.AppComponent
-import local.oss.chronicle.injection.components.DaggerAppComponent
-import local.oss.chronicle.injection.modules.AppModule
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Singleton
 
 // Exposing a ref to the application statically doesn't leak anything because Application is already
 // a singleton
 @Suppress("LeakingThis")
-@Singleton
+@HiltAndroidApp
 open class ChronicleApplication : Application() {
-    // Instance of the AppComponent that will be used by all the Activities in the project
-    val appComponent by lazy {
-        initializeComponent()
-    }
-
     init {
         INSTANCE = this
     }
@@ -96,7 +88,7 @@ open class ChronicleApplication : Application() {
             Timber.plant(Timber.DebugTree())
         }
 
-        appComponent.inject(this)
+        // Hilt handles injection automatically
         setupNetwork(plexPrefs)
         updateDownloadedFileState()
         super.onCreate()
@@ -118,11 +110,6 @@ open class ChronicleApplication : Application() {
                 cachedFileManager.refreshTrackDownloadedStatus()
             }
         }
-    }
-
-    open fun initializeComponent(): AppComponent {
-        // We pass the applicationContext that will be used as Context in the graph
-        return DaggerAppComponent.builder().appModule(AppModule(this)).build()
     }
 
     companion object {

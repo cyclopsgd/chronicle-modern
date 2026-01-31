@@ -19,6 +19,8 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
 import kotlinx.coroutines.CompletableJob
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.R
@@ -38,6 +40,7 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @Module
+@InstallIn(ServiceComponent::class)
 class ServiceModule(private val service: MediaPlayerService) {
     companion object {
         // Attribution tag for audio operations (must match manifest declaration)

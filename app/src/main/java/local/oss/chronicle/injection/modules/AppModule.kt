@@ -18,6 +18,8 @@ import com.tonyodev.fetch2.Fetch
 import com.tonyodev.fetch2.FetchConfiguration
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import local.oss.chronicle.application.LOG_NETWORK_REQUESTS
 import local.oss.chronicle.data.local.*
@@ -38,6 +40,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
+@InstallIn(SingletonComponent::class)
 class AppModule(private val app: Application) {
     companion object {
         const val OKHTTP_CLIENT_MEDIA = "Media"
