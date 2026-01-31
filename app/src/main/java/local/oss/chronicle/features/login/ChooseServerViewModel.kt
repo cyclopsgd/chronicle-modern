@@ -2,7 +2,6 @@ package local.oss.chronicle.features.login
 
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.model.LoadingStatus
 import local.oss.chronicle.data.model.ServerModel
 import local.oss.chronicle.data.model.asServer
@@ -10,6 +9,7 @@ import local.oss.chronicle.data.sources.plex.PlexLoginRepo
 import local.oss.chronicle.data.sources.plex.PlexLoginService
 import local.oss.chronicle.util.Event
 import local.oss.chronicle.util.postEvent
+import kotlinx.coroutines.CoroutineExceptionHandler
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -18,6 +18,7 @@ class ChooseServerViewModel
     constructor(
         private val plexLoginService: PlexLoginService,
         private val plexLoginRepo: PlexLoginRepo,
+        private val exceptionHandler: CoroutineExceptionHandler,
     ) : ViewModel() {
         class Factory
             @Inject
@@ -51,7 +52,7 @@ class ChooseServerViewModel
         }
 
         private fun loadServers() {
-            viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+            viewModelScope.launch(exceptionHandler) {
                 try {
                     _loadingStatus.value = LoadingStatus.LOADING
                     val serverContainer = plexLoginService.resources()

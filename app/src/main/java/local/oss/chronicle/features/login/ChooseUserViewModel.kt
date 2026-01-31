@@ -1,8 +1,8 @@
 package local.oss.chronicle.features.login
 
 import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.model.LoadingStatus
 import local.oss.chronicle.data.sources.plex.IPlexLoginRepo
 import local.oss.chronicle.data.sources.plex.PlexLoginService
@@ -13,20 +13,24 @@ import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 
-class ChooseUserViewModel(
-    private val plexLoginService: PlexLoginService,
-    private val plexLoginRepo: IPlexLoginRepo,
-) : ViewModel() {
+class ChooseUserViewModel
+    @Inject
+    constructor(
+        private val plexLoginService: PlexLoginService,
+        private val plexLoginRepo: IPlexLoginRepo,
+        private val exceptionHandler: CoroutineExceptionHandler,
+    ) : ViewModel() {
     class Factory
         @Inject
         constructor(
             private val plexLoginService: PlexLoginService,
             private val plexLoginRepo: IPlexLoginRepo,
+            private val exceptionHandler: CoroutineExceptionHandler,
         ) : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(ChooseUserViewModel::class.java)) {
-                    return ChooseUserViewModel(plexLoginService, plexLoginRepo) as T
+                    return ChooseUserViewModel(plexLoginService, plexLoginRepo, exceptionHandler) as T
                 }
                 throw IllegalArgumentException("Unknown ViewHolder class")
             }
@@ -73,7 +77,7 @@ class ChooseUserViewModel(
         if (!users.value.isNullOrEmpty() && !forceLoad) {
             return
         }
-        viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+        viewModelScope.launch(exceptionHandler) {
             try {
                 _usersLoadingStatus.value = LoadingStatus.LOADING
                 val usersResponse = plexLoginService.getUsersForAccount()

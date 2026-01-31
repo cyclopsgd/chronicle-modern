@@ -1,11 +1,13 @@
 package local.oss.chronicle.features.library
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.text.format.Formatter
 import androidx.lifecycle.*
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import local.oss.chronicle.R
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.LibrarySyncRepository
@@ -36,14 +38,18 @@ import local.oss.chronicle.views.BottomSheetChooser.FormattableString.ResourceSt
 import timber.log.Timber
 import javax.inject.Inject
 
-class LibraryViewModel(
-    private val bookRepository: IBookRepository,
-    private val trackRepository: ITrackRepository,
-    private val prefsRepo: PrefsRepo,
-    private val cachedFileManager: ICachedFileManager,
-    private val librarySyncRepository: LibrarySyncRepository,
-    sharedPreferences: SharedPreferences,
-) : ViewModel() {
+class LibraryViewModel
+    @Inject
+    constructor(
+        private val bookRepository: IBookRepository,
+        private val trackRepository: ITrackRepository,
+        private val prefsRepo: PrefsRepo,
+        private val cachedFileManager: ICachedFileManager,
+        private val librarySyncRepository: LibrarySyncRepository,
+        sharedPreferences: SharedPreferences,
+        @ApplicationContext private val context: Context,
+        private val exceptionHandler: CoroutineExceptionHandler,
+    ) : ViewModel() {
     @Suppress("UNCHECKED_CAST")
     class Factory
         @Inject
@@ -54,6 +60,8 @@ class LibraryViewModel(
             private val cachedFileManager: ICachedFileManager,
             private val librarySyncRepository: LibrarySyncRepository,
             private val sharedPreferences: SharedPreferences,
+            @ApplicationContext private val context: Context,
+            private val exceptionHandler: CoroutineExceptionHandler,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(LibraryViewModel::class.java)) {
@@ -64,6 +72,8 @@ class LibraryViewModel(
                         cachedFileManager,
                         librarySyncRepository,
                         sharedPreferences,
+                        context,
+                        exceptionHandler,
                     ) as T
                 } else {
                     throw IllegalArgumentException(
@@ -214,7 +224,7 @@ class LibraryViewModel(
     private val serverConnectionObserver =
         Observer<Boolean> { isConnectedToServer ->
             if (isConnectedToServer) {
-                viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+                viewModelScope.launch(exceptionHandler) {
                     val millisSinceLastRefresh =
                         System.currentTimeMillis() - prefsRepo.lastRefreshTimeStamp
                     val minutesSinceLastRefresh = millisSinceLastRefresh / 1000 / 60
@@ -257,9 +267,9 @@ class LibraryViewModel(
             var bytesToBeUsed = 0L
             tracks.forEach { bytesToBeUsed += it.size }
             val downloadSize =
-                Formatter.formatFileSize(Injector.get().applicationContext(), bytesToBeUsed)
+                Formatter.formatFileSize(context, bytesToBeUsed)
             val availableStorage =
-                Formatter.formatFileSize(Injector.get().applicationContext(), bytesAvailable)
+                Formatter.formatFileSize(context, bytesAvailable)
             val prompt =
                 ResourceString(
                     stringRes = R.string.download_all_prompt,

@@ -2,8 +2,8 @@ package local.oss.chronicle.features.collections
 
 import android.content.SharedPreferences
 import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.data.local.BookRepository
 import local.oss.chronicle.data.local.CollectionsRepository
 import local.oss.chronicle.data.local.LibrarySyncRepository
@@ -21,13 +21,16 @@ import local.oss.chronicle.views.BottomSheetChooser.BottomChooserState.Companion
 import timber.log.Timber
 import javax.inject.Inject
 
-class CollectionsViewModel(
-    private val prefsRepo: PrefsRepo,
-    private val librarySyncRepository: LibrarySyncRepository,
-    collectionsRepository: CollectionsRepository,
-    sharedPreferences: SharedPreferences,
-    private val bookRepository: BookRepository,
-) : ViewModel() {
+class CollectionsViewModel
+    @Inject
+    constructor(
+        private val prefsRepo: PrefsRepo,
+        private val librarySyncRepository: LibrarySyncRepository,
+        collectionsRepository: CollectionsRepository,
+        sharedPreferences: SharedPreferences,
+        private val bookRepository: BookRepository,
+        private val exceptionHandler: CoroutineExceptionHandler,
+    ) : ViewModel() {
     @Suppress("UNCHECKED_CAST")
     class Factory
         @Inject
@@ -37,6 +40,7 @@ class CollectionsViewModel(
             private val librarySyncRepository: LibrarySyncRepository,
             private val sharedPreferences: SharedPreferences,
             private val bookRepository: BookRepository,
+            private val exceptionHandler: CoroutineExceptionHandler,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(CollectionsViewModel::class.java)) {
@@ -46,6 +50,7 @@ class CollectionsViewModel(
                         collectionsRepository,
                         sharedPreferences,
                         bookRepository,
+                        exceptionHandler,
                     ) as T
                 } else {
                     throw IllegalArgumentException(
@@ -170,7 +175,7 @@ class CollectionsViewModel(
     private val serverConnectionObserver =
         Observer<Boolean> { isConnectedToServer ->
             if (isConnectedToServer) {
-                viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+                viewModelScope.launch(exceptionHandler) {
                     val millisSinceLastRefresh =
                         System.currentTimeMillis() - prefsRepo.lastRefreshTimeStamp
                     val minutesSinceLastRefresh = millisSinceLastRefresh / 1000 / 60

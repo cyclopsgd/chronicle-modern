@@ -71,26 +71,30 @@
 - ✅ Added @AndroidEntryPoint to AudiobookDetailsFragment
 - ✅ Removed old manual injection code from AudiobookDetailsFragment
 
+### Phase 1.2: Hilt Migration - ViewModels Complete
+- ✅ Migrated all 7 ViewModels to inject CoroutineExceptionHandler
+  - ✅ CollectionsViewModel (inject @Inject constructor + CoroutineExceptionHandler)
+  - ✅ CurrentlyPlayingViewModel (inject @Inject constructor + Context + CoroutineExceptionHandler)
+  - ✅ HomeViewModel (inject @Inject constructor + CoroutineExceptionHandler)
+  - ✅ LibraryViewModel (inject @Inject constructor + Context + CoroutineExceptionHandler)
+  - ✅ ChooseServerViewModel (already had @Inject, added CoroutineExceptionHandler)
+  - ✅ ChooseUserViewModel (inject @Inject constructor + CoroutineExceptionHandler)
+  - ✅ LoginViewModel (inject @Inject constructor + CoroutineExceptionHandler)
+- ✅ Replaced all Injector.get().unhandledExceptionHandler() with injected exceptionHandler
+- ✅ Replaced all Injector.get().applicationContext() with @ApplicationContext Context in ViewModels
+
 ## In Progress
 
 ### Phase 1.2: Hilt Migration - Remaining Work
-**Status:** Continuing systematic migration (estimated ~120-140 errors remaining)
+**Status:** ViewModels complete! Now moving to Fragments (estimated ~100-120 errors remaining)
 
 ### Phase 1.2: Hilt Migration - Remaining Work
 Still need to migrate:
-- [ ] ViewModels using unhandledExceptionHandler (~7 files)
-  - CollectionsViewModel
-  - CurrentlyPlayingViewModel
-  - HomeViewModel
-  - LibraryViewModel
-  - ChooseServerViewModel
-  - ChooseUserViewModel
-  - LoginViewModel
 - [ ] Remaining Fragments using .inject() pattern (~18+ files)
 - [ ] Remaining Workers needing @HiltWorker (~2-4 files)
   - DownloadNotificationWorker
   - MoveSyncLocationWorker
-- [ ] Remaining files with Injector references (~15-20 files)
+- [ ] Remaining files with Injector references (~10-15 files)
 
 ## Todo
 

@@ -2,8 +2,8 @@ package local.oss.chronicle.features.home
 
 import android.content.SharedPreferences
 import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import local.oss.chronicle.application.Injector
 import local.oss.chronicle.application.MainActivityViewModel
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.LibrarySyncRepository
@@ -17,12 +17,15 @@ import local.oss.chronicle.util.observeOnce
 import timber.log.Timber
 import javax.inject.Inject
 
-class HomeViewModel(
-    private val plexConfig: PlexConfig,
-    private val bookRepository: IBookRepository,
-    private val librarySyncRepository: LibrarySyncRepository,
-    private val prefsRepo: PrefsRepo,
-) : ViewModel() {
+class HomeViewModel
+    @Inject
+    constructor(
+        private val plexConfig: PlexConfig,
+        private val bookRepository: IBookRepository,
+        private val librarySyncRepository: LibrarySyncRepository,
+        private val prefsRepo: PrefsRepo,
+        private val exceptionHandler: CoroutineExceptionHandler,
+    ) : ViewModel() {
     @Suppress("UNCHECKED_CAST")
     class Factory
         @Inject
@@ -31,6 +34,7 @@ class HomeViewModel(
             private val bookRepository: IBookRepository,
             private val librarySyncRepository: LibrarySyncRepository,
             private val prefsRepo: PrefsRepo,
+            private val exceptionHandler: CoroutineExceptionHandler,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
@@ -39,6 +43,7 @@ class HomeViewModel(
                         bookRepository,
                         librarySyncRepository,
                         prefsRepo,
+                        exceptionHandler,
                     ) as T
                 } else {
                     throw IllegalArgumentException(
@@ -100,7 +105,7 @@ class HomeViewModel(
     private val serverConnectionObserver =
         Observer<Boolean> { isConnectedToServer ->
             if (isConnectedToServer) {
-                viewModelScope.launch(Injector.get().unhandledExceptionHandler()) {
+                viewModelScope.launch(exceptionHandler) {
                     val millisSinceLastRefresh =
                         System.currentTimeMillis() - prefsRepo.lastRefreshTimeStamp
                     val minutesSinceLastRefresh = millisSinceLastRefresh / 1000 / 60
