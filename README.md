@@ -153,9 +153,9 @@ cd chronicle-modern
 - [x] Full-screen mode (hides bottom nav)
 - [x] High-resolution cover art
 - [x] Chapter-relative progress tracking
+- [x] Chapter list bottom sheet (Compose)
 - [ ] Speed selector bottom sheet (Compose)
 - [ ] Sleep timer bottom sheet
-- [ ] Chapter list bottom sheet
 
 ### Phase 3-6: See [DESIGN_SPEC.md](DESIGN_SPEC.md)
 

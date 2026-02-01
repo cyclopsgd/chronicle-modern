@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Sleep timer badge on cover art
   - Playback speed display
   - Full-screen mode hides bottom navigation
+- **Chapter List Bottom Sheet** - Material3 ModalBottomSheet for chapter navigation
+  - Current chapter highlighted with playing indicator
+  - Auto-scrolls to current chapter on open
+  - Shows chapter duration
+  - Tap to jump to any chapter
 - New `NowPlayingViewModel` bridging existing playback infrastructure to Compose
 
 ### Improvements

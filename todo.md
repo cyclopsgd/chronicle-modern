@@ -23,7 +23,7 @@
 - [x] High-resolution cover art (1000x1000)
 - [ ] Speed selector bottom sheet (0.5x - 3.0x) - *uses existing speed chooser*
 - [ ] Sleep timer bottom sheet with presets
-- [ ] Chapter list bottom sheet (Compose)
+- [x] Chapter list bottom sheet (Compose)
 - [ ] Per-book speed memory (store in Room)
 
 ### Phase 2.2: Playback Controls
