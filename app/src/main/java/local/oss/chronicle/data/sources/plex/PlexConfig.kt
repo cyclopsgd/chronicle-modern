@@ -178,6 +178,20 @@ class PlexConfig
                 ).build()
         }
 
+        /**
+         * Creates a high-resolution thumbnail URI for the Now Playing screen.
+         * Uses 1000x1000 for crisp display on high-density screens.
+         */
+        fun makeHighResThumbUri(part: String): Uri {
+            val plexThumbPart = "photo/:/transcode?width=1000&height=1000&url=$part"
+            val uri = Uri.parse(toServerString(plexThumbPart))
+            return uri.buildUpon()
+                .appendQueryParameter(
+                    "X-Plex-Token",
+                    plexPrefsRepo.server?.accessToken ?: plexPrefsRepo.accountAuthToken,
+                ).build()
+        }
+
         fun setPotentialConnections(connections: List<Connection>) {
             Timber.d("URL_DEBUG: Setting ${connections.size} potential connections: ${connections.map { "${it.uri} (local=${it.local})" }}")
             connectionSet.clear()

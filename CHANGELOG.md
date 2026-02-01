@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.61.0] - 2026-02-01
+
+### Branding
+- **Rebranded to Opus** - New app name "Opus - Audiobook Player"
+- New color scheme: Amber primary (#FFAB40), dark background (#121212)
+- Created OpusTheme for Jetpack Compose with brand colors
+- Updated all layouts to use dark background theme
+
+### New Features
+- **Compose Now Playing Screen** - Complete redesign with cover-art-dominant layout
+  - Blurred background with cover art
+  - Chapter-relative progress tracking
+  - High-resolution cover art (1000x1000)
+  - Sleep timer badge on cover art
+  - Playback speed display
+  - Full-screen mode hides bottom navigation
+- New `NowPlayingViewModel` bridging existing playback infrastructure to Compose
+
+### Improvements
+- **Full-screen player** - Bottom navigation now hides when player is expanded
+- **Cover art quality** - Added `makeHighResThumbUri()` for crisp cover display
+- **DI Architecture** - Added `ActivityRetainedModule` for ViewModel-accessible dependencies
+
+### Fixed
+- MediaBrowser connection callback not firing (added missing `setSessionToken()`)
+- Cover art not displaying (auth token was missing from URL)
+- Progress showing whole book instead of chapter time
+
+### Technical
+- Moved `MediaServiceConnection` and `LocalBroadcastManager` to `ActivityRetainedComponent`
+- Updated all fragment backgrounds from orange to dark theme
+- Added event system for ViewModel-to-Fragment communication
+
 ## [0.60.17] - 2026-01-29
 
 - fix: issue with android auto (2417131)

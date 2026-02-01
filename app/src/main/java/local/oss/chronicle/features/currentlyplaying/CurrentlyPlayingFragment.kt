@@ -1,51 +1,39 @@
 package local.oss.chronicle.features.currentlyplaying
 
 import android.content.Context
-import android.content.IntentFilter
 import android.os.Bundle
-import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.android.material.slider.Slider
+import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.application.MainActivityViewModel.BottomSheetState.COLLAPSED
-import local.oss.chronicle.data.model.Chapter
-import local.oss.chronicle.data.sources.plex.PlexConfig
-import local.oss.chronicle.databinding.FragmentCurrentlyPlayingBinding
-import local.oss.chronicle.features.bookdetails.ChapterListAdapter
-import local.oss.chronicle.features.bookdetails.TrackClickListener
-import local.oss.chronicle.features.player.SleepTimer
-import local.oss.chronicle.util.observeEvent
+import local.oss.chronicle.features.nowplaying.NowPlayingScreen
+import local.oss.chronicle.features.nowplaying.NowPlayingViewModel
+import local.oss.chronicle.features.nowplaying.NowPlayingViewModel.NowPlayingEvent
+import local.oss.chronicle.ui.theme.OpusTheme
 import local.oss.chronicle.views.ModalBottomSheetSpeedChooser
-import timber.log.Timber
-import javax.inject.Inject
 
-/** Responsible for playback controls and displaying the currently playing media */
+/**
+ * Fragment hosting the Compose-based Now Playing screen.
+ *
+ * This fragment serves as a bridge between the existing navigation/bottom sheet
+ * system and the new Compose UI. It delegates all UI rendering to NowPlayingScreen
+ * and uses NowPlayingViewModel for state management.
+ */
 @AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class CurrentlyPlayingFragment : Fragment() {
     private lateinit var currentlyPlayingInterface: MainActivity.CurrentlyPlayingInterface
-
-    @Inject
-    lateinit var plexConfig: PlexConfig
-
-    @Inject
-    lateinit var viewModelFactory: CurrentlyPlayingViewModel.Factory
-
-    @Inject
-    lateinit var localBroadcastManager: LocalBroadcastManager
-
-    private val viewModel: CurrentlyPlayingViewModel by lazy {
-        ViewModelProvider(this, viewModelFactory).get(CurrentlyPlayingViewModel::class.java)
-    }
 
     companion object {
         fun newInstance() = CurrentlyPlayingFragment()
@@ -56,91 +44,67 @@ class CurrentlyPlayingFragment : Fragment() {
         currentlyPlayingInterface = (context as MainActivity).getCurrentlyPlayingInterface()
     }
 
-    override fun onStart() {
-        super.onStart()
-        localBroadcastManager.registerReceiver(
-            viewModel.onUpdateSleepTimer,
-            IntentFilter(SleepTimer.ACTION_SLEEP_TIMER_CHANGE),
-        )
-    }
-
-    override fun onStop() {
-        localBroadcastManager.unregisterReceiver(viewModel.onUpdateSleepTimer)
-        super.onStop()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        // Activity and context are non-null on view creation. This informs lint about that
-        val binding = FragmentCurrentlyPlayingBinding.inflate(inflater, container, false)
+        return ComposeView(requireContext()).apply {
+            // Dispose composition when fragment's view is destroyed
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-        viewModel.showUserMessage.observeEvent(viewLifecycleOwner) { message ->
-            Toast.makeText(context, message, LENGTH_SHORT).show()
-        }
+            setContent {
+                // Use Hilt's hiltViewModel() to get the ViewModel scoped to the fragment
+                val viewModel: NowPlayingViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
 
-        binding.viewModel = viewModel
-        binding.plexConfig = plexConfig
-        binding.lifecycleOwner = viewLifecycleOwner
-
-        val adapter =
-            ChapterListAdapter(
-                object : TrackClickListener {
-                    override fun onClick(chapter: Chapter) {
-                        viewModel.jumpToChapter(chapter.startTimeOffset, chapter.trackId.toInt())
+                // Handle one-time events from ViewModel
+                LaunchedEffect(Unit) {
+                    viewModel.events.collect { event ->
+                        when (event) {
+                            is NowPlayingEvent.ShowChapterList -> {
+                                // TODO: Implement chapter list bottom sheet
+                                Toast.makeText(context, "Chapter list coming soon", Toast.LENGTH_SHORT).show()
+                            }
+                            is NowPlayingEvent.ShowSpeedSelector -> {
+                                ModalBottomSheetSpeedChooser().show(
+                                    childFragmentManager,
+                                    ModalBottomSheetSpeedChooser.TAG,
+                                )
+                            }
+                            is NowPlayingEvent.ShowSleepTimerOptions -> {
+                                // TODO: Implement sleep timer options bottom sheet
+                                Toast.makeText(context, "Sleep timer options coming soon", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
-                },
-            )
-
-        binding.chapterProgressSeekbar.addOnSliderTouchListener(
-            object : Slider.OnSliderTouchListener {
-                override fun onStartTrackingTouch(slider: Slider) {
-                    viewModel.isSliding = true
                 }
 
-                override fun onStopTrackingTouch(slider: Slider) {
-                    viewModel.isSliding = false
-                    viewModel.seekTo(slider.value.toDouble() / slider.valueTo)
+                OpusTheme(darkTheme = true) {
+                    NowPlayingScreen(
+                        state = uiState,
+                        onNavigateBack = {
+                            currentlyPlayingInterface.setBottomSheetState(COLLAPSED)
+                        },
+                        onPlayPause = viewModel::playPause,
+                        onSkipForward = viewModel::skipForward,
+                        onSkipBackward = viewModel::skipBackward,
+                        onSkipToNext = viewModel::skipToNext,
+                        onSkipToPrevious = viewModel::skipToPrevious,
+                        onSeekTo = viewModel::seekTo,
+                        onSpeedClick = {
+                            // Show the existing speed chooser bottom sheet
+                            ModalBottomSheetSpeedChooser().show(
+                                childFragmentManager,
+                                ModalBottomSheetSpeedChooser.TAG,
+                            )
+                        },
+                        onSleepTimerClick = viewModel::showSleepTimerOptions,
+                        onBookmarkClick = viewModel::toggleBookmark,
+                        onChapterClick = viewModel::showChapterList,
+                    )
                 }
-            },
-        )
-
-        binding.chapterProgressSeekbar.setLabelFormatter { value: Float ->
-            DateUtils.formatElapsedTime(
-                StringBuilder(),
-                value.toLong() / 1000,
-            )
-        }
-
-        viewModel.activeChapter.observe(viewLifecycleOwner) { chapter ->
-            Timber.i(
-                "Updating current chapter: (${chapter.trackId}, ${chapter.discNumber}, ${chapter.index})",
-            )
-            adapter.updateCurrentChapter(
-                trackId = chapter.trackId,
-                discNumber = chapter.discNumber,
-                chapterIndex = chapter.index,
-            )
-        }
-
-        binding.tracks.adapter = adapter
-
-        binding.detailsToolbar.setNavigationOnClickListener {
-            currentlyPlayingInterface.setBottomSheetState(COLLAPSED)
-        }
-
-        viewModel.showModalBottomSheetSpeedChooser.observe(viewLifecycleOwner) { eventShowChooser ->
-            if (!eventShowChooser.hasBeenHandled) {
-                ModalBottomSheetSpeedChooser().show(
-                    childFragmentManager,
-                    ModalBottomSheetSpeedChooser.TAG,
-                )
-                eventShowChooser.getContentIfNotHandled()
             }
         }
-
-        return binding.root
     }
 }

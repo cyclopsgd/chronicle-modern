@@ -16,10 +16,14 @@
 - [x] Create OpusTheme with brand colors
 - [x] Create NowPlayingScreen composable
 - [x] Create NowPlayingViewModel
-- [ ] Wire NowPlayingScreen into app navigation
-- [ ] Speed selector bottom sheet (0.5x - 3.0x)
+- [x] Wire NowPlayingScreen into app navigation
+- [x] Full-screen player hides bottom navigation
+- [x] Chapter-relative progress display
+- [x] Cover art with authentication token
+- [x] High-resolution cover art (1000x1000)
+- [ ] Speed selector bottom sheet (0.5x - 3.0x) - *uses existing speed chooser*
 - [ ] Sleep timer bottom sheet with presets
-- [ ] Chapter list bottom sheet
+- [ ] Chapter list bottom sheet (Compose)
 - [ ] Per-book speed memory (store in Room)
 
 ### Phase 2.2: Playback Controls
@@ -64,7 +68,7 @@
 
 ## Completed
 
-### 2026-02-01: Phase 1.3 + Branding
+### 2026-02-01: Phase 1.3 + Branding + Now Playing Integration
 - [x] Fix MediaBrowserCompat connection (setSessionToken)
 - [x] Smart Rewind on Resume
 - [x] Network-Aware Playback Recovery
@@ -72,6 +76,13 @@
 - [x] Emergency Position Save
 - [x] Opus branding (theme, colors, logo)
 - [x] NowPlayingScreen composable (Phase 2.1)
+- [x] Wire NowPlayingScreen into CurrentlyPlayingFragment
+- [x] Full-screen player hides bottom navigation
+- [x] Fix cover art URL authentication
+- [x] High-resolution cover art (1000x1000)
+- [x] Chapter-relative progress tracking
+- [x] Dark background throughout app (all fragments updated)
+- [x] Hilt DI reorganization (ActivityRetainedModule for ViewModel access)
 
 ### Previous: Hilt Migration
 - [x] Complete Hilt 2.54 migration

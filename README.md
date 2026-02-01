@@ -149,8 +149,11 @@ cd chronicle-modern
 - [x] Compose theme (OpusTheme)
 - [x] NowPlayingScreen composable
 - [x] NowPlayingViewModel
-- [ ] Wire into app navigation
-- [ ] Speed selector bottom sheet
+- [x] Wire into app navigation
+- [x] Full-screen mode (hides bottom nav)
+- [x] High-resolution cover art
+- [x] Chapter-relative progress tracking
+- [ ] Speed selector bottom sheet (Compose)
 - [ ] Sleep timer bottom sheet
 - [ ] Chapter list bottom sheet
 

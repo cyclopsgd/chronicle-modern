@@ -27,7 +27,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/colorBackground"
         android:orientation="vertical"
         tools:context=".features.library.LibraryFragment">
 
@@ -118,7 +118,7 @@
                     serverConnectedSearch="@{plexConfig.isConnected()}"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/colorPrimaryDark"
+                    android:background="@color/colorBackground"
                     android:elevation="8dp"
                     android:visibility="@{viewModel.isSearchActive() ? View.VISIBLE: View.GONE}"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -148,7 +148,7 @@
                 android:id="@+id/filter_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
+                android:background="@color/colorBackground"
                 android:clickable="true"
                 android:padding="@dimen/screen_horizontal_padding"
                 app:behavior_fitToContents="true"

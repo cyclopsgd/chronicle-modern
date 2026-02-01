@@ -13,8 +13,11 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,6 +51,16 @@ class NowPlayingViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(NowPlayingUiState())
     val uiState: StateFlow<NowPlayingUiState> = _uiState.asStateFlow()
+
+    // Events for UI actions that require Fragment/Activity handling
+    private val _events = MutableSharedFlow<NowPlayingEvent>()
+    val events: SharedFlow<NowPlayingEvent> = _events.asSharedFlow()
+
+    sealed class NowPlayingEvent {
+        object ShowChapterList : NowPlayingEvent()
+        object ShowSpeedSelector : NowPlayingEvent()
+        object ShowSleepTimerOptions : NowPlayingEvent()
+    }
 
     private var sleepTimerRemainingMs: Long = 0L
 
@@ -101,12 +114,17 @@ class NowPlayingViewModel @Inject constructor(
         // Use LiveData observer for MediaServiceConnection
         mediaServiceConnection.playbackState.observeForever { state ->
             val isPlaying = state?.state == PlaybackStateCompat.STATE_PLAYING
-            val position = state?.position ?: 0L
+            val absolutePosition = state?.position ?: 0L
+
+            // Convert to chapter-relative position
+            val chapter = currentlyPlaying.chapter.value
+            val chapterRelativePosition = (absolutePosition - chapter.startTimeOffset)
+                .coerceAtLeast(0L)
 
             _uiState.update { current ->
                 current.copy(
                     isPlaying = isPlaying,
-                    currentPositionMs = position,
+                    currentPositionMs = chapterRelativePosition,
                 )
             }
         }
@@ -120,9 +138,12 @@ class NowPlayingViewModel @Inject constructor(
         // Observe StateFlows from CurrentlyPlaying
         viewModelScope.launch {
             currentlyPlaying.book.collect { book ->
+                // Build high-resolution cover URL with auth token
+                // Using 1000x1000 for crisp display on high-density screens
                 val coverUrl = book.thumb?.let { thumb ->
-                    plexConfig.toServerString("photo/:/transcode?width=600&height=600&url=$thumb")
+                    plexConfig.makeHighResThumbUri(thumb).toString()
                 }
+                Timber.d("Cover URL for ${book.title}: $coverUrl")
 
                 _uiState.update { current ->
                     current.copy(
@@ -253,8 +274,9 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     fun showChapterList() {
-        // Will trigger bottom sheet in fragment/activity
-        Timber.d("Show chapter list requested")
+        viewModelScope.launch {
+            _events.emit(NowPlayingEvent.ShowChapterList)
+        }
     }
 
     override fun onCleared() {

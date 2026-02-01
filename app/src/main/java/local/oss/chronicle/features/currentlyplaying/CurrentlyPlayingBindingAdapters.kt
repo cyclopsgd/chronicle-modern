@@ -35,8 +35,13 @@ fun setBottomSheetState(
     parent.setConstraintSet(constraints)
     constraints.applyTo(parent)
 
+    // Hide mini player handle when not collapsed
     val bottomSheetHandle = parent.findViewById<View>(R.id.currently_playing_handle)
     bottomSheetHandle.visibility = if (state == COLLAPSED) View.VISIBLE else View.GONE
+
+    // Hide bottom navigation when expanded (full screen player)
+    val bottomNav = parent.findViewById<View>(R.id.bottom_nav)
+    bottomNav?.visibility = if (state == EXPANDED) View.GONE else View.VISIBLE
 }
 
 private fun collapseConstraint(constraintSet: ConstraintSet) {
@@ -50,8 +55,9 @@ private fun collapseConstraint(constraintSet: ConstraintSet) {
 }
 
 private fun expandConstraint(constraintSet: ConstraintSet) {
+    // Full screen: extend from top to bottom of parent (bottom nav will be hidden)
     constraintSet.connect(R.id.currently_playing_container, TOP, PARENT_ID, TOP)
-    constraintSet.connect(R.id.currently_playing_container, BOTTOM, R.id.bottom_nav, TOP)
+    constraintSet.connect(R.id.currently_playing_container, BOTTOM, PARENT_ID, BOTTOM)
 }
 
 private fun hideConstraint(constraintSet: ConstraintSet) {
