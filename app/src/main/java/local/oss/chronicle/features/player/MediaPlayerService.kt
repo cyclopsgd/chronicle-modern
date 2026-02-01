@@ -122,6 +122,21 @@ class MediaPlayerService :
     @Inject
     lateinit var playbackStateController: PlaybackStateController
 
+    @Inject
+    lateinit var smartRewindCalculator: SmartRewindCalculator
+
+    @Inject
+    lateinit var playbackErrorHandler: PlaybackErrorHandler
+
+    @Inject
+    lateinit var playbackNetworkCoordinator: PlaybackNetworkCoordinator
+
+    /** Tracks retry attempts for error recovery */
+    private var errorRetryCount = 0
+
+    /** Maximum retry attempts before giving up */
+    private val maxErrorRetries = 3
+
     companion object {
         /** Strings used by plex to indicate playback state */
         const val PLEX_STATE_PLAYING = "playing"
@@ -269,6 +284,18 @@ class MediaPlayerService :
         progressUpdater.startRegularProgressUpdates()
 
         plexConfig.connectionState.observeForever(serverChangedListener)
+
+        // Start observing network state for playback coordination
+        playbackNetworkCoordinator.startObserving(serviceScope)
+        playbackNetworkCoordinator.onNetworkRestoredCallback = {
+            // Resume playback when network is restored
+            serviceScope.launch {
+                if (currentPlayer?.playWhenReady == false) {
+                    Timber.i("Resuming playback after network restoration")
+                    mediaSessionCallback.onPlay()
+                }
+            }
+        }
     }
 
     private fun updateAudioAttrs(exoPlayer: ExoPlayer) {
@@ -550,6 +577,10 @@ class MediaPlayerService :
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
 
+        // Emergency save progress before the app is killed
+        Timber.i("onTaskRemoved: Initiating emergency progress save")
+        progressUpdater.emergencySaveProgress()
+
         // Ensures that players will not block being removed as a foreground service
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
@@ -581,6 +612,9 @@ class MediaPlayerService :
 
         progressUpdater.cancel()
         serviceJob.cancel()
+
+        // Stop network observation
+        playbackNetworkCoordinator.stopObserving()
 
         plexConfig.connectionState.removeObserver(serverChangedListener)
         prefsRepo.unregisterPrefsListener(prefsListener)
@@ -910,10 +944,47 @@ class MediaPlayerService :
         object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 Timber.e("Exoplayer playback error: $error")
-                val errorIntent = Intent(ACTION_PLAYBACK_ERROR)
-                errorIntent.putExtra(PLAYBACK_ERROR_MESSAGE, error.message)
-                localBroadcastManager.sendBroadcast(errorIntent)
-                setSessionCustomErrorMessage(error.message)
+
+                // Determine recovery action
+                val recoveryAction = playbackErrorHandler.determineRecoveryAction(error, errorRetryCount)
+
+                serviceScope.launch(exceptionHandler) {
+                    playbackErrorHandler.executeRecovery(
+                        action = recoveryAction,
+                        onRetry = {
+                            errorRetryCount++
+                            Timber.i("Retrying playback (attempt $errorRetryCount)")
+                            currentPlayer?.prepare()
+                            currentPlayer?.play()
+                        },
+                        onRefreshUrl = {
+                            errorRetryCount++
+                            Timber.i("Refreshing URL and retrying (attempt $errorRetryCount)")
+                            // Re-prepare with fresh URLs
+                            mediaSessionCallback.onPlay()
+                        },
+                        onSkipTrack = {
+                            Timber.i("Skipping to next track due to error")
+                            errorRetryCount = 0
+                            mediaSessionCallback.onSkipToNext()
+                        },
+                        onWaitForNetwork = {
+                            Timber.i("Waiting for network to resume playback")
+                            val wasPlaying = currentPlayer?.playWhenReady == true
+                            playbackNetworkCoordinator.notifyPlaybackInterruptedByNetwork(wasPlaying)
+                            setSessionCustomErrorMessage(getString(R.string.playback_waiting_for_network))
+                        },
+                        onNotifyUser = { message ->
+                            Timber.w("Unrecoverable playback error: $message")
+                            errorRetryCount = 0
+                            val errorIntent = Intent(ACTION_PLAYBACK_ERROR)
+                            errorIntent.putExtra(PLAYBACK_ERROR_MESSAGE, message)
+                            localBroadcastManager.sendBroadcast(errorIntent)
+                            setSessionCustomErrorMessage(message)
+                        },
+                    )
+                }
+
                 updateSessionPlaybackState()
             }
 
@@ -921,6 +992,25 @@ class MediaPlayerService :
                 playWhenReady: Boolean,
                 reason: Int,
             ) {
+                // Handle smart rewind and pause timestamp tracking
+                if (playWhenReady) {
+                    // Resuming playback - apply smart rewind
+                    val rewindDuration = smartRewindCalculator.calculateRewindDuration()
+                    if (rewindDuration > 0) {
+                        val currentPosition = currentPlayer?.currentPosition ?: 0L
+                        val newPosition = maxOf(0L, currentPosition - rewindDuration)
+                        Timber.i("SmartRewind: Rewinding from $currentPosition to $newPosition (${rewindDuration}ms)")
+                        currentPlayer?.seekTo(newPosition)
+                    }
+                    smartRewindCalculator.clearPauseTimestamp()
+
+                    // Reset error retry count on successful playback
+                    errorRetryCount = 0
+                } else {
+                    // Pausing playback - record timestamp for smart rewind
+                    smartRewindCalculator.recordPause()
+                }
+
                 // Update playing state in controller
                 serviceScope.launch {
                     playbackStateController.updatePlayingState(playWhenReady)
@@ -983,6 +1073,12 @@ class MediaPlayerService :
                 if (playbackState != Player.STATE_IDLE) {
                     setSessionCustomErrorMessage(null)
                 }
+
+                // Reset error count when playback is ready (successful recovery)
+                if (playbackState == Player.STATE_READY) {
+                    errorRetryCount = 0
+                }
+
                 updateSessionPlaybackState()
                 if (playbackState != Player.STATE_ENDED) {
                     return

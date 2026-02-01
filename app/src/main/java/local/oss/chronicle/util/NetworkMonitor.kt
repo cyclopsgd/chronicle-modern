@@ -2,6 +2,7 @@ package local.oss.chronicle.util
 
 import android.content.Context
 import android.net.ConnectivityManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -50,7 +51,7 @@ sealed class NetworkState {
 class NetworkMonitor
     @Inject
     constructor(
-        private val context: Context,
+        @ApplicationContext private val context: Context,
     ) {
         private val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

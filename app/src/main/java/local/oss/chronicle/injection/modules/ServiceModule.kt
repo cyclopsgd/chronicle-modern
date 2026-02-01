@@ -206,11 +206,7 @@ abstract class ServiceModule {
             return ToneGenerator(AudioManager.STREAM_MUSIC, 100)
         }
 
-        @Provides
-        @ServiceScoped
-        fun providePlaybackUrlResolver(
-            plexMediaService: PlexMediaService,
-            plexConfig: PlexConfig,
-        ): PlaybackUrlResolver = PlaybackUrlResolver(plexMediaService, plexConfig)
+        // PlaybackUrlResolver is now provided via @Inject constructor with @Singleton scope
+        // This allows it to be shared across service and singleton components
     }
 }

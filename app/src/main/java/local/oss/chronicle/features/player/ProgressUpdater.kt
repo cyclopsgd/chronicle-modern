@@ -53,6 +53,12 @@ interface ProgressUpdater {
     /** Cancels regular progress updates */
     fun cancel()
 
+    /**
+     * Emergency save for when the app is being killed.
+     * Uses WorkManager with expedited flag to persist progress even if the process dies.
+     */
+    fun emergencySaveProgress()
+
     companion object {
         val BOOK_FINISHED_END_OFFSET_MILLIS = 2.minutes.inWholeMilliseconds
 
@@ -333,5 +339,68 @@ class SimpleProgressUpdater
 
         override fun cancel() {
             handler.removeCallbacks(updateProgressAction)
+        }
+
+        override fun emergencySaveProgress() {
+            val controller = mediaController ?: run {
+                Timber.w("EmergencySave: No mediaController available")
+                return
+            }
+
+            val trackId = controller.metadata?.id?.toIntOrNull() ?: run {
+                Timber.w("EmergencySave: No track ID available")
+                return
+            }
+
+            if (trackId == TRACK_NOT_FOUND) {
+                Timber.w("EmergencySave: Track not found")
+                return
+            }
+
+            // Get absolute position from extras
+            val absolutePosition =
+                controller.playbackState?.extras?.getLong(MediaPlayerService.EXTRA_ABSOLUTE_TRACK_POSITION) ?: 0L
+
+            // Get chapter info for position calculation
+            val chapter = currentlyPlaying.chapter.value
+            val chapterRelativePosition = controller.playbackState?.currentPlayBackPosition ?: 0L
+
+            val playerPosition =
+                if (chapter != EMPTY_CHAPTER && chapterRelativePosition >= 0) {
+                    chapter.startTimeOffset + chapterRelativePosition
+                } else {
+                    absolutePosition
+                }
+
+            Timber.i("EmergencySave: Saving progress for track $trackId at position $playerPosition")
+
+            // Create an expedited worker to save progress
+            val inputData =
+                workDataOf(
+                    EMERGENCY_SAVE_TRACK_ID to trackId,
+                    EMERGENCY_SAVE_POSITION to playerPosition,
+                    EMERGENCY_SAVE_TIMESTAMP to System.currentTimeMillis(),
+                )
+
+            val emergencyWorker =
+                OneTimeWorkRequestBuilder<EmergencyProgressSaveWorker>()
+                    .setInputData(inputData)
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .build()
+
+            workManager
+                .beginUniqueWork(
+                    EMERGENCY_SAVE_WORK_NAME,
+                    ExistingWorkPolicy.REPLACE,
+                    emergencyWorker,
+                )
+                .enqueue()
+        }
+
+        companion object {
+            const val EMERGENCY_SAVE_WORK_NAME = "emergency_progress_save"
+            const val EMERGENCY_SAVE_TRACK_ID = "emergency_track_id"
+            const val EMERGENCY_SAVE_POSITION = "emergency_position"
+            const val EMERGENCY_SAVE_TIMESTAMP = "emergency_timestamp"
         }
     }

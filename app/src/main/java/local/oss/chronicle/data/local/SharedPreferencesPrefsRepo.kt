@@ -14,6 +14,7 @@ import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_JUMP_BACKWARD_SECO
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_JUMP_FORWARD_SECONDS
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_LAST_REFRESH
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_LIBRARY_MEDIA_TYPE
+import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_LAST_PAUSE_TIMESTAMP
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_LIBRARY_VIEW_STYLE
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_OFFLINE_MODE
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_PAUSE_ON_FOCUS_LOST
@@ -128,6 +129,9 @@ interface PrefsRepo {
     /** Disable progress tracking in the local DB for debugging purposes */
     var debugOnlyDisableLocalProgressTracking: Boolean
 
+    /** Timestamp when playback was last paused (for smart rewind calculation) */
+    var lastPauseTimestamp: Long
+
     companion object {
         const val KEY_SYNC_DIR_PATH = "key_sync_location"
         const val KEY_BOOK_COVER_STYLE = "key_book_cover_style"
@@ -152,6 +156,7 @@ interface PrefsRepo {
         const val KEY_HIDE_PLAYED_AUDIOBOOKS = "key_hide_played_audiobooks"
         const val KEY_LIBRARY_MEDIA_TYPE = "key_media_type"
         const val KEY_LIBRARY_VIEW_STYLE = "key_library_view_style"
+        const val KEY_LAST_PAUSE_TIMESTAMP = "key_last_pause_timestamp"
         const val VIEW_STYLE_COVER_GRID = "view_style_cover_grid"
         const val VIEW_STYLE_TEXT_LIST = "view_style_text_list"
         const val VIEW_STYLE_DETAILS_LIST = "view_style_details_list"
@@ -389,4 +394,8 @@ class SharedPreferencesPrefsRepo
         override fun containsKey(key: String): Boolean {
             return sharedPreferences.contains(key)
         }
+
+        override var lastPauseTimestamp: Long
+            get() = sharedPreferences.getLong(KEY_LAST_PAUSE_TIMESTAMP, 0L)
+            set(value) = sharedPreferences.edit().putLong(KEY_LAST_PAUSE_TIMESTAMP, value).apply()
     }
