@@ -36,7 +36,6 @@
             android:visibility="@{viewModel.isLoggedIn() ? View.VISIBLE : View.GONE}"
             app:itemIconTint="@color/bottom_nav_item_color"
             app:itemTextColor="@color/bottom_nav_item_color"
-            app:itemActiveIndicatorStyle="@style/Widget.BottomNavigationView.ActiveIndicator"
             app:labelVisibilityMode="labeled"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
