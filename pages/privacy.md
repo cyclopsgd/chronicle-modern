@@ -88,10 +88,7 @@ We encourage you to review this privacy policy periodically to stay informed abo
 
 ## Contact
 
-If you have any questions or concerns about this privacy policy or Chronicle Epilogue's privacy practices, please:
-
-- Open an issue on our [GitHub repository](https://github.com/germann/chronicle/issues)
-- Review our documentation and FAQs in the repository
+If you have any questions or concerns about this privacy policy or Chronicle Epilogue's privacy practices, please review our documentation and FAQs in the repository.
 
 ---
 

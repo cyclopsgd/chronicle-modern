@@ -44,18 +44,14 @@ Stream and enjoy your audiobook collection from your Plex server with a dedicate
 
 ## Resources
 
-- [Support Chronicle](support) ❤️
 - [Privacy Policy](privacy)
-- [GitHub Repository](https://github.com/fabiogermann/chronicle)
-- [Contributing Guide](https://github.com/fabiogermann/chronicle/blob/main/CONTRIBUTING.md)
-- [Changelog](https://github.com/fabiogermann/chronicle/blob/main/CHANGELOG.md)
 
 ## Open Source
 
-Chronicle Epilogue is open source software licensed under the GNU General Public License v3.0. Contributions are welcome!
+Chronicle Epilogue is open source software licensed under the GNU General Public License v3.0.
 
 ---
 
 <small>
-© 2024 Chronicle Epilogue | [License](https://github.com/fabiogermann/chronicle/blob/main/LICENSE) | Made with ❤️ for audiobook lovers
+Chronicle Epilogue | Licensed under GPL-3.0
 </small>

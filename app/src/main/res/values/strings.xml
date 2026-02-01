@@ -220,7 +220,7 @@
     <string name="settings_book_cover_type_rect">Rectangular</string>
     <string name="settings_premium_upgrade_label">Upgrade to pro</string>
     <string name="settings_premium_upgrade_explanation">Get access to your books offline, get adjustable playback speed, and more!</string>
-    <string name="settings_premium_unlocked_title">Well there is no PRO but you can support us</string>
+    <string name="settings_premium_unlocked_title">All features unlocked</string>
     <string name="settings_premium_unlocked_explanation">You have full access to all of Chronicle\'s features</string>
     <string name="settings_category_appearance">Appearance</string>
     <string name="settings_category_playback">Playback</string>
@@ -238,10 +238,10 @@
     <string name="settings_category_etc">Etc</string>
     <string name="settings_licenses_title">Licenses</string>
     <string name="settings_licenses_explanation">Open source libraries used by Chronicle</string>
-    <string name="settings_subreddit_title">reddit.com/r/ChronicleEpilogueApp/</string>
-    <string name="settings_subreddit_explanation">Share bug reports, request features, and learn what\'s coming next in Chronicle</string>
-    <string name="settings_github_title">github.com/fabiogermann/chronicle</string>
-    <string name="settings_github_explanation">Chronicle is open source!</string>
+    <string name="settings_subreddit_title">Community</string>
+    <string name="settings_subreddit_explanation">Join the Chronicle community on Reddit</string>
+    <string name="settings_github_title">Source Code</string>
+    <string name="settings_github_explanation">Chronicle is open source software (GPL-3.0)</string>
     <string name="settings_clear_downloads_warning">This will delete your downloaded files. Continue?</string>
     <string name="settings_shake_to_snooze_title">Shake to snooze</string>
     <string name="settings_shake_to_snooze_explanation">Shaking device will snooze sleep timer by 5 minutes</string>

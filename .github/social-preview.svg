@@ -77,11 +77,11 @@
       </text>
     </g>
     
-    <!-- GitHub info -->
+    <!-- Open Source badge -->
     <g transform="translate(0, 420)">
-      <text x="0" y="0" font-family="system-ui, -apple-system, 'Segoe UI', monospace, Arial, sans-serif" 
+      <text x="0" y="0" font-family="system-ui, -apple-system, 'Segoe UI', monospace, Arial, sans-serif"
             font-size="24" fill="#9575cd" font-weight="400" letter-spacing="0.5">
-        github.com/fabiogermann/chronicle
+        Open Source | GPL-3.0
       </text>
     </g>
   </g>

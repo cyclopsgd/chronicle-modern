@@ -883,7 +883,7 @@ class SettingsViewModel(
                     click =
                         object : PreferenceClick {
                             override fun onClick() {
-                                _webLink.postEvent("https://github.com/fabiogermann/chronicle")
+                                // Source code link - update to your fork if desired
                             }
                         },
                 ),
