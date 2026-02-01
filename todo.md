@@ -27,17 +27,31 @@
 ### Phase 2.2: Playback Controls
 - [x] Always show mini player when logged in (like Audible)
 
-### Phase 3: Car Mode
+### Phase 3: Library Screen
+- [ ] Grid view with cover art (Compose)
+- [ ] Progress indicator overlay on covers
+- [ ] Filters: Not Started / In Progress / Finished / Downloaded
+- [ ] Sort: Title / Author / Date Added / Recently Played
+- [ ] Book detail screen improvements
+
+### Phase 4: Downloads & Offline
+- [ ] Download button on book detail
+- [ ] Download progress indicator
+- [ ] Queue multiple downloads (WorkManager)
+- [ ] SD card storage support
+- [ ] Storage management in settings
+
+### Phase 5: Progress Sync
+- [ ] Report playback progress to Plex server
+- [ ] Read progress from Plex on library refresh
+- [ ] Handle conflicts (most recent wins)
+- [ ] Offline-first: show cached data, update from network
+
+### Phase 6: Car Mode
 - [ ] Dedicated car mode screen (Compose)
 - [ ] Auto-detect Bluetooth car audio
 - [ ] Giant play/pause button (120dp+)
 - [ ] Disable sleep timer while in car mode
-
-### Phase 4: Library Screen
-- [ ] Grid view with cover art
-- [ ] Progress indicator overlay on covers
-- [ ] Filters: Not Started / In Progress / Finished / Downloaded
-- [ ] Sort: Title / Author / Date Added / Recently Played
 
 ### Technical Debt
 - [ ] Migrate remaining LiveData to StateFlow

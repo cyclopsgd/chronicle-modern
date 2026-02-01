@@ -20,16 +20,15 @@
   - Audible-style persistent mini player
 
 ### 🚧 In Progress
-- **Phase 3**: Car Mode (next up)
+- **Phase 3**: Library Screen (next up)
 
 ### 📋 Backlog (see `todo.md`)
 - PNG launcher icons (vector done, PNG fallbacks needed)
 - User profile images not loading
-- Always show mini player when logged in (like Audible)
-- Phase 3: Car Mode
-- Phase 4: Library Screen
-- Phase 5: Downloads
-- Phase 6: Advanced Features
+- Phase 3: Library Screen
+- Phase 4: Downloads & Offline
+- Phase 5: Progress Sync
+- Phase 6: Car Mode
 - Phase 7: Stats & Polish
 
 ---
