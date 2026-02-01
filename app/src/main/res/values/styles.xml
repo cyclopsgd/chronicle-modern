@@ -144,9 +144,9 @@
         <item name="itemTextColor">@color/bottom_nav_item_color</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="itemIconSize">24dp</item>
-        <item name="itemPaddingTop">8dp</item>
-        <item name="itemPaddingBottom">12dp</item>
-        <item name="android:minHeight">80dp</item>
+        <item name="itemPaddingTop">4dp</item>
+        <item name="itemPaddingBottom">4dp</item>
+        <item name="android:minHeight">56dp</item>
         <item name="fontFamily">@font/lato_bold</item>
     </style>
 

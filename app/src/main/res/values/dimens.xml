@@ -19,18 +19,17 @@
     <dimen name="top_level_icon">32dp</dimen>
 
     <!-- Bottom navigation bar -->
-    <dimen name="bottom_nav_bar_height">80dp</dimen>
+    <dimen name="bottom_nav_bar_height">56dp</dimen>
     <dimen name="bottom_nav_bar_collapsed_height">0dp</dimen>
 
-
-    <dimen name="bottom_nav_bar_height_plus_handle_height">152dp</dimen>
+    <dimen name="bottom_nav_bar_height_plus_handle_height">112dp</dimen>
 
     <!-- From material guidelines-->
     <!-- <dimen name="bottom_sheet_elevation">8dp</dimen>-->
     <!-- <dimen name="bottom_sheet_corner_radius">16dp</dimen>-->
 
-    <!-- Bottom sheet chooser -->
-    <dimen name="bottom_sheet_handle_height">72dp</dimen>
+    <!-- Bottom sheet chooser / mini player -->
+    <dimen name="bottom_sheet_handle_height">56dp</dimen>
     <dimen name="bottom_sheet_radius">8dp</dimen>
 
     <!-- Audiobook item -->
