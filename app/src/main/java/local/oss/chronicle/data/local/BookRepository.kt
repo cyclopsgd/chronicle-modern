@@ -141,6 +141,12 @@ interface IBookRepository {
 
     suspend fun setUnwatched(bookId: Int)
 
+    /** Updates the per-book playback speed (null to use global default) */
+    suspend fun updatePlaybackSpeed(bookId: Int, speed: Float?)
+
+    /** Gets the per-book playback speed (null means use global default) */
+    suspend fun getPlaybackSpeed(bookId: Int): Float?
+
     /** Loads an [Audiobook] in from the network */
     suspend fun fetchBookAsync(bookId: Int): Audiobook?
 
@@ -387,6 +393,18 @@ class BookRepository
                 } catch (t: Throwable) {
                     Timber.e("Failed to update watched status: $t")
                 }
+            }
+        }
+
+        override suspend fun updatePlaybackSpeed(bookId: Int, speed: Float?) {
+            withContext(Dispatchers.IO) {
+                bookDao.updatePlaybackSpeed(bookId, speed)
+            }
+        }
+
+        override suspend fun getPlaybackSpeed(bookId: Int): Float? {
+            return withContext(Dispatchers.IO) {
+                bookDao.getPlaybackSpeed(bookId)
             }
         }
 

@@ -27,6 +27,7 @@ fun getBookDatabase(context: Context): BookDatabase {
                     BOOK_MIGRATION_5_6,
                     BOOK_MIGRATION_6_7,
                     BOOK_MIGRATION_7_8,
+                    BOOK_MIGRATION_8_9,
                 ).build()
         }
     }
@@ -84,7 +85,14 @@ val BOOK_MIGRATION_7_8 =
         }
     }
 
-@Database(entities = [Audiobook::class], version = 8, exportSchema = true)
+val BOOK_MIGRATION_8_9 =
+    object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE Audiobook ADD COLUMN playbackSpeed REAL DEFAULT NULL")
+        }
+    }
+
+@Database(entities = [Audiobook::class], version = 9, exportSchema = true)
 abstract class BookDatabase : RoomDatabase() {
     abstract val bookDao: BookDao
 }
@@ -239,4 +247,10 @@ interface BookDao {
 
     @Query("UPDATE Audiobook SET viewCount = 0 WHERE id = :bookId")
     suspend fun setUnwatched(bookId: Int)
+
+    @Query("UPDATE Audiobook SET playbackSpeed = :speed WHERE id = :bookId")
+    suspend fun updatePlaybackSpeed(bookId: Int, speed: Float?)
+
+    @Query("SELECT playbackSpeed FROM Audiobook WHERE id = :bookId LIMIT 1")
+    suspend fun getPlaybackSpeed(bookId: Int): Float?
 }

@@ -22,7 +22,7 @@
 - [x] Speed selector bottom sheet (0.5x - 3.0x) - *Compose implementation*
 - [x] Sleep timer bottom sheet with presets
 - [x] Chapter list bottom sheet (Compose)
-- [ ] Per-book speed memory (store in Room)
+- [x] Per-book speed memory (store in Room)
 
 ### Phase 2.2: Playback Controls
 - [ ] Always show mini player when logged in (like Audible)

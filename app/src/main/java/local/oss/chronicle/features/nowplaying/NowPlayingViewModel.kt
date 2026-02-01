@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.data.model.Chapter
@@ -51,6 +52,7 @@ class NowPlayingViewModel @Inject constructor(
     private val prefsRepo: PrefsRepo,
     private val plexConfig: PlexConfig,
     private val localBroadcastManager: LocalBroadcastManager,
+    private val bookRepository: IBookRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NowPlayingUiState())
@@ -67,6 +69,7 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     private var sleepTimerRemainingMs: Long = 0L
+    private var currentBookId: Int = -1
 
     private val sleepTimerReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -158,6 +161,12 @@ class NowPlayingViewModel @Inject constructor(
                         author = book.author,
                         coverArtUrl = coverUrl,
                     )
+                }
+
+                // Load per-book speed when book changes
+                if (book.id != currentBookId && book.id > 0) {
+                    currentBookId = book.id
+                    loadBookPlaybackSpeed(book.id)
                 }
             }
         }
@@ -271,8 +280,27 @@ class NowPlayingViewModel @Inject constructor(
     fun setPlaybackSpeed(speed: Float) {
         hideSpeedSelector()
         val clampedSpeed = speed.coerceIn(0.5f, 3.0f)
+
+        // Save per-book speed
+        if (currentBookId > 0) {
+            viewModelScope.launch {
+                bookRepository.updatePlaybackSpeed(currentBookId, clampedSpeed)
+            }
+        }
+
+        // Also update global prefs (so it's used immediately by the player)
         prefsRepo.playbackSpeed = clampedSpeed
         _uiState.update { it.copy(playbackSpeed = clampedSpeed) }
+    }
+
+    private fun loadBookPlaybackSpeed(bookId: Int) {
+        viewModelScope.launch {
+            val bookSpeed = bookRepository.getPlaybackSpeed(bookId)
+            val effectiveSpeed = bookSpeed ?: prefsRepo.playbackSpeed
+            prefsRepo.playbackSpeed = effectiveSpeed
+            _uiState.update { it.copy(playbackSpeed = effectiveSpeed) }
+            Timber.d("Loaded playback speed for book $bookId: $effectiveSpeed (per-book: $bookSpeed)")
+        }
     }
 
     fun showSleepTimerOptions() {

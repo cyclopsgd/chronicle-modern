@@ -52,6 +52,8 @@ data class Audiobook(
     val viewCount: Long = 0L,
     /** Chapter metadata corresponding to m4b chapter metadata in the m4b files */
     val chapters: List<Chapter> = emptyList(),
+    /** Per-book playback speed (null = use global default) */
+    val playbackSpeed: Float? = null,
 ) {
     companion object {
         fun from(dir: PlexDirectory) =
@@ -101,6 +103,7 @@ data class Audiobook(
                     favorited = local.favorited,
                     chapters = local.chapters,
                     source = local.source,
+                    playbackSpeed = local.playbackSpeed,
                 )
             } else {
                 network.copy(
@@ -111,6 +114,7 @@ data class Audiobook(
                     lastViewedAt = local.lastViewedAt,
                     favorited = local.favorited,
                     chapters = local.chapters,
+                    playbackSpeed = local.playbackSpeed,
                 )
             }
         }
