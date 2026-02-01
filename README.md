@@ -42,6 +42,7 @@ A **premium audiobook experience** that rivals commercial apps like Audible, whi
 | **Background** | `#121212` |
 | **Surface** | `#1E1E1E` |
 | **Logo** | "O" with audio waveform |
+| **Launcher Icon** | Adaptive icon with vector drawable |
 
 Brand assets are in [`docs/Logos/`](docs/Logos/).
 
