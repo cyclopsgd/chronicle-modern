@@ -28,6 +28,7 @@
 - [ ] Volume fade-out before sleep stop (15 seconds)
 - [ ] Shake-to-extend sleep timer (accelerometer)
 - [ ] Chapter markers on scrubber
+- [ ] Always show mini player when logged in (like Audible)
 
 ### Phase 3: Car Mode
 - [ ] Dedicated car mode screen (Compose)
@@ -40,6 +41,13 @@
 - [ ] Progress indicator overlay on covers
 - [ ] Filters: Not Started / In Progress / Finished / Downloaded
 - [ ] Sort: Title / Author / Date Added / Recently Played
+
+### Phase 5: Stats Screen
+- [ ] Add Stats tab to bottom navigation (Home, Library, Stats, Settings)
+- [ ] Listening time (daily, weekly, monthly, all-time)
+- [ ] Books finished count
+- [ ] Listening streaks
+- [ ] Average session length
 
 ### Technical Debt
 - [ ] Migrate remaining LiveData to StateFlow
@@ -58,9 +66,14 @@
 - [ ] Notification doesn't update on chapter change
 - [ ] Large libraries slow to load (needs incremental loading)
 - [ ] Playback progress in library not real-time
+- [ ] User profile images not loading on choose user screen
+- [ ] Profile picture shows black/orange square on selection screen
 
 ### Low Priority
 - [ ] Sleep timer "end of chapter" doesn't account for playback speed
+- [ ] Recently added section - option for vertical layout instead of horizontal
+- [ ] Update home nav icon (currently bland oblong shape)
+- [ ] Review/improve transition animations
 
 ---
 
