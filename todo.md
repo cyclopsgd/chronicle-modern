@@ -3,12 +3,10 @@
 ## Pending Tasks
 
 ### Branding (High Priority)
-- [ ] **Generate launcher icons from SVGs**
-  - Convert `docs/Logos/ic_launcher_foreground.svg` to Android Vector Drawable
-  - Convert `docs/Logos/ic_launcher_background.svg` to Android Vector Drawable
-  - Generate mipmap PNGs at all densities (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
-  - Update `app/src/main/res/mipmap-*` folders
-  - Update `ic_launcher.xml` and `ic_launcher_round.xml` for adaptive icons
+- [x] **Generate launcher icons from SVGs**
+  - Converted to Android Vector Drawables
+  - Updated adaptive icon configs
+  - Opus "O" + waveform logo in amber on dark background
 - [ ] Update notification icon to use new branding
 - [ ] Update splash screen (if exists) with Opus branding
 

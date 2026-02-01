@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New color scheme: Amber primary (#FFAB40), dark background (#121212)
 - Created OpusTheme for Jetpack Compose with brand colors
 - Updated all layouts to use dark background theme
+- **New Opus launcher icon** - Vector drawable with "O" + waveform design
+- **Modernized bottom navigation** - Dark surface background with amber active indicators
 
 ### New Features
 - **Compose Now Playing Screen** - Complete redesign with cover-art-dominant layout
