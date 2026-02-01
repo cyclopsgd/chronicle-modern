@@ -88,10 +88,13 @@ open class ChronicleApplication : Application() {
             Timber.plant(Timber.DebugTree())
         }
 
-        // Hilt handles injection automatically
+        // IMPORTANT: super.onCreate() must be called BEFORE accessing any @Inject fields
+        // Hilt performs injection during super.onCreate()
+        super.onCreate()
+
+        // Now injected fields are available
         setupNetwork(plexPrefs)
         updateDownloadedFileState()
-        super.onCreate()
         Fresco.initialize(this, frescoConfig)
         // TODO: remove in a future version
         applicationScope.launch {

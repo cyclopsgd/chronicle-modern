@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.slider.Slider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.application.MainActivityViewModel.BottomSheetState.COLLAPSED
@@ -28,6 +29,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /** Responsible for playback controls and displaying the currently playing media */
+@AndroidEntryPoint
 @ExperimentalCoroutinesApi
 class CurrentlyPlayingFragment : Fragment() {
     private lateinit var currentlyPlayingInterface: MainActivity.CurrentlyPlayingInterface
