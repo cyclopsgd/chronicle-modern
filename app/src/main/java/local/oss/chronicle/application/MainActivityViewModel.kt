@@ -148,14 +148,23 @@ class MainActivityViewModel(
                         setAudiobook(trackId.toInt())
                     }
                 }
-            } ?: _currentlyPlayingLayoutState.postValue(HIDDEN)
+            }
+            // Note: Don't hide mini player when metadata is null - we keep showing
+            // the last played book (Audible-style behavior)
         }
 
     private val playbackObserver =
         Observer<PlaybackStateCompat> { state ->
             Timber.i("Observing playback: $state")
             when (state.state) {
-                STATE_STOPPED, STATE_NONE -> setBottomSheetState(HIDDEN)
+                STATE_STOPPED, STATE_NONE -> {
+                    // Keep mini player visible if a book is loaded (Audible-style behavior)
+                    // Only transition from EXPANDED to COLLAPSED, never to HIDDEN
+                    if (currentlyPlayingLayoutState.value == EXPANDED) {
+                        setBottomSheetState(COLLAPSED)
+                    }
+                    // If already COLLAPSED or HIDDEN, leave it as is
+                }
                 else -> {
                     if (currentlyPlayingLayoutState.value == HIDDEN) {
                         setBottomSheetState(COLLAPSED)
@@ -167,6 +176,18 @@ class MainActivityViewModel(
     init {
         mediaServiceConnection.nowPlaying.observeForever(metadataObserver)
         mediaServiceConnection.playbackState.observeForever(playbackObserver)
+
+        // Load most recently played book on app start (Audible-style mini player)
+        viewModelScope.launch(exceptionHandler) {
+            val recentBook = bookRepository.getMostRecentlyPlayed()
+            if (recentBook.id != NO_AUDIOBOOK_FOUND_ID) {
+                audiobookId.postValue(recentBook.id)
+                if (_currentlyPlayingLayoutState.value == HIDDEN) {
+                    _currentlyPlayingLayoutState.postValue(COLLAPSED)
+                }
+                Timber.d("Loaded most recently played book: ${recentBook.title}")
+            }
+        }
     }
 
     private fun setAudiobook(trackId: Int) {

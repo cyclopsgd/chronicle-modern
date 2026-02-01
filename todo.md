@@ -25,7 +25,7 @@
 - [x] Per-book speed memory (store in Room)
 
 ### Phase 2.2: Playback Controls
-- [ ] Always show mini player when logged in (like Audible)
+- [x] Always show mini player when logged in (like Audible)
 
 ### Phase 3: Car Mode
 - [ ] Dedicated car mode screen (Compose)
