@@ -34,6 +34,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Extend (+5 min) and Cancel when timer active
   - Shows countdown of active timer
 - New `NowPlayingViewModel` bridging existing playback infrastructure to Compose
+- **Speed Selector Bottom Sheet** - Compose-based playback speed control
+  - Slider with 0.05 increments (0.5x to 3.0x range)
+  - Preset chips for common speeds (0.75x, 1x, 1.25x, 1.5x, 1.75x, 2x)
+  - Real-time speed display while adjusting
+- **Per-Book Speed Memory** - Each book remembers its playback speed
+  - Stored in Room database
+  - Automatically loads when switching books
+  - Falls back to global speed if no per-book setting
+- **Persistent Mini Player** - Audible-style always-visible player
+  - Shows last played book on app start
+  - Stays visible after playback stops
+  - One-tap access to resume playback
 
 ### Improvements
 - **Full-screen player** - Bottom navigation now hides when player is expanded
@@ -51,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved `MediaServiceConnection` and `LocalBroadcastManager` to `ActivityRetainedComponent`
 - Updated all fragment backgrounds from orange to dark theme
 - Added event system for ViewModel-to-Fragment communication
+- Database migration 8→9: Added `playbackSpeed` column to Audiobook table
 
 ## [0.60.17] - 2026-01-29
 

@@ -14,10 +14,13 @@
 - **Phase 1.1**: Multi-module architecture
 - **Phase 1.2**: Hilt 2.54 migration (complete)
 - **Phase 1.3**: Core reliability fixes (smart rewind, error recovery, position persistence)
-- **Phase 2.1**: Now-Playing Screen (mostly complete)
+- **Phase 2**: Now-Playing Screen (complete)
+  - Compose speed selector with slider + presets (0.5x-3.0x)
+  - Per-book playback speed memory (Room)
+  - Audible-style persistent mini player
 
 ### 🚧 In Progress
-- **Phase 2**: Final polish items (speed selector, per-book speed memory)
+- **Phase 3**: Car Mode (next up)
 
 ### 📋 Backlog (see `todo.md`)
 - PNG launcher icons (vector done, PNG fallbacks needed)
