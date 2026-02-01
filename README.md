@@ -182,8 +182,13 @@ cd chronicle-modern
 - [ ] Full Media3 migration
 - [ ] Progress sync with Plex server
 - [ ] Bookmarks with notes
-- [ ] Listening statistics
 - [ ] Android Auto optimization
+
+### Phase 7: Stats & Polish
+- [ ] Stats tab in bottom navigation
+- [ ] Listening time tracking
+- [ ] Books finished count
+- [ ] UI polish and animation refinements
 
 ---
 

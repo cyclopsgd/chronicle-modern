@@ -42,18 +42,18 @@
 - [ ] Filters: Not Started / In Progress / Finished / Downloaded
 - [ ] Sort: Title / Author / Date Added / Recently Played
 
-### Phase 5: Stats Screen
-- [ ] Add Stats tab to bottom navigation (Home, Library, Stats, Settings)
-- [ ] Listening time (daily, weekly, monthly, all-time)
-- [ ] Books finished count
-- [ ] Listening streaks
-- [ ] Average session length
-
 ### Technical Debt
 - [ ] Migrate remaining LiveData to StateFlow
 - [ ] Replace Fresco with Coil throughout
 - [ ] Full Media3 migration (MediaSessionService)
 - [ ] Update package name from `local.oss.chronicle` to new name (breaking change)
+
+### Phase 7: Stats & Polish
+- [ ] Add Stats tab to bottom navigation (Home, Library, Stats, Settings)
+- [ ] Listening time (daily, weekly, monthly, all-time)
+- [ ] Books finished count
+- [ ] Listening streaks
+- [ ] UI polish and animation refinements
 
 ---
 
