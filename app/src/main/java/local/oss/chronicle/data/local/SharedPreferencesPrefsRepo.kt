@@ -5,6 +5,7 @@ import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_ALLOW_AUTO
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_AUTO_ENTER_CAR_MODE
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_AUTO_REWIND_ENABLED
+import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_SKIP_CHAPTER_JUMP_WARNING
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_BOOK_COVER_STYLE
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_BOOK_SORT_BY
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_DEBUG_DISABLE_PROGRESS
@@ -136,6 +137,9 @@ interface PrefsRepo {
     /** Whether to automatically enter car mode when connected to car Bluetooth */
     var autoEnterCarMode: Boolean
 
+    /** Whether to skip the warning when jumping to a chapter */
+    var skipChapterJumpWarning: Boolean
+
     companion object {
         const val KEY_SYNC_DIR_PATH = "key_sync_location"
         const val KEY_BOOK_COVER_STYLE = "key_book_cover_style"
@@ -162,6 +166,7 @@ interface PrefsRepo {
         const val KEY_LIBRARY_VIEW_STYLE = "key_library_view_style"
         const val KEY_LAST_PAUSE_TIMESTAMP = "key_last_pause_timestamp"
         const val KEY_AUTO_ENTER_CAR_MODE = "key_auto_enter_car_mode"
+        const val KEY_SKIP_CHAPTER_JUMP_WARNING = "key_skip_chapter_jump_warning"
         const val VIEW_STYLE_COVER_GRID = "view_style_cover_grid"
         const val VIEW_STYLE_TEXT_LIST = "view_style_text_list"
         const val VIEW_STYLE_DETAILS_LIST = "view_style_details_list"
@@ -408,4 +413,9 @@ class SharedPreferencesPrefsRepo
         override var autoEnterCarMode: Boolean
             get() = sharedPreferences.getBoolean(KEY_AUTO_ENTER_CAR_MODE, defaultAutoEnterCarMode)
             set(value) = sharedPreferences.edit().putBoolean(KEY_AUTO_ENTER_CAR_MODE, value).apply()
+
+        private val defaultSkipChapterJumpWarning = false
+        override var skipChapterJumpWarning: Boolean
+            get() = sharedPreferences.getBoolean(KEY_SKIP_CHAPTER_JUMP_WARNING, defaultSkipChapterJumpWarning)
+            set(value) = sharedPreferences.edit().putBoolean(KEY_SKIP_CHAPTER_JUMP_WARNING, value).apply()
     }

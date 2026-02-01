@@ -62,16 +62,25 @@
 - [ ] Full Media3 migration (MediaSessionService)
 - [ ] Update package name from `local.oss.chronicle` to new name (breaking change)
 
-### Phase 7: Stats & Polish
-- [ ] Add Stats tab to bottom navigation (Home, Library, Stats, Settings)
-- [ ] Listening time (daily, weekly, monthly, all-time)
-- [ ] Books finished count
-- [ ] Listening streaks
+### Phase 7: Home Screen Redesign & Polish
+- [ ] **Home page categorization** (Netflix/Audible style)
+  - Continue Listening (in-progress books)
+  - Recently Played (based on lastViewedAt)
+  - Recently Added (based on addedAt)
+  - Genre-based rows (e.g., "Mystery", "Sci-Fi", "Biography")
+  - Horizontal scrolling rows
 - [ ] UI polish and animation refinements
 - [ ] Volume fade-out before sleep stop (15 seconds)
 - [ ] Shake-to-extend sleep timer (accelerometer)
 - [ ] Chapter markers on scrubber
 - [ ] Book detail screen Compose migration
+- [ ] Hide chapters behind "Chapters" button on book detail page
+
+### Future: Stats Feature
+- [ ] Add Stats tab to bottom navigation (Home, Library, Stats, Settings)
+- [ ] Listening time (daily, weekly, monthly, all-time)
+- [ ] Books finished count
+- [ ] Listening streaks
 
 ---
 
@@ -81,6 +90,8 @@
 - [x] MediaBrowser onConnected callback not firing (fixed: setSessionToken was missing)
 
 ### Medium Priority
+- [ ] Mini player loses audiobook link after app restart (shows "no audiobook found" when clicked)
+- [ ] Samsung Now Bar notification image is low resolution
 - [ ] Notification doesn't update on chapter change
 - [ ] Large libraries slow to load (needs incremental loading)
 - [ ] Playback progress in library not real-time

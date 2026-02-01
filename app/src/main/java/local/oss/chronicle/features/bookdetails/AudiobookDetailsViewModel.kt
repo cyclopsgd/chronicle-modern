@@ -151,9 +151,9 @@ class AudiobookDetailsViewModel(
     val cacheIconDrawable: LiveData<Int> =
         cacheStatus.map { status ->
             return@map when (status) {
-                CACHING -> R.drawable.ic_cloud_download_white // Doesn't matter, we show a spinner over it
-                NOT_CACHED -> R.drawable.ic_cloud_download_white
-                CACHED -> R.drawable.ic_cloud_done_white
+                CACHING -> R.drawable.ic_download_white // Doesn't matter, we show a spinner over it
+                NOT_CACHED -> R.drawable.ic_download_white
+                CACHED -> R.drawable.ic_download_done_white
             }
         }
 
@@ -488,20 +488,32 @@ class AudiobookDetailsViewModel(
         trackId: Long = TRACK_NOT_FOUND.toLong(),
         hasUserConfirmation: Boolean = false,
     ) {
-        if (!hasUserConfirmation) {
+        // Skip warning if user has checked "Don't show again"
+        if (!hasUserConfirmation && !prefsRepo.skipChapterJumpWarning) {
             showOptionsMenu(
                 title =
                     FormattableString.from(
                         R.string.warning_jump_to_chapter_will_clear_progress,
                     ),
-                options = listOf(FormattableString.yes, FormattableString.no),
+                options = listOf(
+                    FormattableString.yes,
+                    FormattableString.no,
+                    FormattableString.from(R.string.dont_show_again),
+                ),
                 listener =
                     object : BottomChooserItemListener() {
                         override fun onItemClicked(formattableString: FormattableString) {
                             when (formattableString) {
                                 FormattableString.yes -> jumpToChapter(offset, trackId, true)
                                 FormattableString.no -> Unit
-                                else -> throw NoWhenBranchMatchedException()
+                                else -> {
+                                    // "Don't show again" - save preference and jump
+                                    if (formattableString is FormattableString.ResourceString &&
+                                        formattableString.stringRes == R.string.dont_show_again) {
+                                        prefsRepo.skipChapterJumpWarning = true
+                                        jumpToChapter(offset, trackId, true)
+                                    }
+                                }
                             }
                             hideBottomSheet()
                         }

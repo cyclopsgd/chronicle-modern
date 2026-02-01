@@ -45,6 +45,10 @@ object OpusColors {
     val Downloaded = Secondary
     val Error = Color(0xFFEF5350)
     val Buffering = Color(0xFF64B5F6)
+
+    // Dividers / separators
+    val Divider = Color(0x1AFFFFFF) // 10% white - very subtle
+    val DividerStrong = Color(0x33FFFFFF) // 20% white - slightly more visible
 }
 
 private val DarkColorScheme = darkColorScheme(

@@ -144,10 +144,12 @@
         <item name="itemTextColor">@color/bottom_nav_item_color</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="itemIconSize">24dp</item>
-        <item name="itemPaddingTop">8dp</item>
+        <item name="itemPaddingTop">4dp</item>
         <item name="itemPaddingBottom">4dp</item>
         <item name="android:minHeight">56dp</item>
         <item name="fontFamily">@font/lato_bold</item>
+        <!-- Reduce space between icon and label -->
+        <item name="itemSpacing">0dp</item>
         <!-- Disable the pill-shaped active indicator -->
         <item name="itemActiveIndicatorStyle">@null</item>
     </style>

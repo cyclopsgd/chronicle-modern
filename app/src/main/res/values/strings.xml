@@ -250,6 +250,7 @@
     <string name="prompt_clear_downloads_allow_retain">Would you like to keep your downloaded files?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="dont_show_again">Don\'t ask again</string>
 
     <string name="settings_jump_forward_value">Jump forward: %1$s</string>
     <string name="settings_jump_forward_title">Jump forward</string>

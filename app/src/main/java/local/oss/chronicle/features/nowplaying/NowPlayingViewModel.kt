@@ -172,23 +172,14 @@ class NowPlayingViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            currentlyPlaying.track.collect { track ->
-                _uiState.update { current ->
-                    current.copy(
-                        durationMs = track.duration,
-                    )
-                }
-            }
-        }
-
-        viewModelScope.launch {
             currentlyPlaying.chapter.collect { chapter ->
+                // Use chapter duration for progress display (not track/book duration)
+                val chapterDuration = chapter.endTimeOffset - chapter.startTimeOffset
                 _uiState.update { current ->
                     current.copy(
                         chapterTitle = chapter.title,
                         currentChapterIndex = chapter.index.toInt(),
-                        // Chapter-scoped duration
-                        durationMs = chapter.endTimeOffset - chapter.startTimeOffset,
+                        durationMs = chapterDuration,
                     )
                 }
             }
@@ -278,8 +269,10 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        hideSpeedSelector()
         val clampedSpeed = speed.coerceIn(0.5f, 3.0f)
+
+        // Update UI state first (before hiding selector to avoid flash of old value)
+        _uiState.update { it.copy(playbackSpeed = clampedSpeed, showSpeedSelector = false) }
 
         // Save per-book speed
         if (currentBookId > 0) {
@@ -290,7 +283,6 @@ class NowPlayingViewModel @Inject constructor(
 
         // Also update global prefs (so it's used immediately by the player)
         prefsRepo.playbackSpeed = clampedSpeed
-        _uiState.update { it.copy(playbackSpeed = clampedSpeed) }
     }
 
     private fun loadBookPlaybackSpeed(bookId: Int) {
@@ -362,12 +354,14 @@ class NowPlayingViewModel @Inject constructor(
         // Hide the chapter list
         hideChapterList()
 
-        // Jump to the chapter using custom action
-        val extras = Bundle().apply {
-            putInt(KEY_SEEK_TO_TRACK_WITH_ID, chapter.trackId.toInt())
-            putLong(KEY_START_TIME_TRACK_OFFSET, chapter.startTimeOffset)
+        // Jump to the chapter using playFromMediaId with track and offset in extras
+        if (currentBookId > 0) {
+            val extras = Bundle().apply {
+                putLong(KEY_SEEK_TO_TRACK_WITH_ID, chapter.trackId)
+                putLong(KEY_START_TIME_TRACK_OFFSET, chapter.startTimeOffset)
+            }
+            transportControls.playFromMediaId(currentBookId.toString(), extras)
         }
-        transportControls.sendCustomAction("JUMP_TO_CHAPTER", extras)
     }
 
     override fun onCleared() {

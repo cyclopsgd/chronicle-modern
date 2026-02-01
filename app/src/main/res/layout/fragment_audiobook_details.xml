@@ -95,45 +95,16 @@
                         app:layout_constraintTop_toBottomOf="@id/details_artwork"
                         tools:text="35%" />
 
-                    <FrameLayout
-                        android:id="@+id/download_indicator_container"
-                        android:layout_width="@dimen/list_icon_size"
-                        android:layout_height="@dimen/list_icon_size"
-                        app:layout_constraintBottom_toBottomOf="@id/author"
-                        app:layout_constraintLeft_toLeftOf="@id/left_gutter"
-                        app:layout_constraintTop_toTopOf="@id/book_title">
-
-                        <ProgressBar
-                            android:id="@+id/caching_tracks_spinner"
-                            android:layout_width="@dimen/list_icon_size"
-                            android:layout_height="@dimen/list_icon_size"
-                            android:contentDescription="@string/downloading_book"
-                            android:onClick="@{(view) -> viewModel.onCacheButtonClick()}"
-                            android:visibility="@{viewModel.cacheStatus == CacheStatus.CACHING ? View.VISIBLE : View.GONE}" />
-
-                        <ImageView
-                            android:id="@+id/download"
-                            android:layout_width="@dimen/list_icon_size"
-                            android:layout_height="@dimen/list_icon_size"
-                            android:contentDescription="@string/download"
-                            android:onClick="@{(view) -> viewModel.onCacheButtonClick()}"
-                            android:src="@{viewModel.cacheIconDrawable}"
-                            android:visibility="@{viewModel.cacheStatus == CacheStatus.CACHING ? View.INVISIBLE : View.VISIBLE}"
-                            app:tint="@{viewModel.cacheIconTint}" />
-
-                    </FrameLayout>
-
                     <TextView
                         android:id="@+id/book_title"
                         style="@style/TextAppearance.Body1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/margin_normal"
                         android:maxLines="2"
                         android:text="@{viewModel.audiobook.title}"
                         app:layout_constraintBottom_toTopOf="@id/author"
-                        app:layout_constraintLeft_toRightOf="@id/download_indicator_container"
-                        app:layout_constraintRight_toLeftOf="@id/play_button_container"
+                        app:layout_constraintLeft_toLeftOf="@id/left_gutter"
+                        app:layout_constraintRight_toLeftOf="@id/download_indicator_container"
                         app:layout_constraintTop_toTopOf="@id/play_button_container"
                         app:layout_constraintVertical_chainStyle="packed"
                         tools:ignore="RtlHardcoded"
@@ -152,6 +123,37 @@
                         app:layout_constraintTop_toBottomOf="@id/book_title"
                         app:layout_constraintVertical_chainStyle="packed"
                         tools:text="Author name won't overflow" />
+
+                    <FrameLayout
+                        android:id="@+id/download_indicator_container"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintBottom_toBottomOf="@id/play_button_container"
+                        app:layout_constraintRight_toLeftOf="@id/play_button_container"
+                        app:layout_constraintTop_toTopOf="@id/play_button_container">
+
+                        <ProgressBar
+                            android:id="@+id/caching_tracks_spinner"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:contentDescription="@string/downloading_book"
+                            android:onClick="@{(view) -> viewModel.onCacheButtonClick()}"
+                            android:visibility="@{viewModel.cacheStatus == CacheStatus.CACHING ? View.VISIBLE : View.GONE}" />
+
+                        <ImageView
+                            android:id="@+id/download"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="?android:attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/download"
+                            android:onClick="@{(view) -> viewModel.onCacheButtonClick()}"
+                            android:padding="4dp"
+                            android:src="@{viewModel.cacheIconDrawable}"
+                            android:visibility="@{viewModel.cacheStatus == CacheStatus.CACHING ? View.INVISIBLE : View.VISIBLE}"
+                            app:tint="@{viewModel.cacheIconTint}" />
+
+                    </FrameLayout>
 
                     <FrameLayout
                         android:id="@+id/play_button_container"
