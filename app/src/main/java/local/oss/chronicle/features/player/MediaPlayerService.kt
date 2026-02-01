@@ -247,6 +247,10 @@ class MediaPlayerService :
         mediaSession.setPlaybackState(PlaybackStateCompat.Builder().build())
         mediaSession.setCallback(mediaSessionCallback)
 
+        // CRITICAL: Expose the session token to MediaBrowser clients
+        // Without this, MediaBrowserCompat.ConnectionCallback.onConnected() never fires
+        sessionToken = mediaSession.sessionToken
+
         updateCustomActions()
         switchToPlayer(exoPlayer)
 
