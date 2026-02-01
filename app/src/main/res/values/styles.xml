@@ -140,14 +140,20 @@
     <!-- Bottom Navigation -->
     <style name="Widget.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
         <item name="backgroundTint">@color/colorSurface</item>
-        <item name="itemIconTint">@color/chip_background_color</item>
-        <item name="itemTextColor">@color/chip_background_color</item>
+        <item name="itemIconTint">@color/bottom_nav_item_color</item>
+        <item name="itemTextColor">@color/bottom_nav_item_color</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="itemIconSize">24dp</item>
         <item name="itemPaddingTop">8dp</item>
         <item name="itemPaddingBottom">12dp</item>
         <item name="android:minHeight">80dp</item>
         <item name="fontFamily">@font/lato_bold</item>
+    </style>
+
+    <!-- Bottom Navigation Active Indicator -->
+    <style name="Widget.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/colorPrimary</item>
+        <item name="android:alpha">0.15</item>
     </style>
 
     <!-- Full-screen dialog for OAuth login -->
