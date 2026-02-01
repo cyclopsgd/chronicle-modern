@@ -28,10 +28,10 @@
 - [x] Always show mini player when logged in (like Audible)
 
 ### Phase 3: Library Screen
-- [ ] Grid view with cover art (Compose)
-- [ ] Progress indicator overlay on covers
-- [ ] Filters: Not Started / In Progress / Finished / Downloaded
-- [ ] Sort: Title / Author / Date Added / Recently Played
+- [x] Grid view with cover art (Compose)
+- [x] Progress indicator overlay on covers
+- [x] Filters: Not Started / In Progress / Finished / Downloaded
+- [x] Sort: Title / Author / Date Added / Recently Played / Duration / Year
 - [ ] Book detail screen improvements
 
 ### Phase 4: Downloads & Offline

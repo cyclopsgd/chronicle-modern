@@ -15,7 +15,7 @@ import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Compani
 import local.oss.chronicle.features.collections.CollectionDetailsFragment
 import local.oss.chronicle.features.collections.CollectionsFragment
 import local.oss.chronicle.features.home.HomeFragment
-import local.oss.chronicle.features.library.LibraryFragment
+import local.oss.chronicle.features.library.compose.ComposeLibraryFragment
 import local.oss.chronicle.features.login.ChooseLibraryFragment
 import local.oss.chronicle.features.login.ChooseServerFragment
 import local.oss.chronicle.features.login.ChooseUserFragment
@@ -120,7 +120,7 @@ class Navigator
 
         fun showLibrary() {
             clearBackStack()
-            val libraryFragment = LibraryFragment.newInstance()
+            val libraryFragment = ComposeLibraryFragment.newInstance()
             fragmentManager.beginTransaction().replace(R.id.fragNavHost, libraryFragment).commit()
         }
 
