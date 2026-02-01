@@ -159,8 +159,31 @@ cd chronicle-modern
 - [x] Chapter list bottom sheet (Compose)
 - [x] Sleep timer bottom sheet (Compose)
 - [ ] Speed selector bottom sheet (Compose)
+- [ ] Per-book speed memory
 
-### Phase 3-6: See [DESIGN_SPEC.md](DESIGN_SPEC.md)
+### Phase 3: Car Mode
+- [ ] Dedicated car mode screen (Compose)
+- [ ] Auto-detect Bluetooth car audio
+- [ ] Giant play/pause button (120dp+)
+- [ ] Disable sleep timer while in car mode
+
+### Phase 4: Library Screen
+- [ ] Grid view with cover art
+- [ ] Progress indicator overlay on covers
+- [ ] Filters: Not Started / In Progress / Finished / Downloaded
+- [ ] Sort: Title / Author / Date Added / Recently Played
+
+### Phase 5: Downloads & Offline
+- [ ] Download management overhaul
+- [ ] SD card storage support
+- [ ] Background downloads via WorkManager
+
+### Phase 6: Advanced Features
+- [ ] Full Media3 migration
+- [ ] Progress sync with Plex server
+- [ ] Bookmarks with notes
+- [ ] Listening statistics
+- [ ] Android Auto optimization
 
 ---
 
