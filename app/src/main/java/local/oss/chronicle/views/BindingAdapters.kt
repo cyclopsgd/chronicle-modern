@@ -3,6 +3,8 @@
 package local.oss.chronicle.views
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.net.Uri
 import android.os.Build
 import android.view.View
@@ -20,13 +22,29 @@ import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.injection.PlexConfigEntryPoint
 import timber.log.Timber
 
+/**
+ * Unwraps a Context to find the underlying Activity.
+ * This is needed because Hilt wraps fragment contexts in FragmentContextWrapper.
+ */
+private fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) {
+            return context
+        }
+        context = context.baseContext
+    }
+    return null
+}
+
 @BindingAdapter(value = ["srcRounded", "serverConnected"], requireAll = true)
 fun bindImageRounded(
     draweeView: DraweeView<GenericDraweeHierarchy>,
     src: String?,
     serverConnected: Boolean,
 ) {
-    if ((draweeView.context as Activity).isDestroyed) {
+    val activity = draweeView.context.findActivity()
+    if (activity == null || activity.isDestroyed) {
         return
     }
 
