@@ -118,10 +118,19 @@ class MediaServiceConnection
         fun connect() {
             if (!mediaBrowser.isConnected) {
                 try {
+                    Timber.d("MediaBrowser connecting...")
                     mediaBrowser.connect()
                 } catch (e: IllegalStateException) {
-                    // Already connecting, ignore
-                    Timber.d("MediaBrowser already connecting, ignoring connect() call")
+                    // Stuck in connecting state - reset and retry
+                    Timber.w("MediaBrowser stuck in connecting state, resetting...")
+                    try {
+                        mediaBrowser.disconnect()
+                    } catch (ignored: Exception) {}
+                    try {
+                        mediaBrowser.connect()
+                    } catch (e2: Exception) {
+                        Timber.e("Failed to reconnect MediaBrowser: $e2")
+                    }
                 }
             }
         }
@@ -130,13 +139,23 @@ class MediaServiceConnection
             mediaControllerCallback.onConnected = onConnected
             if (mediaBrowser.isConnected) {
                 // Already connected, invoke callback immediately
+                Timber.d("MediaBrowser already connected, invoking callback")
                 onConnected.invoke()
             } else {
                 try {
+                    Timber.d("MediaBrowser connecting with callback...")
                     mediaBrowser.connect()
                 } catch (e: IllegalStateException) {
-                    // Already connecting, callback will be invoked when connection completes
-                    Timber.d("MediaBrowser already connecting, callback will be invoked on connection")
+                    // Stuck in connecting state - reset and retry
+                    Timber.w("MediaBrowser stuck in connecting state, resetting...")
+                    try {
+                        mediaBrowser.disconnect()
+                    } catch (ignored: Exception) {}
+                    try {
+                        mediaBrowser.connect()
+                    } catch (e2: Exception) {
+                        Timber.e("Failed to reconnect MediaBrowser: $e2")
+                    }
                 }
             }
         }
