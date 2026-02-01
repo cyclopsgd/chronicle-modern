@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Full-screen player** - Bottom navigation now hides when player is expanded
 - **Cover art quality** - Added `makeHighResThumbUri()` for crisp cover display
 - **DI Architecture** - Added `ActivityRetainedModule` for ViewModel-accessible dependencies
+- **Bottom navigation styling** - Reduced height (56dp), removed pill indicator, dark theme
+- **Mini player** - 72dp height with accent top border
 
 ### Fixed
 - MediaBrowser connection callback not firing (added missing `setSessionToken()`)

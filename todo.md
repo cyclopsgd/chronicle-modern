@@ -3,10 +3,10 @@
 ## Pending Tasks
 
 ### Branding (High Priority)
-- [x] **Generate launcher icons from SVGs**
-  - Converted to Android Vector Drawables
-  - Updated adaptive icon configs
-  - Opus "O" + waveform logo in amber on dark background
+- [ ] **Generate PNG launcher icons at all densities**
+  - Vector drawable done, but PNG fallbacks needed for some launchers
+  - Use Android Studio Image Asset tool or convert SVGs
+  - Needed: mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi
 - [ ] Update notification icon to use new branding
 - [ ] Update splash screen (if exists) with Opus branding
 
