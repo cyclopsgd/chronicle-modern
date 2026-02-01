@@ -116,12 +116,29 @@ class MediaServiceConnection
         }
 
         fun connect() {
-            mediaBrowser.connect()
+            if (!mediaBrowser.isConnected) {
+                try {
+                    mediaBrowser.connect()
+                } catch (e: IllegalStateException) {
+                    // Already connecting, ignore
+                    Timber.d("MediaBrowser already connecting, ignoring connect() call")
+                }
+            }
         }
 
         fun connect(onConnected: () -> Unit?) {
-            mediaBrowser.connect()
             mediaControllerCallback.onConnected = onConnected
+            if (mediaBrowser.isConnected) {
+                // Already connected, invoke callback immediately
+                onConnected.invoke()
+            } else {
+                try {
+                    mediaBrowser.connect()
+                } catch (e: IllegalStateException) {
+                    // Already connecting, callback will be invoked when connection completes
+                    Timber.d("MediaBrowser already connecting, callback will be invoked on connection")
+                }
+            }
         }
     }
 
