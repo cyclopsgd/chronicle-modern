@@ -14,9 +14,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Forward30
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay10
@@ -32,20 +37,25 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TimerOff
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +74,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.launch
+import local.oss.chronicle.data.model.Chapter
 import local.oss.chronicle.ui.theme.OpusColors
 import local.oss.chronicle.ui.theme.OpusTheme
 
@@ -85,6 +97,10 @@ data class NowPlayingUiState(
     val isBookmarked: Boolean = false,
     val skipBackwardSeconds: Int = 10,
     val skipForwardSeconds: Int = 30,
+    // Chapter list
+    val chapters: List<Chapter> = emptyList(),
+    val currentChapterIndex: Int = 0,
+    val showChapterList: Boolean = false,
 )
 
 /**
@@ -108,8 +124,34 @@ fun NowPlayingScreen(
     onSleepTimerClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     onChapterClick: () -> Unit = {},
+    onChapterSelected: (Chapter) -> Unit = {},
+    onDismissChapterList: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // Show chapter list bottom sheet
+    if (state.showChapterList) {
+        ChapterListBottomSheet(
+            chapters = state.chapters,
+            currentChapterIndex = state.currentChapterIndex,
+            sheetState = sheetState,
+            onChapterSelected = { chapter ->
+                scope.launch {
+                    sheetState.hide()
+                    onChapterSelected(chapter)
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    sheetState.hide()
+                    onDismissChapterList()
+                }
+            }
+        )
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -575,6 +617,150 @@ private fun BottomControlsSection(
                 tint = if (isBookmarked) OpusColors.Primary else OpusColors.TextSecondary,
                 modifier = Modifier.size(28.dp)
             )
+        }
+    }
+}
+
+/**
+ * Chapter list bottom sheet.
+ * Displays all chapters with the current one highlighted.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChapterListBottomSheet(
+    chapters: List<Chapter>,
+    currentChapterIndex: Int,
+    sheetState: androidx.compose.material3.SheetState,
+    onChapterSelected: (Chapter) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val listState = rememberLazyListState()
+
+    // Scroll to current chapter when sheet opens
+    LaunchedEffect(currentChapterIndex) {
+        if (currentChapterIndex >= 0 && chapters.isNotEmpty()) {
+            listState.animateScrollToItem(
+                index = currentChapterIndex.coerceIn(0, chapters.lastIndex),
+                scrollOffset = -100 // Offset to show some context above
+            )
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = OpusColors.Surface,
+        contentColor = OpusColors.TextPrimary,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+        ) {
+            // Header
+            Text(
+                text = "Chapters",
+                style = MaterialTheme.typography.titleLarge,
+                color = OpusColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+            )
+
+            HorizontalDivider(color = OpusColors.ControlsBackground)
+
+            // Chapter list
+            if (chapters.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No chapters available",
+                        color = OpusColors.TextSecondary,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
+                ) {
+                    itemsIndexed(chapters) { index, chapter ->
+                        ChapterListItem(
+                            chapter = chapter,
+                            isCurrentChapter = index == currentChapterIndex,
+                            onClick = { onChapterSelected(chapter) }
+                        )
+                    }
+                }
+            }
+
+            // Bottom padding
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+/**
+ * Individual chapter item in the list.
+ */
+@Composable
+private fun ChapterListItem(
+    chapter: Chapter,
+    isCurrentChapter: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        color = if (isCurrentChapter) OpusColors.Primary.copy(alpha = 0.15f) else Color.Transparent,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Playing indicator for current chapter
+            if (isCurrentChapter) {
+                Icon(
+                    imageVector = Icons.Default.GraphicEq,
+                    contentDescription = "Currently playing",
+                    tint = OpusColors.Primary,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(end = 0.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+
+            // Chapter info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = chapter.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (isCurrentChapter) OpusColors.Primary else OpusColors.TextPrimary,
+                    fontWeight = if (isCurrentChapter) FontWeight.SemiBold else FontWeight.Normal,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // Chapter duration
+                val durationMs = chapter.endTimeOffset - chapter.startTimeOffset
+                if (durationMs > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = formatTime(durationMs),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = OpusColors.TextSecondary,
+                    )
+                }
+            }
         }
     }
 }

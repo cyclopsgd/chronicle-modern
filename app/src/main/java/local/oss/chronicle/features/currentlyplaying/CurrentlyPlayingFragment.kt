@@ -102,6 +102,8 @@ class CurrentlyPlayingFragment : Fragment() {
                         onSleepTimerClick = viewModel::showSleepTimerOptions,
                         onBookmarkClick = viewModel::toggleBookmark,
                         onChapterClick = viewModel::showChapterList,
+                        onChapterSelected = viewModel::jumpToChapter,
+                        onDismissChapterList = viewModel::hideChapterList,
                     )
                 }
             }

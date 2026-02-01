@@ -23,8 +23,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.data.sources.plex.PlexConfig
+import local.oss.chronicle.data.model.Chapter
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
+import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingSingleton
 import local.oss.chronicle.features.player.MediaServiceConnection
+import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_SEEK_TO_TRACK_WITH_ID
+import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_START_TIME_TRACK_OFFSET
 import local.oss.chronicle.features.player.SKIP_BACKWARDS_STRING
 import local.oss.chronicle.features.player.SKIP_FORWARDS_STRING
 import local.oss.chronicle.features.player.SleepTimer
@@ -170,9 +174,23 @@ class NowPlayingViewModel @Inject constructor(
                 _uiState.update { current ->
                     current.copy(
                         chapterTitle = chapter.title,
+                        currentChapterIndex = chapter.index.toInt(),
                         // Chapter-scoped duration
                         durationMs = chapter.endTimeOffset - chapter.startTimeOffset,
                     )
+                }
+            }
+        }
+
+        // Observe chapters list from PlaybackStateController via CurrentlyPlayingSingleton
+        if (currentlyPlaying is CurrentlyPlayingSingleton) {
+            viewModelScope.launch {
+                currentlyPlaying.state.collect { state ->
+                    _uiState.update { current ->
+                        current.copy(
+                            chapters = state.chapters,
+                        )
+                    }
                 }
             }
         }
@@ -274,9 +292,25 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     fun showChapterList() {
-        viewModelScope.launch {
-            _events.emit(NowPlayingEvent.ShowChapterList)
+        _uiState.update { it.copy(showChapterList = true) }
+    }
+
+    fun hideChapterList() {
+        _uiState.update { it.copy(showChapterList = false) }
+    }
+
+    fun jumpToChapter(chapter: Chapter) {
+        val transportControls = mediaServiceConnection.transportControls ?: return
+
+        // Hide the chapter list
+        hideChapterList()
+
+        // Jump to the chapter using custom action
+        val extras = Bundle().apply {
+            putInt(KEY_SEEK_TO_TRACK_WITH_ID, chapter.trackId.toInt())
+            putLong(KEY_START_TIME_TRACK_OFFSET, chapter.startTimeOffset)
         }
+        transportControls.sendCustomAction("JUMP_TO_CHAPTER", extras)
     }
 
     override fun onCleared() {
