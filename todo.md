@@ -27,12 +27,13 @@
 ### Phase 2.2: Playback Controls
 - [x] Always show mini player when logged in (like Audible)
 
-### Phase 3: Library Screen
+### Phase 3: Library Screen ✅
 - [x] Grid view with cover art (Compose)
 - [x] Progress indicator overlay on covers
 - [x] Filters: Not Started / In Progress / Finished / Downloaded
 - [x] Sort: Title / Author / Date Added / Recently Played / Duration / Year
-- [ ] Book detail screen improvements
+- [x] Search with real-time filtering
+- [x] Pull-to-refresh
 
 ### Phase 4: Downloads & Offline
 - [ ] Download button on book detail
@@ -68,6 +69,7 @@
 - [ ] Volume fade-out before sleep stop (15 seconds)
 - [ ] Shake-to-extend sleep timer (accelerometer)
 - [ ] Chapter markers on scrubber
+- [ ] Book detail screen Compose migration
 
 ---
 

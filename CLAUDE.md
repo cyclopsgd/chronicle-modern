@@ -18,14 +18,18 @@
   - Compose speed selector with slider + presets (0.5x-3.0x)
   - Per-book playback speed memory (Room)
   - Audible-style persistent mini player
+- **Phase 3**: Library Screen (complete)
+  - Compose grid view with cover art
+  - Progress filters (All/Not Started/In Progress/Finished/Downloaded)
+  - Sort options with direction toggle
+  - Search with real-time filtering
 
 ### 🚧 In Progress
-- **Phase 3**: Library Screen (next up)
+- **Phase 4**: Downloads & Offline (next up)
 
 ### 📋 Backlog (see `todo.md`)
 - PNG launcher icons (vector done, PNG fallbacks needed)
 - User profile images not loading
-- Phase 3: Library Screen
 - Phase 4: Downloads & Offline
 - Phase 5: Progress Sync
 - Phase 6: Car Mode
