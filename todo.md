@@ -19,15 +19,12 @@
 - [x] Chapter-relative progress display
 - [x] Cover art with authentication token
 - [x] High-resolution cover art (1000x1000)
-- [ ] Speed selector bottom sheet (0.5x - 3.0x) - *uses existing speed chooser*
+- [x] Speed selector bottom sheet (0.5x - 3.0x) - *Compose implementation*
 - [x] Sleep timer bottom sheet with presets
 - [x] Chapter list bottom sheet (Compose)
 - [ ] Per-book speed memory (store in Room)
 
 ### Phase 2.2: Playback Controls
-- [ ] Volume fade-out before sleep stop (15 seconds)
-- [ ] Shake-to-extend sleep timer (accelerometer)
-- [ ] Chapter markers on scrubber
 - [ ] Always show mini player when logged in (like Audible)
 
 ### Phase 3: Car Mode
@@ -54,6 +51,9 @@
 - [ ] Books finished count
 - [ ] Listening streaks
 - [ ] UI polish and animation refinements
+- [ ] Volume fade-out before sleep stop (15 seconds)
+- [ ] Shake-to-extend sleep timer (accelerometer)
+- [ ] Chapter markers on scrubber
 
 ---
 

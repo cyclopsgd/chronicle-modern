@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
@@ -19,9 +17,7 @@ import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.application.MainActivityViewModel.BottomSheetState.COLLAPSED
 import local.oss.chronicle.features.nowplaying.NowPlayingScreen
 import local.oss.chronicle.features.nowplaying.NowPlayingViewModel
-import local.oss.chronicle.features.nowplaying.NowPlayingViewModel.NowPlayingEvent
 import local.oss.chronicle.ui.theme.OpusTheme
-import local.oss.chronicle.views.ModalBottomSheetSpeedChooser
 
 /**
  * Fragment hosting the Compose-based Now Playing screen.
@@ -58,28 +54,6 @@ class CurrentlyPlayingFragment : Fragment() {
                 val viewModel: NowPlayingViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
 
-                // Handle one-time events from ViewModel
-                LaunchedEffect(Unit) {
-                    viewModel.events.collect { event ->
-                        when (event) {
-                            is NowPlayingEvent.ShowChapterList -> {
-                                // TODO: Implement chapter list bottom sheet
-                                Toast.makeText(context, "Chapter list coming soon", Toast.LENGTH_SHORT).show()
-                            }
-                            is NowPlayingEvent.ShowSpeedSelector -> {
-                                ModalBottomSheetSpeedChooser().show(
-                                    childFragmentManager,
-                                    ModalBottomSheetSpeedChooser.TAG,
-                                )
-                            }
-                            is NowPlayingEvent.ShowSleepTimerOptions -> {
-                                // TODO: Implement sleep timer options bottom sheet
-                                Toast.makeText(context, "Sleep timer options coming soon", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                }
-
                 OpusTheme(darkTheme = true) {
                     NowPlayingScreen(
                         state = uiState,
@@ -92,13 +66,9 @@ class CurrentlyPlayingFragment : Fragment() {
                         onSkipToNext = viewModel::skipToNext,
                         onSkipToPrevious = viewModel::skipToPrevious,
                         onSeekTo = viewModel::seekTo,
-                        onSpeedClick = {
-                            // Show the existing speed chooser bottom sheet
-                            ModalBottomSheetSpeedChooser().show(
-                                childFragmentManager,
-                                ModalBottomSheetSpeedChooser.TAG,
-                            )
-                        },
+                        onSpeedClick = viewModel::showSpeedSelector,
+                        onSpeedSelected = viewModel::setPlaybackSpeed,
+                        onDismissSpeedSelector = viewModel::hideSpeedSelector,
                         onSleepTimerClick = viewModel::showSleepTimerOptions,
                         onBookmarkClick = viewModel::toggleBookmark,
                         onChapterClick = viewModel::showChapterList,

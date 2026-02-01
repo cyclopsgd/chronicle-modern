@@ -103,6 +103,8 @@ data class NowPlayingUiState(
     val showChapterList: Boolean = false,
     // Sleep timer
     val showSleepTimer: Boolean = false,
+    // Speed selector
+    val showSpeedSelector: Boolean = false,
 )
 
 /**
@@ -123,6 +125,8 @@ fun NowPlayingScreen(
     onSkipToPrevious: () -> Unit = {},
     onSeekTo: (Float) -> Unit = {},
     onSpeedClick: () -> Unit = {},
+    onSpeedSelected: (Float) -> Unit = {},
+    onDismissSpeedSelector: () -> Unit = {},
     onSleepTimerClick: () -> Unit = {},
     onBookmarkClick: () -> Unit = {},
     onChapterClick: () -> Unit = {},
@@ -135,6 +139,7 @@ fun NowPlayingScreen(
     val scope = rememberCoroutineScope()
     val chapterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val sleepTimerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val speedSelectorSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Show chapter list bottom sheet
     if (state.showChapterList) {
@@ -173,6 +178,26 @@ fun NowPlayingScreen(
                 scope.launch {
                     sleepTimerSheetState.hide()
                     onDismissSleepTimer()
+                }
+            }
+        )
+    }
+
+    // Show speed selector bottom sheet
+    if (state.showSpeedSelector) {
+        SpeedSelectorBottomSheet(
+            currentSpeed = state.playbackSpeed,
+            sheetState = speedSelectorSheetState,
+            onSpeedSelected = { speed ->
+                scope.launch {
+                    speedSelectorSheetState.hide()
+                    onSpeedSelected(speed)
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    speedSelectorSheetState.hide()
+                    onDismissSpeedSelector()
                 }
             }
         )
@@ -967,6 +992,146 @@ private fun SleepTimerOptionItem(
                 fontWeight = if (isHighlighted || isDestructive) FontWeight.SemiBold else FontWeight.Normal,
             )
         }
+    }
+}
+
+/**
+ * Speed selector bottom sheet.
+ * Displays a slider and preset speed buttons.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SpeedSelectorBottomSheet(
+    currentSpeed: Float,
+    sheetState: androidx.compose.material3.SheetState,
+    onSpeedSelected: (Float) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    // Local state for the slider while dragging
+    var sliderSpeed by remember(currentSpeed) { mutableFloatStateOf(currentSpeed) }
+
+    val speedPresets = listOf(0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = OpusColors.Surface,
+        contentColor = OpusColors.TextPrimary,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+        ) {
+            // Header
+            Text(
+                text = "Playback Speed",
+                style = MaterialTheme.typography.titleLarge,
+                color = OpusColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+            )
+
+            HorizontalDivider(color = OpusColors.ControlsBackground)
+
+            // Current speed display
+            Text(
+                text = formatSpeed(sliderSpeed),
+                style = MaterialTheme.typography.displaySmall,
+                color = OpusColors.Primary,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
+            )
+
+            // Slider
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Slider(
+                    value = sliderSpeed,
+                    onValueChange = { sliderSpeed = it },
+                    onValueChangeFinished = { onSpeedSelected(sliderSpeed) },
+                    valueRange = 0.5f..3.0f,
+                    steps = 49, // 0.05 increments: (3.0 - 0.5) / 0.05 - 1 = 49
+                    colors = SliderDefaults.colors(
+                        thumbColor = OpusColors.Primary,
+                        activeTrackColor = OpusColors.Primary,
+                        inactiveTrackColor = OpusColors.SliderTrack,
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Min/Max labels
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "0.5x",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = OpusColors.TextSecondary,
+                    )
+                    Text(
+                        text = "3.0x",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = OpusColors.TextSecondary,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Preset speed chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                speedPresets.forEach { speed ->
+                    SpeedPresetChip(
+                        speed = speed,
+                        isSelected = kotlin.math.abs(sliderSpeed - speed) < 0.01f,
+                        onClick = {
+                            sliderSpeed = speed
+                            onSpeedSelected(speed)
+                        }
+                    )
+                }
+            }
+
+            // Bottom padding
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+/**
+ * Individual speed preset chip.
+ */
+@Composable
+private fun SpeedPresetChip(
+    speed: Float,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        color = if (isSelected) OpusColors.Primary else OpusColors.ControlsBackground,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        Text(
+            text = formatSpeed(speed),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (isSelected) Color.Black else OpusColors.TextPrimary,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+        )
     }
 }
 

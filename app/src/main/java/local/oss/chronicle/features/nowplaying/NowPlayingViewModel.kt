@@ -112,6 +112,9 @@ class NowPlayingViewModel @Inject constructor(
 
         // Set initial skip seconds from prefs
         updateSkipSeconds()
+
+        // Set initial playback speed from prefs
+        _uiState.update { it.copy(playbackSpeed = prefsRepo.playbackSpeed) }
     }
 
     private fun observePlaybackState() {
@@ -258,16 +261,18 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     fun showSpeedSelector() {
-        // Will trigger bottom sheet in fragment/activity
-        // For now, cycle through common speeds
-        val currentSpeed = _uiState.value.playbackSpeed
-        val speeds = listOf(0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f)
-        val currentIndex = speeds.indexOfFirst { it >= currentSpeed }.takeIf { it >= 0 } ?: 0
-        val nextIndex = (currentIndex + 1) % speeds.size
-        val newSpeed = speeds[nextIndex]
+        _uiState.update { it.copy(showSpeedSelector = true) }
+    }
 
-        prefsRepo.playbackSpeed = newSpeed
-        _uiState.update { it.copy(playbackSpeed = newSpeed) }
+    fun hideSpeedSelector() {
+        _uiState.update { it.copy(showSpeedSelector = false) }
+    }
+
+    fun setPlaybackSpeed(speed: Float) {
+        hideSpeedSelector()
+        val clampedSpeed = speed.coerceIn(0.5f, 3.0f)
+        prefsRepo.playbackSpeed = clampedSpeed
+        _uiState.update { it.copy(playbackSpeed = clampedSpeed) }
     }
 
     fun showSleepTimerOptions() {
