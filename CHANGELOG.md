@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Auto-scrolls to current chapter on open
   - Shows chapter duration
   - Tap to jump to any chapter
+- **Sleep Timer Bottom Sheet** - Compose-based sleep timer selection
+  - Preset durations: 5, 15, 30, 45, 60, 90 minutes
+  - End of Chapter option (calculates remaining time)
+  - Extend (+5 min) and Cancel when timer active
+  - Shows countdown of active timer
 - New `NowPlayingViewModel` bridging existing playback infrastructure to Compose
 
 ### Improvements

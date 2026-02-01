@@ -22,7 +22,7 @@
 - [x] Cover art with authentication token
 - [x] High-resolution cover art (1000x1000)
 - [ ] Speed selector bottom sheet (0.5x - 3.0x) - *uses existing speed chooser*
-- [ ] Sleep timer bottom sheet with presets
+- [x] Sleep timer bottom sheet with presets
 - [x] Chapter list bottom sheet (Compose)
 - [ ] Per-book speed memory (store in Room)
 
