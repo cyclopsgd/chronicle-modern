@@ -21,6 +21,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.media.session.MediaButtonReceiver
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.R
@@ -44,7 +45,7 @@ const val NOW_PLAYING_NOTIFICATION: Int = 0xb32229
 class NotificationBuilder
     @Inject
     constructor(
-        private val context: Context,
+        @ApplicationContext private val context: Context,
         private val plexConfig: PlexConfig,
         private val controller: MediaControllerCompat,
         private val currentlyPlaying: CurrentlyPlaying,

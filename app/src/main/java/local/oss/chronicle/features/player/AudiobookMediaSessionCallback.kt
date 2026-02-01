@@ -14,6 +14,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.michaelbull.result.Ok
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.application.MILLIS_PER_SECOND
@@ -48,7 +49,7 @@ class AudiobookMediaSessionCallback
         private val trackListStateManager: TrackListStateManager,
         service: android.app.Service,
         private val mediaSession: MediaSessionCompat,
-        private val appContext: Context,
+        @ApplicationContext private val appContext: Context,
         private val currentlyPlaying: CurrentlyPlaying,
         private val progressUpdater: ProgressUpdater,
         private val playbackUrlResolver: local.oss.chronicle.data.sources.plex.PlaybackUrlResolver,

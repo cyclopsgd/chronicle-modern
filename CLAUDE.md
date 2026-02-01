@@ -6,52 +6,42 @@
 
 ---
 
-## 🚧 CURRENT WORK IN PROGRESS 🚧
+## ✅ HILT MIGRATION COMPLETE ✅
 
-**Phase 1.2: Hilt Migration** - IN PROGRESS (estimated 97% complete)
+**Phase 1.2: Hilt Migration** - COMPLETE
 
 **Branch:** `feature/hilt-2.54-migration`
 
 ---
 
-### Session 2024-02-01: Service Bindings & List Variance Fix
+### Session 2026-02-01: Final Migration Fixes
 
-**✅ Completed:**
-1. **Service Interface Binding Solution**
-   - **Problem**: Services can't be injected as dependencies in Hilt
-   - **Solution**: Modified consumers to inject `android.app.Service` and cast to needed interfaces
-   - Files updated:
-     - `AudiobookMediaSessionCallback.kt` - inject Service, cast to interfaces
-     - `SimpleSleepTimer.kt` - inject Service, cast to SleepTimerBroadcaster
-     - `OnMediaChangedCallback.kt` - inject Service, cast to interfaces
-     - `ServiceModule.kt` - removed invalid @Binds methods
+**✅ All Issues Resolved:**
 
-2. **List<File> Variance Issue**
-   - **Problem**: Kotlin/Java interop - `List<File>` vs `List<? extends File>` mismatch
-   - **Solution**: Added `@JvmSuppressWildcards` to both provider and consumers
-   - Files updated:
-     - `AppModule.kt` - added `@JvmSuppressWildcards` to return type
-     - `SharedPreferencesPrefsRepo.kt` - added `@JvmSuppressWildcards` to parameter
-     - `CachedFileManager.kt` - added `@JvmSuppressWildcards` to parameter
-     - `MoveSyncLocationWorker.kt` - added `@JvmSuppressWildcards` to parameter
-     - `SettingsViewModel.kt` - added `@JvmSuppressWildcards` to both constructors
+1. **Unqualified Context Injections** - Fixed with `@ApplicationContext`
+   - `ChronicleBillingManager.kt` - added `@ApplicationContext`
+   - `NotificationBuilder.kt` - added `@ApplicationContext`
+   - `AudiobookMediaSessionCallback.kt` - added `@ApplicationContext`
+   - `CachedFileManager.kt` - added `@ApplicationContext`
 
-3. **@Named Qualifier for externalDeviceDirs**
-   - Added `@Named("externalDeviceDirs")` to provider and all consumers
-   - Added missing `javax.inject.Named` imports
-   - Updated `AppContextEntryPoint.kt` to include @Named qualifier
+2. **FragmentManager & AppCompatActivity Injection**
+   - **Problem**: Navigator needed FragmentManager and Activity at ActivityComponent scope
+   - **Solution**: Added providers in `ActivityModule`:
+     - `provideAppCompatActivity()` - casts ActivityContext to AppCompatActivity
+     - `provideFragmentManager()` - gets supportFragmentManager from activity
 
-**❌ Remaining Issues (4 errors):**
-1. `android.content.Context` - unqualified Context injection (need @ApplicationContext)
-2. `androidx.fragment.app.FragmentManager` - activity-scoped requested at app scope
-3. `androidx.appcompat.app.AppCompatActivity` - shouldn't be injected
-4. `kotlinx.coroutines.CoroutineScope` - need app-scoped provider
+3. **CoroutineScope for Activity Components**
+   - **Problem**: `SimpleProgressUpdater` needed CoroutineScope in ActivityComponent
+   - **Solution**: Added `provideActivityCoroutineScope()` using `activity.lifecycleScope`
+
+4. **ProgressUpdater Binding**
+   - Added `provideProgressUpdater()` in ActivityModule for fragment/activity use
 
 **Build Status:**
 - ✅ Kotlin compilation: SUCCESS
 - ✅ KSP processing: SUCCESS
-- ❌ Hilt annotation processing: 4 binding errors (down from 6)
-- Progress: Service bindings ✅, List variance ✅
+- ✅ Hilt annotation processing: SUCCESS
+- ✅ Full APK build: SUCCESS
 
 ---
 
@@ -102,58 +92,46 @@ fun provideExternalDirs(): List<File> = ...
 
 **Don't forget**: EntryPoints also need @Named if they expose qualified dependencies
 
----
+#### 4. Activity-Scoped Dependencies
+**Problem**: Some classes need activity-scoped objects (FragmentManager, Activity, CoroutineScope)
 
-### Next Session Tasks
+**Solution**: Provide them in ActivityModule:
+```kotlin
+@Module
+@InstallIn(ActivityComponent::class)
+object ActivityModule {
+    @Provides
+    @ActivityScoped
+    fun provideAppCompatActivity(@ActivityContext context: Context): AppCompatActivity =
+        context as AppCompatActivity
 
-1. **Find and fix unqualified Context injections**
-   ```bash
-   # Search for constructors with unqualified Context
-   grep -r "constructor.*Context[^.]" app/src
-   ```
-   Add `@ApplicationContext` qualifier where needed
+    @Provides
+    @ActivityScoped
+    fun provideFragmentManager(activity: AppCompatActivity): FragmentManager =
+        activity.supportFragmentManager
 
-2. **Find FragmentManager injection**
-   ```bash
-   grep -r "FragmentManager" app/src --include="*.kt"
-   ```
-   Move to activity-scoped component or remove if not needed
+    @Provides
+    @ActivityScoped
+    fun provideActivityCoroutineScope(activity: AppCompatActivity): CoroutineScope =
+        activity.lifecycleScope
+}
+```
 
-3. **Find AppCompatActivity injection**
-   ```bash
-   grep -r "constructor.*AppCompatActivity" app/src
-   ```
-   Remove - activities shouldn't be injected
-
-4. **Add app-scoped CoroutineScope**
-   Add to AppModule:
-   ```kotlin
-   @Provides
-   @Singleton
-   fun provideApplicationScope(): CoroutineScope =
-       CoroutineScope(SupervisorJob() + Dispatchers.Main)
-   ```
-
-5. **Final verification**
-   - Run full build
-   - Test app launch
-   - Commit and merge feature branch
+1. **Merge feature branch** - PR to main
+2. **Test app on device** - Verify all features work with new DI
+3. **Continue to Phase 1.3** - Core Reliability Fixes
+4. **Phase 2** - Now-Playing Screen Redesign (Compose)
 
 ---
 
-### Files Modified This Session
-- `gradle/libs.versions.toml` - Hilt 2.54, Kotlin 2.1.0
-- `app/build.gradle.kts` - Removed experimental workarounds
-- `app/src/main/java/local/oss/chronicle/injection/modules/AppModule.kt`
-- `app/src/main/java/local/oss/chronicle/injection/modules/ServiceModule.kt`
-- `app/src/main/java/local/oss/chronicle/injection/AppContextEntryPoint.kt`
-- `app/src/main/java/local/oss/chronicle/features/player/AudiobookMediaSessionCallback.kt`
-- `app/src/main/java/local/oss/chronicle/features/player/OnMediaChangedCallback.kt`
-- `app/src/main/java/local/oss/chronicle/features/player/SleepTimer.kt`
-- `app/src/main/java/local/oss/chronicle/data/local/SharedPreferencesPrefsRepo.kt`
-- `app/src/main/java/local/oss/chronicle/data/sources/plex/CachedFileManager.kt`
-- `app/src/main/java/local/oss/chronicle/features/download/MoveSyncLocationWorker.kt`
-- `app/src/main/java/local/oss/chronicle/features/settings/SettingsViewModel.kt`
+### Files Modified in Final Session
+- `gradle.properties` - Added `org.gradle.java.home` for JDK 17
+- `app/src/main/java/local/oss/chronicle/application/ChronicleBillingManager.kt` - `@ApplicationContext`
+- `app/src/main/java/local/oss/chronicle/features/player/NotificationBuilder.kt` - `@ApplicationContext`
+- `app/src/main/java/local/oss/chronicle/features/player/AudiobookMediaSessionCallback.kt` - `@ApplicationContext`
+- `app/src/main/java/local/oss/chronicle/data/sources/plex/CachedFileManager.kt` - `@ApplicationContext`
+- `app/src/main/java/local/oss/chronicle/injection/modules/ActivityModule.kt` - Added activity-scoped providers
+- `app/src/main/java/local/oss/chronicle/navigation/Navigator.kt` - Now receives dependencies from ActivityModule
 
 **Environment:**
 - Kotlin: 2.1.0, KSP: 2.1.0-1.0.29, Hilt: 2.54, Dagger: 2.54, AGP: 8.13.2, Java: JDK 17.0.17+10

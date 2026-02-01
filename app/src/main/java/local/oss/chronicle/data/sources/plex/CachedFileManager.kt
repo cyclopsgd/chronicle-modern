@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.work.*
 import com.tonyodev.fetch2.*
 import com.tonyodev.fetch2core.DownloadBlock
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import local.oss.chronicle.BuildConfig
@@ -70,7 +71,7 @@ class CachedFileManager
         private val trackRepository: ITrackRepository,
         private val bookRepository: IBookRepository,
         private val plexConfig: PlexConfig,
-        private val applicationContext: Context,
+        @ApplicationContext private val applicationContext: Context,
         @Named("externalDeviceDirs") private val externalFileDirs: @JvmSuppressWildcards List<File>,
     ) : ICachedFileManager {
 

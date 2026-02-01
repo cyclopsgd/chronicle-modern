@@ -3,6 +3,7 @@ package local.oss.chronicle.application
 import android.app.Activity
 import android.content.Context
 import com.limurse.iap.IapConnector
+import dagger.hilt.android.qualifiers.ApplicationContext
 import local.oss.chronicle.data.local.PrefsRepo
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +18,7 @@ import javax.inject.Singleton
 class ChronicleBillingManager
     @Inject
     constructor(
-        applicationContext: Context,
+        @ApplicationContext applicationContext: Context,
         private val prefsRepo: PrefsRepo,
     ) {
         fun launchBillingFlow(activity: Activity) {
