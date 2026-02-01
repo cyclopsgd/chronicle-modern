@@ -1,14 +1,14 @@
-# Chronicle Modern 🎧
+# Opus - Audiobook Player 🎧
 
 <div align="center">
 
 **A modern, premium Plex audiobook player for Android**
 
-*Complete architectural modernization of Chronicle with 2025's best practices*
+*Bringing your self-hosted audiobook library to life*
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1-purple.svg)](https://kotlinlang.org/)
 [![API](https://img.shields.io/badge/API-26%2B-brightgreen.svg)](https://android-arsenal.com/api?level=26)
 
 [Features](#-features) • [Roadmap](#-roadmap) • [Tech Stack](#-tech-stack) • [Contributing](#-contributing)
@@ -19,21 +19,31 @@
 
 ## 📖 About
 
-Chronicle Modern is a ground-up modernization of **[Chronicle](https://github.com/mattttvaughn/chronicle)** - the beloved Plex audiobook player originally created by Matt Vaughn.
-
-Rather than just maintaining the original codebase, this project takes a **complete architectural overhaul approach**: rebuilding Chronicle from the inside out using 2025's modern Android development practices, while preserving the solid foundation that made the original great.
+**Opus** is a complete modernization of the Chronicle Plex audiobook player, rebuilt from the ground up with 2025's best Android development practices.
 
 ### The Vision
 
-Transform Chronicle into a **premium audiobook experience** that rivals commercial apps like Audible, while maintaining the flexibility and privacy of self-hosted Plex:
+A **premium audiobook experience** that rivals commercial apps like Audible, while maintaining the flexibility and privacy of self-hosted Plex:
 
 - 🏗️ **Modern architecture** - Multi-module design, Hilt DI, Jetpack Compose
 - 🎨 **Premium UX** - Cover-art-dominant design, car mode, smart features
 - ⚡ **Rock-solid reliability** - Robust playback, offline handling, progress sync
 - 🚀 **Active development** - Continuous improvement, not just bug fixes
-- 🤖 **AI-assisted development** - Leveraging Claude Code for systematic, high-quality transformation
 
-This is Chronicle, **reimagined for the modern era**.
+---
+
+## 🎨 Brand Identity
+
+| Element | Value |
+|---------|-------|
+| **Name** | Opus - Audiobook Player |
+| **Primary Color** | Amber `#FFAB40` |
+| **Secondary Color** | Soft Green `#81C784` |
+| **Background** | `#121212` |
+| **Surface** | `#1E1E1E` |
+| **Logo** | "O" with audio waveform |
+
+Brand assets are in [`docs/Logos/`](docs/Logos/).
 
 ---
 
@@ -44,72 +54,56 @@ This is Chronicle, **reimagined for the modern era**.
 - ✅ Offline playback with downloads
 - ✅ Playback progress sync with Plex
 - ✅ Variable playback speed
-- ✅ Sleep timer
-- ✅ Chapter navigation
+- ✅ Sleep timer with shake-to-extend
+- ✅ Chapter navigation (including M4B chapters)
 - ✅ Android Auto support
-- ✅ Auto-rewind
+- ✅ Smart auto-rewind on resume
 - ✅ Skip silent audio
+- ✅ Network-aware playback recovery
 
-### 🚧 Modernization In Progress
+### 🚧 In Progress
 
-**Phase 1: Foundation & Architecture** *(60% complete)*
-- ⚡ **Hilt dependency injection** - Modern, type-safe DI
-- 📦 **Multi-module architecture** - Clean separation of concerns
-- 🎯 **Android SDK 35** - Latest platform features
-- 🛠️ **Enhanced reliability** - Robust playback position persistence
-- 📱 **Jetpack Compose foundation** - Progressive UI modernization
+**Phase 2: Now-Playing Screen** *(Active)*
+- 🎨 **Compose-based UI** with cover-art-dominant design
+- ⏱️ **Enhanced sleep timer** - Volume fade-out, shake to extend
+- 📑 **Chapter list bottom sheet** - Beautiful chapter navigation
+- 🎚️ **Speed selector** - 0.5x to 3.0x in 0.1x increments
 
 ### 🔮 Coming Soon
 
-**Phase 2: Now-Playing Screen** *(Next Up)*
-- 🎨 **Cover-art-dominant design** with blurred backgrounds
-- ⏱️ **Smart sleep timer** - Shake to extend, volume fade-out
-- 🎚️ **Per-book speed memory** - Remembers your preference per audiobook
-- 📑 **Enhanced chapter navigation** - Beautiful bottom sheet with progress
-- 🎨 **Dynamic theming** - Colors extracted from cover art
-
-**Phase 3: Car Mode** *(High Priority)*
-- 🚗 **Dedicated driving interface** - Giant, easy-to-tap buttons
-- 🔌 **Auto-activation** - Triggers on Bluetooth car connection
-- 🎯 **Zero distraction** - Just play, rewind, and bookmark
-- 🔊 **Voice announcements** - Chapter changes, timer warnings
+**Phase 3: Car Mode**
+- 🚗 Dedicated driving interface with giant buttons
+- 🔌 Auto-activation on Bluetooth connection
+- 🎯 Zero-distraction design
 
 **Phase 4-6: Complete Transformation**
-- 📚 **Library redesign** - Grid view, advanced filtering, search
-- ⬇️ **Download overhaul** - Better management, progress tracking
-- 🎵 **Media3 migration** - Next-gen playback engine
-- 📊 **Listening stats** - Track your audiobook journey
-- 🌙 **Material You** - Dynamic theming, modern design language
+- 📚 Library redesign with grid view and filters
+- ⬇️ Download management overhaul
+- 🎵 Media3 migration
+- 📊 Listening statistics
 
 ---
 
 ## 🏗️ Tech Stack
 
 ### Modern Android Development
-- **Language**: Kotlin 2.0
-- **Min SDK**: 26 (Android 8.0 Oreo)
+- **Language**: Kotlin 2.1
+- **Min SDK**: 26 (Android 8.0)
 - **Target SDK**: 35 (Android 15)
 - **Build**: Gradle Kotlin DSL + Version Catalog
 
 ### Architecture & Dependencies
-- **DI**: Hilt (fully migrated from Dagger)
+- **DI**: Hilt 2.54
 - **Architecture**: Multi-module MVVM
 - **UI**: Jetpack Compose + XML Views (progressive migration)
 - **Async**: Coroutines + Flow
-- **Navigation**: Jetpack Navigation Component
 - **Database**: Room
 
 ### Media & Networking
-- **Playback**: ExoPlayer (migrating to Media3)
+- **Playback**: ExoPlayer / Media3
 - **HTTP**: Retrofit 2 + OkHttp 4
-- **JSON**: Moshi with Kotlin codegen
-- **Downloads**: Fetch2 + WorkManager
-- **Images**: Glide
-
-### Quality Assurance
-- **Testing**: JUnit 5, Espresso, Mockito
-- **Code Analysis**: Detekt (planned)
-- **CI/CD**: GitHub Actions (planned)
+- **JSON**: Moshi
+- **Images**: Coil (Compose) + Fresco (Views)
 
 ---
 
@@ -124,120 +118,55 @@ This is Chronicle, **reimagined for the modern era**.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/chronicle-modern.git
+git clone https://github.com/cyclopsgd/chronicle-modern.git
 cd chronicle-modern
 
 # Build debug APK
 ./gradlew assembleDebug
 
-# Or install directly to connected device
+# Install to connected device
 ./gradlew installDebug
 ```
 
 ### First Run Setup
 1. Launch the app
-2. Enter your Plex server address
-3. Authenticate with your Plex account
-4. Select your audiobook library
-5. Start listening! 🎧
+2. Login with your Plex account
+3. Select your server and audiobook library
+4. Start listening! 🎧
 
 ---
 
 ## 📈 Development Roadmap
 
-### Phase 1: Foundation ✅ 60% Complete
-- [x] Multi-module architecture setup
-- [x] Gradle version catalog (libs.versions.toml)
-- [x] Update to Android SDK 35, Hilt 2.52, Compose BOM 2025.01.00
-- [x] Hilt migration - Core modules, data layer, ViewModels
-- [ ] Complete Hilt migration - Remaining fragments and workers
-- [ ] Core reliability improvements (robust position saving, error handling)
-- [ ] Comprehensive test suite
+### Phase 1: Foundation ✅ Complete
+- [x] Multi-module architecture
+- [x] Hilt dependency injection migration
+- [x] Android SDK 35, Kotlin 2.1
+- [x] Core reliability fixes (smart rewind, error recovery, position persistence)
+- [x] Opus branding
 
-### Phase 2: Now-Playing Screen Redesign
-- [ ] Compose-based UI with cover-art-dominant layout
-- [ ] Smart sleep timer with configurable presets
-- [ ] Per-book playback speed memory
-- [ ] Enhanced chapter list bottom sheet
-- [ ] Extract and use M4B embedded chapters
+### Phase 2: Now-Playing Screen 🚧 In Progress
+- [x] Compose theme (OpusTheme)
+- [x] NowPlayingScreen composable
+- [x] NowPlayingViewModel
+- [ ] Wire into app navigation
+- [ ] Speed selector bottom sheet
+- [ ] Sleep timer bottom sheet
+- [ ] Chapter list bottom sheet
 
-### Phase 3: Car Mode
-- [ ] Dedicated car UI with giant buttons
-- [ ] Bluetooth auto-activation
-- [ ] Safety-focused minimal design
-- [ ] Quick bookmark functionality
-
-### Phase 4: Library Screen Overhaul
-- [ ] Grid view with cover art
-- [ ] Advanced filters (progress, author, series)
-- [ ] Fast search
-- [ ] Sort options
-- [ ] Collection/series grouping
-
-### Phase 5: Downloads & Offline
-- [ ] Redesigned download management UI
-- [ ] Quality selection (standard/high)
-- [ ] Storage location choice (SD card support)
-- [ ] Space usage visualization
-- [ ] Background download notifications
-
-### Phase 6: Media3 & Polish
-- [ ] Migrate to Media3 for future-proof playback
-- [ ] Material You dynamic theming
-- [ ] Listening statistics dashboard
-- [ ] Enhanced Android Auto experience
-- [ ] Performance optimizations
-
-**Full details**: See [DESIGN_SPEC.md](DESIGN_SPEC.md) and [MIGRATION_CHANGELOG.md](MIGRATION_CHANGELOG.md)
+### Phase 3-6: See [DESIGN_SPEC.md](DESIGN_SPEC.md)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are **very welcome**! This is an active modernization project with lots of opportunity to get involved.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### How to Contribute
-
-1. **Browse issues** - Look for `good first issue` or `help wanted` tags
-2. **Check progress** - See [MIGRATION_CHANGELOG.md](MIGRATION_CHANGELOG.md) for current work
-3. **Fork & branch** - Create a feature branch from `main`
-4. **Follow patterns** - Use Hilt DI, MVVM, existing code style
-5. **Test your changes** - Add tests for new functionality
-6. **Submit PR** - Clear description of what and why
-
-### Development Guidelines
-
-```bash
-# Setup
-git checkout -b feature/awesome-feature
-
-# Development
-# See CLAUDE.md for architectural decisions and patterns
-# Follow Kotlin coding conventions
-# Use Hilt for all dependency injection
-
-# Testing
-./gradlew test
-./gradlew connectedAndroidTest
-
-# Verify build
-./gradlew assembleDebug
-
-# Commit
-git commit -m "feat: add awesome feature"
-
-# Submit
-git push origin feature/awesome-feature
-# Then open PR on GitHub
-```
-
-### Code Standards
-- **Kotlin conventions** - Follow official style guide
-- **Meaningful names** - Clear, descriptive variable/function names
-- **Small, focused functions** - Single responsibility principle
-- **Comments for complexity** - Document non-obvious logic
-- **Hilt for DI** - Constructor injection preferred
-- **Immutability** - Use `val` and immutable collections where possible
+### Quick Start
+1. Fork & clone
+2. Create feature branch from `main`
+3. Follow existing patterns (Hilt DI, MVVM, Compose for new UI)
+4. Submit PR with clear description
 
 ---
 
@@ -245,78 +174,16 @@ git push origin feature/awesome-feature
 
 Licensed under **GNU General Public License v3.0** - see [LICENSE](LICENSE)
 
-**TL;DR:**
-- ✅ Free to use, modify, and distribute
-- ✅ Source code must be disclosed if distributed
-- ✅ Modifications must use GPL-3.0
-- ✅ No warranty provided
-
-**Note on Branding**: If you fork this project for distribution, replace branding assets (logo, icons) with your own.
-
 ---
 
-## 🙏 Credits & Acknowledgments
+## 🙏 Credits
 
-### Original Creator
-**Matt Vaughn** ([@mattttvaughn](https://github.com/mattttvaughn)) - Created the original Chronicle app. This modernization builds upon his excellent foundation and vision for a self-hosted audiobook player.
+### Original Project
+**Chronicle** by Matt Vaughn ([@mattttvaughn](https://github.com/mattttvaughn)) - The foundation this project builds upon.
 
-### Inspiration
-- **[Prologue](https://prologue.audio/)** - The iOS equivalent, showing what's possible
-- **[Audible](https://www.audible.com/)** - UX inspiration for premium features
-- **[Plex](https://www.plex.tv/)** - For making self-hosted media accessible
-
-### Technology
-Built with assistance from **[Claude Code](https://claude.ai/)** - demonstrating how AI can systematically modernize legacy codebases with architectural precision and maintainability.
-
----
-
-## 💬 Community & Support
-
-- **🐛 Bug Reports**: [Open an issue](https://github.com/yourusername/chronicle-modern/issues/new?template=bug_report.md)
-- **💡 Feature Requests**: [Suggest a feature](https://github.com/yourusername/chronicle-modern/issues/new?template=feature_request.md)
-- **💬 Discussions**: [Join the conversation](https://github.com/yourusername/chronicle-modern/discussions)
-- **📖 Documentation**: See [CLAUDE.md](CLAUDE.md) for development guide
-
-### Useful Resources
-- [Plex Audiobook Guide](https://github.com/seanap/Plex-Audiobook-Guide) - Setup your Plex server for audiobooks
-- [Original Chronicle subreddit](https://www.reddit.com/r/ChronicleApp/) - Community discussions
-
----
-
-## 📊 What Makes This Different?
-
-This isn't just maintenance of the original Chronicle - it's a **complete architectural transformation**:
-
-| Aspect | Original Chronicle | Chronicle Modern |
-|--------|-------------------|------------------|
-| **Status** | Archived (2022) | Active development |
-| **Approach** | Working codebase | Complete modernization |
-| **Dependency Injection** | Dagger | **Hilt** |
-| **UI Framework** | XML Views | **Jetpack Compose** (progressive) |
-| **Media Playback** | ExoPlayer | **Media3** (planned) |
-| **Architecture** | Single module | **Multi-module** |
-| **Android SDK** | 31 | **35** (latest) |
-| **Kotlin** | 1.6 | **2.0** |
-| **New Features** | - | Car Mode, enhanced UX, stats |
-
-**The goal**: Build the audiobook app that Plex deserves in 2025 and beyond.
-
----
-
-## 🎯 Project Philosophy
-
-1. **User Experience First** - Features should delight, not just function
-2. **Reliability Above All** - Your listening position should never be lost
-3. **Modern But Stable** - Use latest tools, but proven patterns
-4. **Privacy Respected** - Self-hosted, no tracking, no analytics
-5. **Community Driven** - Built for users, by users
-6. **Open Source Spirit** - Share improvements, learn together
-
----
-
-## 📸 Screenshots
-
-*Coming soon with Phase 2 completion - stay tuned for the redesigned Now-Playing screen!*
+### Built With
+- **[Claude Code](https://claude.ai/)** - AI-assisted development
+- **[Plex](https://www.plex.tv/)** - Self-hosted media platform
 
 ---
 
@@ -324,10 +191,6 @@ This isn't just maintenance of the original Chronicle - it's a **complete archit
 
 **Built with ❤️ for the Plex audiobook community**
 
-[⭐ Star this repo](https://github.com/yourusername/chronicle-modern) • [🐛 Report Bug](https://github.com/yourusername/chronicle-modern/issues) • [💡 Request Feature](https://github.com/yourusername/chronicle-modern/issues)
-
----
-
-*"The best way to predict the future is to build it."*
+[⭐ Star](https://github.com/cyclopsgd/chronicle-modern) • [🐛 Report Bug](https://github.com/cyclopsgd/chronicle-modern/issues) • [💡 Request Feature](https://github.com/cyclopsgd/chronicle-modern/issues)
 
 </div>

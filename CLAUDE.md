@@ -1,8 +1,29 @@
-# Plex Audiobook Client
+# Opus - Audiobook Player (Development Guide)
+
+> **App Name**: Opus - Audiobook Player
+> **Package**: `local.oss.chronicle` (legacy, may change)
+> **Branding**: See `docs/Logos/` for SVG assets
 
 > See `DESIGN_SPEC.md` for full design specification, UI/UX research (Audible/Prologue analysis), feature tiers, and architecture rationale.
 >
-> **IMPORTANT**: See `MIGRATION_CHANGELOG.md` for ongoing Hilt migration progress tracking and complete todo list.
+> **IMPORTANT**: See `todo.md` for current task tracking and `MIGRATION_CHANGELOG.md` for migration history.
+
+---
+
+## Brand Identity
+
+| Element | Value |
+|---------|-------|
+| **Name** | Opus - Audiobook Player |
+| **Primary** | Amber `#FFAB40` |
+| **Secondary** | Soft Green `#81C784` |
+| **Background** | `#121212` |
+| **Surface** | `#1E1E1E` |
+| **Text** | `#FAFAFA` |
+
+**Theme files**:
+- Compose: `app/src/main/java/local/oss/chronicle/ui/theme/OpusTheme.kt`
+- XML: `app/src/main/res/values/colors.xml`, `styles.xml`
 
 ---
 
