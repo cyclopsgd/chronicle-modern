@@ -145,6 +145,8 @@ cd chronicle-modern
 - [x] Android SDK 35, Kotlin 2.1
 - [x] Core reliability fixes (smart rewind, error recovery, position persistence)
 - [x] Opus branding
+- [x] Launcher icon (vector drawable)
+- [x] Dark theme bottom navigation
 
 ### Phase 2: Now-Playing Screen 🚧 In Progress
 - [x] Compose theme (OpusTheme)
