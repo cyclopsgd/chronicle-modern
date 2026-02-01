@@ -1,45 +1,42 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme - Opus Audiobook Player -->
     <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
-        <!-- Customize your theme here. -->
-        
         <!-- Legacy Material Components colors (for backward compatibility) -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        
-        <!-- Material Design 3 color mappings (Bridge approach - using existing colors) -->
-        <!-- MD3 Primary colors -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorOnPrimary">@color/textPrimary</item>
+
+        <!-- Material Design 3 color mappings -->
+        <!-- MD3 Primary colors (Amber) -->
+        <item name="colorOnPrimary">@color/colorBackground</item>
         <item name="colorPrimaryContainer">@color/colorPrimaryDark</item>
         <item name="colorOnPrimaryContainer">@color/textPrimary</item>
-        
-        <!-- MD3 Secondary/Accent colors -->
-        <item name="colorSecondary">@color/colorAccent</item>
-        <item name="colorOnSecondary">@color/colorPrimary</item>
-        <item name="colorSecondaryContainer">@color/colorAccent</item>
-        <item name="colorOnSecondaryContainer">@color/colorPrimary</item>
-        
+
+        <!-- MD3 Secondary colors (Soft Green) -->
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/colorBackground</item>
+        <item name="colorSecondaryContainer">@color/colorSecondary</item>
+        <item name="colorOnSecondaryContainer">@color/colorBackground</item>
+
         <!-- MD3 Surface colors -->
-        <item name="colorSurface">@color/colorPrimary</item>
+        <item name="colorSurface">@color/colorSurface</item>
         <item name="colorOnSurface">@color/textPrimary</item>
-        <item name="colorSurfaceVariant">@color/colorPrimaryDark</item>
+        <item name="colorSurfaceVariant">@color/colorSurfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/textSecondary</item>
-        
+
         <!-- MD3 Background -->
-        <item name="android:colorBackground">@color/colorPrimaryDark</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
         <item name="colorOnBackground">@color/textPrimary</item>
-        
+
         <!-- Edge-to-edge window configuration -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
         <item name="android:windowLightStatusBar">false</item>
-        
+
         <!-- Custom font -->
         <item name="android:fontFamily">@font/lato</item>
-        
+
         <!-- Chip styles -->
         <item name="chipStyle">@style/FilterChip</item>
         <item name="chipGroupStyle">@style/FilterChipGroup</item>
@@ -107,7 +104,7 @@
         <item name="android:textSize">32sp</item>
     </style>
 
-    <!-- Searchbar style courtesy of: https://stackoverflow.com/questions/30369246/implementing-searchview-as-per-the-material-design-guidelines -->
+    <!-- Searchbar style -->
     <style name="SearchViewTheme" parent="Widget.AppCompat.SearchView.ActionBar">
         <item name="layout">@layout/toolbar_search_view</item>
         <item name="colorControlNormal">@color/material_light_active_icon</item>
@@ -116,8 +113,8 @@
     </style>
 
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="background">@color/colorPrimary</item>
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="background">@color/colorSurface</item>
+        <item name="android:background">@color/colorSurface</item>
         <item name="fontWeight">400</item>
         <item name="fontFamily">@font/lato</item>
         <item name="searchViewStyle">@style/SearchViewTheme</item>
@@ -127,23 +124,22 @@
     <style name="ProgressSliderTooltip" parent="Widget.Material3.Tooltip">
         <item name="backgroundTint">@color/colorAccent</item>
         <item name="android:textAppearance">@style/ProgressSliderTextAppearance</item>
-
         <item name="android:background">@color/colorAccent</item>
         <item name="fontWeight">400</item>
         <item name="fontFamily">@font/lato</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="android:textColor">@color/colorBackground</item>
+        <item name="colorOnPrimary">@color/colorBackground</item>
     </style>
 
     <style name="ProgressSliderTextAppearance" parent="@style/TextAppearance.Material3.BodySmall">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/colorBackground</item>
         <item name="fontFamily">@font/lato</item>
         <item name="fontWeight">600</item>
     </style>
 
     <!-- Bottom Navigation -->
     <style name="Widget.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
-        <item name="backgroundTint">@color/colorPrimaryDark</item>
+        <item name="backgroundTint">@color/colorSurface</item>
         <item name="itemIconTint">@color/chip_background_color</item>
         <item name="itemTextColor">@color/chip_background_color</item>
         <item name="labelVisibilityMode">labeled</item>
@@ -155,11 +151,14 @@
     </style>
 
     <!-- Full-screen dialog for OAuth login -->
-    <style name="Theme.Chronicle.FullScreenDialog" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.Opus.FullScreenDialog" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowBackground">?android:colorBackground</item>
-        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:statusBarColor">@color/colorBackground</item>
+        <item name="android:navigationBarColor">@color/colorBackground</item>
     </style>
+
+    <!-- Keep old name for compatibility -->
+    <style name="Theme.Chronicle.FullScreenDialog" parent="Theme.Opus.FullScreenDialog" />
 
 </resources>

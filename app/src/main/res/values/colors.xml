@@ -1,30 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2D3043</color>
-    <color name="colorPrimaryDark">#191A2A</color>
-    <color name="colorAccent">#00B8D4</color>
-    <color name="textPrimary">#D8FFFFFF</color>
-    <color name="textSecondary">#9EE3D5EB</color>
-    <color name="textActive">#00B8D4</color>
-    <color name="textActiveSecondary">#9E81E8F7</color>
-    <color name="textError">#FF4444</color>
+    <!-- Opus Brand Colors -->
+    <color name="colorPrimary">#FFAB40</color>
+    <color name="colorPrimaryDark">#FF8F00</color>
+    <color name="colorAccent">#FFAB40</color>
+    <color name="colorSecondary">#81C784</color>
+
+    <!-- Background colors -->
+    <color name="colorBackground">#121212</color>
+    <color name="colorSurface">#1E1E1E</color>
+    <color name="colorSurfaceVariant">#2A2A2A</color>
+
+    <!-- Text colors -->
+    <color name="textPrimary">#FAFAFA</color>
+    <color name="textSecondary">#99FAFAFA</color>
+    <color name="textTertiary">#66FAFAFA</color>
+    <color name="textActive">#FFAB40</color>
+    <color name="textActiveSecondary">#99FFAB40</color>
+    <color name="textError">#EF5350</color>
+
+    <!-- Icon colors -->
     <color name="icon">@color/textPrimary</color>
     <color name="iconActive">@color/colorAccent</color>
     <color name="iconDisabled">@color/textSecondary</color>
-    <color name="iconFailed">#FF4444</color>
-    <color name="sleepTimerCountdownOverlayColor">#A8121212</color>
+    <color name="iconFailed">#EF5350</color>
 
-    <!-- For audiobook grid id -->
-    <color name="imagePlaceholderColor">#33B998CC</color>
-    <color name="progressTrackTintColor">#AABBBBBB</color>
+    <!-- Status colors -->
+    <color name="sleepTimerActive">#FF9800</color>
+    <color name="downloaded">#81C784</color>
+    <color name="buffering">#64B5F6</color>
+
+    <!-- UI element colors -->
+    <color name="sleepTimerCountdownOverlayColor">#A8121212</color>
+    <color name="imagePlaceholderColor">#332A2A2A</color>
+    <color name="progressTrackTintColor">#4DFAFAFA</color>
     <color name="progressTintColor">@color/colorAccent</color>
 
-    <!-- For bottom sheet chooser -->
-    <color name="bottomSheetOverlayColor">#44000000</color>
+    <!-- Bottom sheet and overlays -->
+    <color name="bottomSheetOverlayColor">#66000000</color>
     <color name="unlistenedIndicator">@color/colorAccent</color>
     <color name="unlistenedOverlay">#22000000</color>
 
-    <!-- Search bar courtesy of: https://stackoverflow.com/questions/30369246/implementing-searchview-as-per-the-material-design-guidelines -->
+    <!-- Search bar -->
     <color name="material_light_active_icon">#8A000000</color>
     <color name="material_ripple_light">#1F000000</color>
 </resources>

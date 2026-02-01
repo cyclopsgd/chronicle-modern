@@ -64,8 +64,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import local.oss.chronicle.ui.theme.AudiobookColors
-import local.oss.chronicle.ui.theme.AudiobookTheme
+import local.oss.chronicle.ui.theme.OpusColors
+import local.oss.chronicle.ui.theme.OpusTheme
 
 /**
  * State holder for the Now Playing screen.
@@ -113,7 +113,7 @@ fun NowPlayingScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(AudiobookColors.Background)
+            .background(OpusColors.Background)
     ) {
         // Blurred background from cover art
         if (state.coverArtUrl != null) {
@@ -135,9 +135,9 @@ fun NowPlayingScreen(
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
-                                AudiobookColors.Background.copy(alpha = 0.7f),
-                                AudiobookColors.Background.copy(alpha = 0.9f),
-                                AudiobookColors.Background,
+                                OpusColors.Background.copy(alpha = 0.7f),
+                                OpusColors.Background.copy(alpha = 0.9f),
+                                OpusColors.Background,
                             )
                         )
                     )
@@ -155,7 +155,7 @@ fun NowPlayingScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = AudiobookColors.TextPrimary
+                            tint = OpusColors.TextPrimary
                         )
                     }
                 },
@@ -268,7 +268,7 @@ private fun CoverArtSection(
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
                     Surface(
-                        color = AudiobookColors.SleepTimerActive.copy(alpha = 0.9f),
+                        color = OpusColors.SleepTimerActive.copy(alpha = 0.9f),
                         shape = RoundedCornerShape(bottomStart = 16.dp),
                         modifier = Modifier.padding(0.dp)
                     ) {
@@ -314,7 +314,7 @@ private fun BookInfoSection(
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall,
-            color = AudiobookColors.TextPrimary,
+            color = OpusColors.TextPrimary,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             maxLines = 2,
@@ -328,7 +328,7 @@ private fun BookInfoSection(
         Text(
             text = author,
             style = MaterialTheme.typography.bodyLarge,
-            color = AudiobookColors.TextSecondary,
+            color = OpusColors.TextSecondary,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -341,7 +341,7 @@ private fun BookInfoSection(
             Text(
                 text = "Narrated by $narrator",
                 style = MaterialTheme.typography.bodyMedium,
-                color = AudiobookColors.TextTertiary,
+                color = OpusColors.TextTertiary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -353,14 +353,14 @@ private fun BookInfoSection(
         if (chapterTitle.isNotBlank()) {
             Spacer(modifier = Modifier.height(12.dp))
             Surface(
-                color = AudiobookColors.ControlsBackground,
+                color = OpusColors.ControlsBackground,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.clickable(onClick = onChapterClick)
             ) {
                 Text(
                     text = chapterTitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AudiobookColors.Accent,
+                    color = OpusColors.Primary,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -402,9 +402,9 @@ private fun ProgressSection(
                 onSeekTo(sliderPosition)
             },
             colors = SliderDefaults.colors(
-                thumbColor = AudiobookColors.Accent,
-                activeTrackColor = AudiobookColors.Accent,
-                inactiveTrackColor = AudiobookColors.SliderTrack,
+                thumbColor = OpusColors.Primary,
+                activeTrackColor = OpusColors.Primary,
+                inactiveTrackColor = OpusColors.SliderTrack,
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -419,7 +419,7 @@ private fun ProgressSection(
             Text(
                 text = formatTime(if (isSliding) (sliderPosition * durationMs).toLong() else currentPositionMs),
                 style = MaterialTheme.typography.bodySmall,
-                color = AudiobookColors.TextSecondary,
+                color = OpusColors.TextSecondary,
                 fontSize = 12.sp,
             )
 
@@ -428,7 +428,7 @@ private fun ProgressSection(
             Text(
                 text = "-${formatTime(remainingMs.coerceAtLeast(0))}",
                 style = MaterialTheme.typography.bodySmall,
-                color = AudiobookColors.TextSecondary,
+                color = OpusColors.TextSecondary,
                 fontSize = 12.sp,
             )
         }
@@ -470,7 +470,7 @@ private fun PlaybackControlsSection(
 
         // Play/Pause (center, larger)
         Surface(
-            color = AudiobookColors.PlayButtonBackground,
+            color = OpusColors.PlayButtonBackground,
             shape = CircleShape,
             shadowElevation = 8.dp,
             modifier = Modifier
@@ -521,7 +521,7 @@ private fun ControlButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = AudiobookColors.TextPrimary,
+            tint = OpusColors.TextPrimary,
             modifier = Modifier.size(size)
         )
     }
@@ -544,14 +544,14 @@ private fun BottomControlsSection(
     ) {
         // Speed button
         Surface(
-            color = AudiobookColors.ControlsBackground,
+            color = OpusColors.ControlsBackground,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.clickable(onClick = onSpeedClick)
         ) {
             Text(
                 text = formatSpeed(playbackSpeed),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AudiobookColors.TextPrimary,
+                color = OpusColors.TextPrimary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
             )
@@ -562,7 +562,7 @@ private fun BottomControlsSection(
             Icon(
                 imageVector = if (isSleepTimerActive) Icons.Default.Timer else Icons.Default.TimerOff,
                 contentDescription = "Sleep timer",
-                tint = if (isSleepTimerActive) AudiobookColors.SleepTimerActive else AudiobookColors.TextSecondary,
+                tint = if (isSleepTimerActive) OpusColors.SleepTimerActive else OpusColors.TextSecondary,
                 modifier = Modifier.size(28.dp)
             )
         }
@@ -572,7 +572,7 @@ private fun BottomControlsSection(
             Icon(
                 imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                 contentDescription = "Bookmark",
-                tint = if (isBookmarked) AudiobookColors.Accent else AudiobookColors.TextSecondary,
+                tint = if (isBookmarked) OpusColors.Primary else OpusColors.TextSecondary,
                 modifier = Modifier.size(28.dp)
             )
         }
@@ -617,7 +617,7 @@ private fun getForwardIcon(seconds: Int): ImageVector {
 @Preview(showBackground = true, backgroundColor = 0xFF0F0F1A)
 @Composable
 private fun NowPlayingScreenPreview() {
-    AudiobookTheme(darkTheme = true) {
+    OpusTheme(darkTheme = true) {
         NowPlayingScreen(
             state = NowPlayingUiState(
                 bookTitle = "The Hitchhiker's Guide to the Galaxy",

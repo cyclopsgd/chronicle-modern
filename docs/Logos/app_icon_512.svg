@@ -1,0 +1,19 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Opus Audiobook Player - Full App Icon Preview -->
+  <!-- 512x512 for Play Store listing -->
+  
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#121212"/>
+  
+  <!-- Logo centered and scaled -->
+  <g transform="translate(96, 96) scale(3.33)">
+    <!-- Outer O circle -->
+    <circle cx="48" cy="48" r="40" stroke="#FFAB40" stroke-width="4" fill="none"/>
+    
+    <!-- Waveform bars -->
+    <rect x="30" y="36" width="4" height="24" rx="2" fill="#FFAB40"/>
+    <rect x="40" y="28" width="4" height="40" rx="2" fill="#FFAB40"/>
+    <rect x="50" y="32" width="4" height="32" rx="2" fill="#FFAB40"/>
+    <rect x="60" y="38" width="4" height="20" rx="2" fill="#FFAB40"/>
+  </g>
+</svg>

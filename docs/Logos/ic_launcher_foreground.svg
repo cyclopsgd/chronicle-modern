@@ -1,0 +1,17 @@
+<svg viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Opus Audiobook Player - Android Adaptive Icon Foreground -->
+  <!-- 108dp canvas with content in 72dp safe zone (18dp padding each side) -->
+  <!-- Colour: Amber #FFAB40 -->
+  
+  <!-- Content centered in safe zone -->
+  <g transform="translate(18, 18)">
+    <!-- Outer O circle - scaled to fit 72x72 safe zone -->
+    <circle cx="36" cy="36" r="32" stroke="#FFAB40" stroke-width="3.5" fill="none"/>
+    
+    <!-- Waveform bars - scaled proportionally -->
+    <rect x="21" y="27" width="3.5" height="18" rx="1.75" fill="#FFAB40"/>
+    <rect x="29" y="21" width="3.5" height="30" rx="1.75" fill="#FFAB40"/>
+    <rect x="37" y="24" width="3.5" height="24" rx="1.75" fill="#FFAB40"/>
+    <rect x="45" y="28.5" width="3.5" height="15" rx="1.75" fill="#FFAB40"/>
+  </g>
+</svg>
