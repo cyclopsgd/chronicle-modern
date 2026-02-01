@@ -2,7 +2,7 @@ package local.oss.chronicle.data.sources.plex
 
 const val MEDIA_TYPE_ALBUM = 9
 const val MEDIA_TYPE_TRACK = 10
-const val APP_NAME = "Chronicle"
+const val APP_NAME = "Opus"
 
 /**
  * Declares that ContentStyle is supported
