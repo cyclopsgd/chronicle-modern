@@ -8,76 +8,155 @@
 
 ## 🚧 CURRENT WORK IN PROGRESS 🚧
 
-**Phase 1.2: Hilt Migration** - IN PROGRESS (estimated 60-70% complete)
+**Phase 1.2: Hilt Migration** - IN PROGRESS (estimated 97% complete)
 
-**Last Session Completed:**
-- ✅ Deleted Injector.kt (old Dagger singleton pattern)
-- ✅ Migrated entire data layer (repositories, PlexConfig, CachedFileManager)
-- ✅ Migrated MainActivity and MainActivityViewModel
-- ✅ Converted PlexSyncScrobbleWorker to @HiltWorker
-- ✅ Migrated AudiobookDetailsFragment and AudiobookDetailsViewModel
-- ✅ Created EntryPoints for non-injectable contexts
+**Branch:** `feature/hilt-2.54-migration`
 
-**Next Tasks - Continue Systematic Migration:**
+---
 
-1. **ViewModels** (~7 files) - Inject `CoroutineExceptionHandler`:
-   - CollectionsViewModel
-   - CurrentlyPlayingViewModel
-   - HomeViewModel
-   - LibraryViewModel
-   - ChooseServerViewModel
-   - ChooseUserViewModel
-   - LoginViewModel
+### Session 2024-02-01: Service Bindings & List Variance Fix
 
-   **Pattern:**
+**✅ Completed:**
+1. **Service Interface Binding Solution**
+   - **Problem**: Services can't be injected as dependencies in Hilt
+   - **Solution**: Modified consumers to inject `android.app.Service` and cast to needed interfaces
+   - Files updated:
+     - `AudiobookMediaSessionCallback.kt` - inject Service, cast to interfaces
+     - `SimpleSleepTimer.kt` - inject Service, cast to SleepTimerBroadcaster
+     - `OnMediaChangedCallback.kt` - inject Service, cast to interfaces
+     - `ServiceModule.kt` - removed invalid @Binds methods
+
+2. **List<File> Variance Issue**
+   - **Problem**: Kotlin/Java interop - `List<File>` vs `List<? extends File>` mismatch
+   - **Solution**: Added `@JvmSuppressWildcards` to both provider and consumers
+   - Files updated:
+     - `AppModule.kt` - added `@JvmSuppressWildcards` to return type
+     - `SharedPreferencesPrefsRepo.kt` - added `@JvmSuppressWildcards` to parameter
+     - `CachedFileManager.kt` - added `@JvmSuppressWildcards` to parameter
+     - `MoveSyncLocationWorker.kt` - added `@JvmSuppressWildcards` to parameter
+     - `SettingsViewModel.kt` - added `@JvmSuppressWildcards` to both constructors
+
+3. **@Named Qualifier for externalDeviceDirs**
+   - Added `@Named("externalDeviceDirs")` to provider and all consumers
+   - Added missing `javax.inject.Named` imports
+   - Updated `AppContextEntryPoint.kt` to include @Named qualifier
+
+**❌ Remaining Issues (4 errors):**
+1. `android.content.Context` - unqualified Context injection (need @ApplicationContext)
+2. `androidx.fragment.app.FragmentManager` - activity-scoped requested at app scope
+3. `androidx.appcompat.app.AppCompatActivity` - shouldn't be injected
+4. `kotlinx.coroutines.CoroutineScope` - need app-scoped provider
+
+**Build Status:**
+- ✅ Kotlin compilation: SUCCESS
+- ✅ KSP processing: SUCCESS
+- ❌ Hilt annotation processing: 4 binding errors (down from 6)
+- Progress: Service bindings ✅, List variance ✅
+
+---
+
+### Migration Best Practices Learned
+
+#### 1. Service Interface Pattern (Hilt Services)
+**Problem**: Hilt services can't be injected as dependencies (they're entry points, not graph participants)
+
+**Solution**: Inject `android.app.Service` base class and cast:
+```kotlin
+class SomeCallback @Inject constructor(
+    service: android.app.Service,  // Hilt provides this
+    // ... other deps
+) {
+    // Cast to interfaces the service implements
+    private val serviceController = service as ServiceController
+    private val foregroundController = service as ForegroundServiceController
+}
+```
+
+**Why this works**: Hilt provides `Service` in `ServiceComponent`, allowing consumers to get the service instance and access its interface implementations.
+
+#### 2. Kotlin/Java Variance with @JvmSuppressWildcards
+**Problem**: `List<File>` in Kotlin compiles to `List<? extends File>` in Java bytecode, causing type mismatches
+
+**Solution**: Use `@JvmSuppressWildcards` on both provider and consumers:
+```kotlin
+// Provider
+@Provides
+@Named("qualifier")
+fun provideList(): @JvmSuppressWildcards List<File> = ...
+
+// Consumer
+class SomeClass @Inject constructor(
+    @Named("qualifier") val list: @JvmSuppressWildcards List<File>
+)
+```
+
+#### 3. @Named Qualifiers for Generic Types
+**Problem**: Multiple providers of same generic type (e.g., `List<File>`)
+
+**Solution**: Always use `@Named` qualifiers for non-unique types:
+```kotlin
+@Provides
+@Named("externalDeviceDirs")
+fun provideExternalDirs(): List<File> = ...
+```
+
+**Don't forget**: EntryPoints also need @Named if they expose qualified dependencies
+
+---
+
+### Next Session Tasks
+
+1. **Find and fix unqualified Context injections**
+   ```bash
+   # Search for constructors with unqualified Context
+   grep -r "constructor.*Context[^.]" app/src
+   ```
+   Add `@ApplicationContext` qualifier where needed
+
+2. **Find FragmentManager injection**
+   ```bash
+   grep -r "FragmentManager" app/src --include="*.kt"
+   ```
+   Move to activity-scoped component or remove if not needed
+
+3. **Find AppCompatActivity injection**
+   ```bash
+   grep -r "constructor.*AppCompatActivity" app/src
+   ```
+   Remove - activities shouldn't be injected
+
+4. **Add app-scoped CoroutineScope**
+   Add to AppModule:
    ```kotlin
-   class SomeViewModel @Inject constructor(
-       // ... other deps
-       private val exceptionHandler: CoroutineExceptionHandler,
-   ) : ViewModel() {
-       // Replace: Injector.get().unhandledExceptionHandler()
-       // With: exceptionHandler
-   }
+   @Provides
+   @Singleton
+   fun provideApplicationScope(): CoroutineScope =
+       CoroutineScope(SupervisorJob() + Dispatchers.Main)
    ```
 
-2. **Remaining Fragments** (~18+ files) - Add `@AndroidEntryPoint`:
-   - Remove `onAttach()` with manual `.inject()` calls
-   - Add `@AndroidEntryPoint` annotation to class
+5. **Final verification**
+   - Run full build
+   - Test app launch
+   - Commit and merge feature branch
 
-   **Pattern:**
-   ```kotlin
-   @AndroidEntryPoint
-   class SomeFragment : Fragment() {
-       @Inject lateinit var someDependency: SomeDep
-       // Remove onAttach() override that calls inject()
-   }
-   ```
+---
 
-3. **Remaining Workers** (~2-4 files) - Convert to `@HiltWorker`:
-   - DownloadNotificationWorker
-   - MoveSyncLocationWorker
+### Files Modified This Session
+- `gradle/libs.versions.toml` - Hilt 2.54, Kotlin 2.1.0
+- `app/build.gradle.kts` - Removed experimental workarounds
+- `app/src/main/java/local/oss/chronicle/injection/modules/AppModule.kt`
+- `app/src/main/java/local/oss/chronicle/injection/modules/ServiceModule.kt`
+- `app/src/main/java/local/oss/chronicle/injection/AppContextEntryPoint.kt`
+- `app/src/main/java/local/oss/chronicle/features/player/AudiobookMediaSessionCallback.kt`
+- `app/src/main/java/local/oss/chronicle/features/player/OnMediaChangedCallback.kt`
+- `app/src/main/java/local/oss/chronicle/features/player/SleepTimer.kt`
+- `app/src/main/java/local/oss/chronicle/data/local/SharedPreferencesPrefsRepo.kt`
+- `app/src/main/java/local/oss/chronicle/data/sources/plex/CachedFileManager.kt`
+- `app/src/main/java/local/oss/chronicle/features/download/MoveSyncLocationWorker.kt`
+- `app/src/main/java/local/oss/chronicle/features/settings/SettingsViewModel.kt`
 
-   **Pattern:**
-   ```kotlin
-   @HiltWorker
-   class SomeWorker @AssistedInject constructor(
-       @Assisted context: Context,
-       @Assisted workerParameters: WorkerParameters,
-       private val someDep: SomeDep,
-   ) : Worker(context, workerParameters)
-   ```
-
-**Approach:**
-- Fix all files of one type before moving to next (all ViewModels → all Fragments → Workers)
-- Update `MIGRATION_CHANGELOG.md` after completing each category
-- Commit logical chunks (e.g., "feat: migrate all ViewModels to Hilt")
-- Run build periodically to track remaining errors (~120-140 estimated)
-
-**Environment Variables:**
-- JAVA_HOME: `/c/Users/cyclo/.jdks/jdk-17.0.17+10`
-- SDK Path: `C:/Users/cyclo/AppData/Local/Android/Sdk`
-
-**To Continue:** Start by migrating the 7 ViewModels listed above, then move to Fragments.
+**Environment:**
+- Kotlin: 2.1.0, KSP: 2.1.0-1.0.29, Hilt: 2.54, Dagger: 2.54, AGP: 8.13.2, Java: JDK 17.0.17+10
 
 ---
 

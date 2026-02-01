@@ -26,13 +26,15 @@ class OnMediaChangedCallback
         private val mediaSession: MediaSessionCompat,
         private val becomingNoisyReceiver: BecomingNoisyReceiver,
         private val notificationManager: NotificationManagerCompat,
-        private val foregroundServiceController: ForegroundServiceController,
-        private val serviceController: ServiceController,
+        service: android.app.Service,
         private val currentlyPlaying: CurrentlyPlaying,
         private val trackRepo: ITrackRepository,
         private val bookRepo: IBookRepository,
         private val exceptionHandler: CoroutineExceptionHandler,
     ) : MediaControllerCompat.Callback(), OnChapterChangeListener {
+        // Cast service to the interfaces it implements
+        private val foregroundServiceController: ForegroundServiceController = service as ForegroundServiceController
+        private val serviceController: ServiceController = service as ServiceController
         init {
             currentlyPlaying.setOnChapterChangeListener(this)
         }

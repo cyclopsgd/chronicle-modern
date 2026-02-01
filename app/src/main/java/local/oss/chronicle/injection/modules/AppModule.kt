@@ -89,8 +89,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideExternalDeviceDirs(@ApplicationContext context: Context): List<File> =
-        ContextCompat.getExternalFilesDirs(context, null).toList()
+    @Named("externalDeviceDirs")
+    fun provideExternalDeviceDirs(@ApplicationContext context: Context): @JvmSuppressWildcards List<File> =
+        ContextCompat.getExternalFilesDirs(context, null).filterNotNull()
 
     @Provides
     @Singleton

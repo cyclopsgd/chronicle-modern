@@ -46,8 +46,7 @@ class AudiobookMediaSessionCallback
         private val bookRepository: IBookRepository,
         private val serviceScope: CoroutineScope,
         private val trackListStateManager: TrackListStateManager,
-        private val foregroundServiceController: ForegroundServiceController,
-        private val serviceController: ServiceController,
+        service: android.app.Service,
         private val mediaSession: MediaSessionCompat,
         private val appContext: Context,
         private val currentlyPlaying: CurrentlyPlaying,
@@ -58,6 +57,9 @@ class AudiobookMediaSessionCallback
         private val plexMediaService: local.oss.chronicle.data.sources.plex.PlexMediaService,
         defaultPlayer: ExoPlayer,
     ) : MediaSessionCompat.Callback() {
+        // Cast service to the interfaces it implements
+        private val foregroundServiceController: ForegroundServiceController = service as ForegroundServiceController
+        private val serviceController: ServiceController = service as ServiceController
         // Default to ExoPlayer to prevent having a nullable field
         var currentPlayer: Player = defaultPlayer
 

@@ -32,6 +32,7 @@ import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingViewModel.C
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * An interface for getting/setting persistent preferences for Chronicle
@@ -173,7 +174,7 @@ class SharedPreferencesPrefsRepo
     @Inject
     constructor(
         private val sharedPreferences: SharedPreferences,
-        private val externalDeviceDirs: List<File>,
+        @Named("externalDeviceDirs") private val externalDeviceDirs: @JvmSuppressWildcards List<File>,
     ) : PrefsRepo {
         override var cachedMediaDir: File
             get() {

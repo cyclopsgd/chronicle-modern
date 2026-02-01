@@ -35,6 +35,7 @@ import local.oss.chronicle.views.BottomSheetChooser.BottomChooserState.Companion
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Represents the UI state of the settings screen. Responsible for loading and displaying
@@ -59,7 +60,7 @@ class SettingsViewModel(
     private val plexPrefs: PlexPrefsRepo,
     private val collectionsRepository: CollectionsRepository,
     private val exceptionHandler: CoroutineExceptionHandler,
-    private val externalDeviceDirs: List<File>,
+    @Named("externalDeviceDirs") private val externalDeviceDirs: @JvmSuppressWildcards List<File>,
 ) : ViewModel() {
     @Suppress("UNCHECKED_CAST")
     class Factory
@@ -77,7 +78,7 @@ class SettingsViewModel(
             private val plexPrefs: PlexPrefsRepo,
             private val collectionsRepository: CollectionsRepository,
             private val exceptionHandler: CoroutineExceptionHandler,
-            private val externalDeviceDirs: List<File>,
+            @Named("externalDeviceDirs") private val externalDeviceDirs: @JvmSuppressWildcards List<File>,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {

@@ -159,8 +159,6 @@ dependencies {
     implementation(libs.hilt.ext.work)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.ext.compiler)
-    // Override kotlinx-metadata-jvm to support Kotlin 2.1.0 metadata v2.2.0
-    ksp(libs.kotlinx.metadata.jvm)
 
     implementation(libs.material)
     implementation(libs.glide)

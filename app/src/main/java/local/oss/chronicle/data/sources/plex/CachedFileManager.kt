@@ -27,6 +27,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileFilter
 import javax.inject.Inject
+import javax.inject.Named
 
 interface ICachedFileManager {
     enum class CacheStatus { CACHED, CACHING, NOT_CACHED }
@@ -70,7 +71,7 @@ class CachedFileManager
         private val bookRepository: IBookRepository,
         private val plexConfig: PlexConfig,
         private val applicationContext: Context,
-        private val externalFileDirs: List<File>,
+        @Named("externalDeviceDirs") private val externalFileDirs: @JvmSuppressWildcards List<File>,
     ) : ICachedFileManager {
 
         private val scopeManager = ScopedCoroutineManager()

@@ -60,12 +60,13 @@ class SimpleSleepTimer
     @Inject
     constructor(
         private val service: Service,
-        private val broadcastManager: SleepTimer.SleepTimerBroadcaster,
         private val mediaController: MediaControllerCompat,
         private val sensorManager: SensorManager,
         private val toneGenerator: ToneGenerator,
         private val prefsRepo: PrefsRepo,
     ) : SleepTimer {
+        // Cast service to the interface it implements
+        private val broadcastManager: SleepTimer.SleepTimerBroadcaster = service as SleepTimer.SleepTimerBroadcaster
         private val sleepTimerUpdateFrequencyMs = 1000L
         private var sleepTimeRemaining = 0L
         private val sleepTimerHandler = Handler(Looper.getMainLooper())
