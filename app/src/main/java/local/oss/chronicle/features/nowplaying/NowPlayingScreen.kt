@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TimerOff
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -134,6 +135,7 @@ fun NowPlayingScreen(
     onDismissChapterList: () -> Unit = {},
     onSleepTimerSelected: (SleepTimerOption) -> Unit = {},
     onDismissSleepTimer: () -> Unit = {},
+    onCarModeClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
@@ -309,13 +311,14 @@ fun NowPlayingScreen(
 
                 Spacer(modifier = Modifier.weight(0.1f))
 
-                // Bottom controls (speed, sleep timer, bookmark)
+                // Bottom controls (speed, sleep timer, car mode, bookmark)
                 BottomControlsSection(
                     playbackSpeed = state.playbackSpeed,
                     isSleepTimerActive = state.isSleepTimerActive,
                     isBookmarked = state.isBookmarked,
                     onSpeedClick = onSpeedClick,
                     onSleepTimerClick = onSleepTimerClick,
+                    onCarModeClick = onCarModeClick,
                     onBookmarkClick = onBookmarkClick,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )
@@ -627,6 +630,7 @@ private fun BottomControlsSection(
     isBookmarked: Boolean,
     onSpeedClick: () -> Unit,
     onSleepTimerClick: () -> Unit,
+    onCarModeClick: () -> Unit,
     onBookmarkClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -656,6 +660,16 @@ private fun BottomControlsSection(
                 imageVector = if (isSleepTimerActive) Icons.Default.Timer else Icons.Default.TimerOff,
                 contentDescription = "Sleep timer",
                 tint = if (isSleepTimerActive) OpusColors.SleepTimerActive else OpusColors.TextSecondary,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
+        // Car mode button
+        IconButton(onClick = onCarModeClick) {
+            Icon(
+                imageVector = Icons.Default.DirectionsCar,
+                contentDescription = "Car mode",
+                tint = OpusColors.TextSecondary,
                 modifier = Modifier.size(28.dp)
             )
         }

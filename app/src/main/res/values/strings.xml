@@ -265,6 +265,10 @@
     <string name="settings_jump_60_seconds">60 seconds</string>
     <string name="settings_jump_90_seconds">90 seconds</string>
 
+    <!-- Car Mode -->
+    <string name="settings_auto_car_mode_title">Auto-enter car mode</string>
+    <string name="settings_auto_car_mode_explanation">Automatically switch to car mode when connecting to a car Bluetooth audio device</string>
+
     <!-- Android Auto -->
     <string name="allow_auto">Enable Android Auto</string>
     <string name="allow_auto_explanation">Enabling will give library metadata access to the following apps: Google, Android Auto, and WearOS</string>

@@ -54,34 +54,48 @@ Brand assets are in [`docs/Logos/`](docs/Logos/).
 - ✅ Stream audiobooks from your Plex server
 - ✅ Offline playback with downloads
 - ✅ Playback progress sync with Plex
-- ✅ Variable playback speed
+- ✅ Variable playback speed (0.5x - 3.0x, per-book memory)
 - ✅ Sleep timer with shake-to-extend
 - ✅ Chapter navigation (including M4B chapters)
 - ✅ Android Auto support
 - ✅ Smart auto-rewind on resume
 - ✅ Skip silent audio
 - ✅ Network-aware playback recovery
+- ✅ **Car Mode** - Giant buttons, Bluetooth auto-detection
+- ✅ **Compose Library** - Grid view, filters, search
+- ✅ **Modern Now Playing** - Cover-art-dominant design
 
-### 🚧 In Progress
+### ✅ Recently Completed
 
-**Phase 2: Now-Playing Screen** *(Active)*
+**Phase 2: Now-Playing Screen**
 - 🎨 **Compose-based UI** with cover-art-dominant design
-- ⏱️ **Enhanced sleep timer** - Volume fade-out, shake to extend
+- ⏱️ **Enhanced sleep timer** - Presets, extend, cancel
 - 📑 **Chapter list bottom sheet** - Beautiful chapter navigation
-- 🎚️ **Speed selector** - 0.5x to 3.0x in 0.1x increments
+- 🎚️ **Speed selector** - 0.5x to 3.0x with per-book memory
+
+**Phase 3: Library Screen**
+- 📚 Grid view with cover art
+- 📊 Progress indicator overlay
+- 🔍 Search with real-time filtering
+- 🔄 Sort by title, author, date, duration
+
+**Phases 4-5: Downloads & Sync**
+- ⬇️ Download management with WorkManager
+- 💾 SD card storage support
+- 🔄 Progress sync with Plex server
+
+**Phase 6: Car Mode**
+- 🚗 Dedicated driving interface with giant 140dp play button
+- 🔌 Auto-activation on Bluetooth car audio connection
+- 🎯 High-contrast, zero-distraction design
+- 😴 Sleep timer auto-disabled while driving
 
 ### 🔮 Coming Soon
 
-**Phase 3: Car Mode**
-- 🚗 Dedicated driving interface with giant buttons
-- 🔌 Auto-activation on Bluetooth connection
-- 🎯 Zero-distraction design
-
-**Phase 4-6: Complete Transformation**
-- 📚 Library redesign with grid view and filters
-- ⬇️ Download management overhaul
-- 🎵 Media3 migration
-- 📊 Listening statistics
+**Phase 7: Stats & Polish**
+- 📊 Listening statistics (time, streaks, books finished)
+- ✨ UI polish and animation refinements
+- 🎵 Full Media3 migration
 
 ---
 
@@ -148,7 +162,7 @@ cd chronicle-modern
 - [x] Launcher icon (vector drawable)
 - [x] Dark theme bottom navigation
 
-### Phase 2: Now-Playing Screen 🚧 In Progress
+### Phase 2: Now-Playing Screen ✅ Complete
 - [x] Compose theme (OpusTheme)
 - [x] NowPlayingScreen composable
 - [x] NowPlayingViewModel
@@ -158,37 +172,41 @@ cd chronicle-modern
 - [x] Chapter-relative progress tracking
 - [x] Chapter list bottom sheet (Compose)
 - [x] Sleep timer bottom sheet (Compose)
-- [ ] Speed selector bottom sheet (Compose)
-- [ ] Per-book speed memory
+- [x] Speed selector bottom sheet (Compose)
+- [x] Per-book speed memory
 
-### Phase 3: Car Mode
-- [ ] Dedicated car mode screen (Compose)
-- [ ] Auto-detect Bluetooth car audio
-- [ ] Giant play/pause button (120dp+)
-- [ ] Disable sleep timer while in car mode
+### Phase 3: Library Screen ✅ Complete
+- [x] Grid view with cover art
+- [x] Progress indicator overlay on covers
+- [x] Filters: Not Started / In Progress / Finished / Downloaded
+- [x] Sort: Title / Author / Date Added / Recently Played / Duration
 
-### Phase 4: Library Screen
-- [ ] Grid view with cover art
-- [ ] Progress indicator overlay on covers
-- [ ] Filters: Not Started / In Progress / Finished / Downloaded
-- [ ] Sort: Title / Author / Date Added / Recently Played
+### Phase 4: Downloads & Offline ✅ Complete
+- [x] Download management with WorkManager
+- [x] SD card storage support
+- [x] Download progress indicators
+- [x] Storage management in settings
 
-### Phase 5: Downloads & Offline
-- [ ] Download management overhaul
-- [ ] SD card storage support
-- [ ] Background downloads via WorkManager
+### Phase 5: Progress Sync ✅ Complete
+- [x] Report playback progress to Plex server
+- [x] Read progress from Plex on library refresh
+- [x] Handle conflicts (most recent wins)
+- [x] Offline-first architecture
 
-### Phase 6: Advanced Features
-- [ ] Full Media3 migration
-- [ ] Progress sync with Plex server
-- [ ] Bookmarks with notes
-- [ ] Android Auto optimization
+### Phase 6: Car Mode ✅ Complete
+- [x] Dedicated car mode screen (Compose)
+- [x] Auto-detect Bluetooth car audio
+- [x] Giant play/pause button (140dp)
+- [x] Disable sleep timer while in car mode
+- [x] Car mode entry from Now Playing screen
+- [x] Auto-enter car mode setting
 
-### Phase 7: Stats & Polish
+### Phase 7: Stats & Polish 🚧 In Progress
 - [ ] Stats tab in bottom navigation
 - [ ] Listening time tracking
 - [ ] Books finished count
 - [ ] UI polish and animation refinements
+- [ ] Full Media3 migration
 
 ---
 

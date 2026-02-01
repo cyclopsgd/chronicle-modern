@@ -3,6 +3,7 @@ package local.oss.chronicle.data.local
 import android.content.SharedPreferences
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_ALLOW_AUTO
+import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_AUTO_ENTER_CAR_MODE
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_AUTO_REWIND_ENABLED
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_BOOK_COVER_STYLE
 import local.oss.chronicle.data.local.PrefsRepo.Companion.KEY_BOOK_SORT_BY
@@ -132,6 +133,9 @@ interface PrefsRepo {
     /** Timestamp when playback was last paused (for smart rewind calculation) */
     var lastPauseTimestamp: Long
 
+    /** Whether to automatically enter car mode when connected to car Bluetooth */
+    var autoEnterCarMode: Boolean
+
     companion object {
         const val KEY_SYNC_DIR_PATH = "key_sync_location"
         const val KEY_BOOK_COVER_STYLE = "key_book_cover_style"
@@ -157,6 +161,7 @@ interface PrefsRepo {
         const val KEY_LIBRARY_MEDIA_TYPE = "key_media_type"
         const val KEY_LIBRARY_VIEW_STYLE = "key_library_view_style"
         const val KEY_LAST_PAUSE_TIMESTAMP = "key_last_pause_timestamp"
+        const val KEY_AUTO_ENTER_CAR_MODE = "key_auto_enter_car_mode"
         const val VIEW_STYLE_COVER_GRID = "view_style_cover_grid"
         const val VIEW_STYLE_TEXT_LIST = "view_style_text_list"
         const val VIEW_STYLE_DETAILS_LIST = "view_style_details_list"
@@ -398,4 +403,9 @@ class SharedPreferencesPrefsRepo
         override var lastPauseTimestamp: Long
             get() = sharedPreferences.getLong(KEY_LAST_PAUSE_TIMESTAMP, 0L)
             set(value) = sharedPreferences.edit().putLong(KEY_LAST_PAUSE_TIMESTAMP, value).apply()
+
+        private val defaultAutoEnterCarMode = false
+        override var autoEnterCarMode: Boolean
+            get() = sharedPreferences.getBoolean(KEY_AUTO_ENTER_CAR_MODE, defaultAutoEnterCarMode)
+            set(value) = sharedPreferences.edit().putBoolean(KEY_AUTO_ENTER_CAR_MODE, value).apply()
     }

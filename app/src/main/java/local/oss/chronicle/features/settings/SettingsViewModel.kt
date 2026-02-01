@@ -545,6 +545,16 @@ class SettingsViewModel(
                     defaultValue = prefsRepo.pauseOnFocusLost,
                 ),
                 PreferenceModel(
+                    type = PreferenceType.BOOLEAN,
+                    title = FormattableString.from(R.string.settings_auto_car_mode_title),
+                    explanation =
+                        FormattableString.from(
+                            R.string.settings_auto_car_mode_explanation,
+                        ),
+                    key = PrefsRepo.KEY_AUTO_ENTER_CAR_MODE,
+                    defaultValue = prefsRepo.autoEnterCarMode,
+                ),
+                PreferenceModel(
                     type = PreferenceType.CLICKABLE,
                     title =
                         FormattableString.ResourceString(

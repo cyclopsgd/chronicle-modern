@@ -17,7 +17,9 @@ import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.application.MainActivityViewModel.BottomSheetState.COLLAPSED
 import local.oss.chronicle.features.nowplaying.NowPlayingScreen
 import local.oss.chronicle.features.nowplaying.NowPlayingViewModel
+import local.oss.chronicle.navigation.Navigator
 import local.oss.chronicle.ui.theme.OpusTheme
+import javax.inject.Inject
 
 /**
  * Fragment hosting the Compose-based Now Playing screen.
@@ -30,6 +32,9 @@ import local.oss.chronicle.ui.theme.OpusTheme
 @ExperimentalCoroutinesApi
 class CurrentlyPlayingFragment : Fragment() {
     private lateinit var currentlyPlayingInterface: MainActivity.CurrentlyPlayingInterface
+
+    @Inject
+    lateinit var navigator: Navigator
 
     companion object {
         fun newInstance() = CurrentlyPlayingFragment()
@@ -76,6 +81,10 @@ class CurrentlyPlayingFragment : Fragment() {
                         onDismissChapterList = viewModel::hideChapterList,
                         onSleepTimerSelected = viewModel::handleSleepTimerOption,
                         onDismissSleepTimer = viewModel::hideSleepTimer,
+                        onCarModeClick = {
+                            currentlyPlayingInterface.setBottomSheetState(COLLAPSED)
+                            navigator.showCarMode()
+                        },
                     )
                 }
             }

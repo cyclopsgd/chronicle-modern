@@ -35,24 +35,26 @@
 - [x] Search with real-time filtering
 - [x] Pull-to-refresh
 
-### Phase 4: Downloads & Offline
-- [ ] Download button on book detail
-- [ ] Download progress indicator
-- [ ] Queue multiple downloads (WorkManager)
-- [ ] SD card storage support
-- [ ] Storage management in settings
+### Phase 4: Downloads & Offline ✅
+- [x] Download button on book detail
+- [x] Download progress indicator
+- [x] Queue multiple downloads (WorkManager)
+- [x] SD card storage support
+- [x] Storage management in settings
 
-### Phase 5: Progress Sync
-- [ ] Report playback progress to Plex server
-- [ ] Read progress from Plex on library refresh
-- [ ] Handle conflicts (most recent wins)
-- [ ] Offline-first: show cached data, update from network
+### Phase 5: Progress Sync ✅
+- [x] Report playback progress to Plex server
+- [x] Read progress from Plex on library refresh
+- [x] Handle conflicts (most recent wins)
+- [x] Offline-first: show cached data, update from network
 
-### Phase 6: Car Mode
-- [ ] Dedicated car mode screen (Compose)
-- [ ] Auto-detect Bluetooth car audio
-- [ ] Giant play/pause button (120dp+)
-- [ ] Disable sleep timer while in car mode
+### Phase 6: Car Mode ✅
+- [x] Dedicated car mode screen (Compose)
+- [x] Auto-detect Bluetooth car audio
+- [x] Giant play/pause button (120dp+)
+- [x] Disable sleep timer while in car mode
+- [x] Car mode entry from Now Playing screen
+- [x] Auto-enter car mode setting in Settings
 
 ### Technical Debt
 - [ ] Migrate remaining LiveData to StateFlow

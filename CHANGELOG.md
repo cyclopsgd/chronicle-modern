@@ -46,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows last played book on app start
   - Stays visible after playback stops
   - One-tap access to resume playback
+- **Car Mode** - Simplified, high-contrast playback interface for driving
+  - Giant play/pause button (140dp) for easy tapping
+  - High contrast colors (black background, white text, green accents)
+  - Skip forward/backward and chapter navigation
+  - Sleep timer automatically disabled while in car mode
+  - Auto-enter car mode when connecting to car Bluetooth audio
+  - Accessible from Now Playing screen via car icon
 
 ### Improvements
 - **Full-screen player** - Bottom navigation now hides when player is expanded
@@ -53,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **DI Architecture** - Added `ActivityRetainedModule` for ViewModel-accessible dependencies
 - **Bottom navigation styling** - Reduced height (56dp), removed pill indicator, dark theme
 - **Mini player** - 72dp height with accent top border
+- **Settings** - Added auto-enter car mode toggle in Playback settings
 
 ### Fixed
 - MediaBrowser connection callback not firing (added missing `setSessionToken()`)

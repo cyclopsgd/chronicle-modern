@@ -12,6 +12,7 @@ import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment
 import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Companion.ARG_AUDIOBOOK_ID
 import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Companion.ARG_AUDIOBOOK_TITLE
 import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Companion.ARG_IS_AUDIOBOOK_CACHED
+import local.oss.chronicle.features.carmode.CarModeFragment
 import local.oss.chronicle.features.collections.CollectionDetailsFragment
 import local.oss.chronicle.features.collections.CollectionsFragment
 import local.oss.chronicle.features.home.HomeFragment
@@ -167,6 +168,20 @@ class Navigator
                 .commit()
         }
 
+        fun showCarMode() {
+            val carModeFragment = CarModeFragment.newInstance()
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragNavHost, carModeFragment, CAR_MODE_TAG)
+                .addToBackStack(CAR_MODE_TAG)
+                .commit()
+        }
+
+        fun goBack() {
+            if (fragmentManager.backStackEntryCount > 0) {
+                fragmentManager.popBackStack()
+            }
+        }
+
         /** Handle back presses. Return a boolean indicating whether the back press event was handled */
         fun onBackPressed(): Boolean {
             val wasBackPressHandled =
@@ -216,5 +231,9 @@ class Navigator
 
         private fun isFragmentWithTagVisible(tag: String): Boolean {
             return fragmentManager.findFragmentByTag(tag)?.isVisible == true
+        }
+
+        companion object {
+            private const val CAR_MODE_TAG = "car_mode_fragment"
         }
     }
