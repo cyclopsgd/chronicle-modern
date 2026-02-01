@@ -271,16 +271,40 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     fun showSleepTimerOptions() {
-        // Will trigger bottom sheet in fragment/activity
-        // For now, toggle between 15 min and off
-        val isActive = _uiState.value.isSleepTimerActive
+        _uiState.update { it.copy(showSleepTimer = true) }
+    }
+
+    fun hideSleepTimer() {
+        _uiState.update { it.copy(showSleepTimer = false) }
+    }
+
+    fun handleSleepTimerOption(option: SleepTimerOption) {
+        hideSleepTimer()
 
         val intent = Intent(SleepTimer.ACTION_SLEEP_TIMER_CHANGE).apply {
-            if (isActive) {
-                putExtra(SleepTimer.ARG_SLEEP_TIMER_ACTION, SleepTimerAction.CANCEL)
-            } else {
-                putExtra(SleepTimer.ARG_SLEEP_TIMER_ACTION, SleepTimerAction.BEGIN)
-                putExtra(SleepTimer.ARG_SLEEP_TIMER_DURATION_MILLIS, 15 * 60 * 1000L)
+            when (option) {
+                is SleepTimerOption.Cancel -> {
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_ACTION, SleepTimerAction.CANCEL)
+                }
+                is SleepTimerOption.Extend5 -> {
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_ACTION, SleepTimerAction.EXTEND)
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_DURATION_MILLIS, option.durationMs)
+                }
+                is SleepTimerOption.EndOfChapter -> {
+                    // Calculate time to end of current chapter
+                    val chapter = currentlyPlaying.chapter.value
+                    val currentPosition = _uiState.value.currentPositionMs
+                    val chapterDuration = chapter.endTimeOffset - chapter.startTimeOffset
+                    val remainingInChapter = (chapterDuration - currentPosition).coerceAtLeast(0L)
+
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_ACTION, SleepTimerAction.BEGIN)
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_DURATION_MILLIS, remainingInChapter)
+                }
+                else -> {
+                    // Standard duration preset
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_ACTION, SleepTimerAction.BEGIN)
+                    putExtra(SleepTimer.ARG_SLEEP_TIMER_DURATION_MILLIS, option.durationMs)
+                }
             }
         }
         localBroadcastManager.sendBroadcast(intent)

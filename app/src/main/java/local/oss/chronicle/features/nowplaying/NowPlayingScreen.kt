@@ -101,6 +101,8 @@ data class NowPlayingUiState(
     val chapters: List<Chapter> = emptyList(),
     val currentChapterIndex: Int = 0,
     val showChapterList: Boolean = false,
+    // Sleep timer
+    val showSleepTimer: Boolean = false,
 )
 
 /**
@@ -126,27 +128,51 @@ fun NowPlayingScreen(
     onChapterClick: () -> Unit = {},
     onChapterSelected: (Chapter) -> Unit = {},
     onDismissChapterList: () -> Unit = {},
+    onSleepTimerSelected: (SleepTimerOption) -> Unit = {},
+    onDismissSleepTimer: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val chapterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sleepTimerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Show chapter list bottom sheet
     if (state.showChapterList) {
         ChapterListBottomSheet(
             chapters = state.chapters,
             currentChapterIndex = state.currentChapterIndex,
-            sheetState = sheetState,
+            sheetState = chapterSheetState,
             onChapterSelected = { chapter ->
                 scope.launch {
-                    sheetState.hide()
+                    chapterSheetState.hide()
                     onChapterSelected(chapter)
                 }
             },
             onDismiss = {
                 scope.launch {
-                    sheetState.hide()
+                    chapterSheetState.hide()
                     onDismissChapterList()
+                }
+            }
+        )
+    }
+
+    // Show sleep timer bottom sheet
+    if (state.showSleepTimer) {
+        SleepTimerBottomSheet(
+            isSleepTimerActive = state.isSleepTimerActive,
+            remainingMs = state.sleepTimerRemainingMs,
+            sheetState = sleepTimerSheetState,
+            onOptionSelected = { option ->
+                scope.launch {
+                    sleepTimerSheetState.hide()
+                    onSleepTimerSelected(option)
+                }
+            },
+            onDismiss = {
+                scope.launch {
+                    sleepTimerSheetState.hide()
+                    onDismissSleepTimer()
                 }
             }
         )
@@ -761,6 +787,185 @@ private fun ChapterListItem(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Sleep timer options.
+ */
+sealed class SleepTimerOption(val label: String, val durationMs: Long) {
+    data object Minutes5 : SleepTimerOption("5 minutes", 5 * 60 * 1000L)
+    data object Minutes15 : SleepTimerOption("15 minutes", 15 * 60 * 1000L)
+    data object Minutes30 : SleepTimerOption("30 minutes", 30 * 60 * 1000L)
+    data object Minutes45 : SleepTimerOption("45 minutes", 45 * 60 * 1000L)
+    data object Minutes60 : SleepTimerOption("60 minutes", 60 * 60 * 1000L)
+    data object Minutes90 : SleepTimerOption("90 minutes", 90 * 60 * 1000L)
+    data object EndOfChapter : SleepTimerOption("End of chapter", -1L)
+    data object Extend5 : SleepTimerOption("+5 minutes", 5 * 60 * 1000L)
+    data object Cancel : SleepTimerOption("Cancel timer", 0L)
+
+    companion object {
+        val presets = listOf(Minutes5, Minutes15, Minutes30, Minutes45, Minutes60, Minutes90, EndOfChapter)
+    }
+}
+
+/**
+ * Sleep timer bottom sheet.
+ * Displays preset durations and cancel option.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SleepTimerBottomSheet(
+    isSleepTimerActive: Boolean,
+    remainingMs: Long,
+    sheetState: androidx.compose.material3.SheetState,
+    onOptionSelected: (SleepTimerOption) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = OpusColors.Surface,
+        contentColor = OpusColors.TextPrimary,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+        ) {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Sleep Timer",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = OpusColors.TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                // Show remaining time if timer is active
+                if (isSleepTimerActive && remainingMs > 0) {
+                    Surface(
+                        color = OpusColors.SleepTimerActive.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Timer,
+                                contentDescription = null,
+                                tint = OpusColors.SleepTimerActive,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = formatTime(remainingMs),
+                                color = OpusColors.SleepTimerActive,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+
+            HorizontalDivider(color = OpusColors.ControlsBackground)
+
+            // Preset options
+            SleepTimerOption.presets.forEach { option ->
+                SleepTimerOptionItem(
+                    option = option,
+                    onClick = { onOptionSelected(option) }
+                )
+            }
+
+            // Active timer options (extend / cancel)
+            if (isSleepTimerActive) {
+                HorizontalDivider(
+                    color = OpusColors.ControlsBackground,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                // Extend option
+                SleepTimerOptionItem(
+                    option = SleepTimerOption.Extend5,
+                    isHighlighted = true,
+                    onClick = { onOptionSelected(SleepTimerOption.Extend5) }
+                )
+
+                // Cancel option
+                SleepTimerOptionItem(
+                    option = SleepTimerOption.Cancel,
+                    isDestructive = true,
+                    onClick = { onOptionSelected(SleepTimerOption.Cancel) }
+                )
+            }
+
+            // Bottom padding
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+/**
+ * Individual sleep timer option item.
+ */
+@Composable
+private fun SleepTimerOptionItem(
+    option: SleepTimerOption,
+    isHighlighted: Boolean = false,
+    isDestructive: Boolean = false,
+    onClick: () -> Unit,
+) {
+    Surface(
+        color = Color.Transparent,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val textColor = when {
+                isDestructive -> Color(0xFFEF5350) // Red for cancel
+                isHighlighted -> OpusColors.SleepTimerActive
+                else -> OpusColors.TextPrimary
+            }
+
+            // Icon based on option type
+            val icon = when (option) {
+                is SleepTimerOption.EndOfChapter -> Icons.Default.SkipNext
+                is SleepTimerOption.Extend5 -> Icons.Default.Timer
+                is SleepTimerOption.Cancel -> Icons.Default.TimerOff
+                else -> Icons.Default.Timer
+            }
+
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = textColor,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = option.label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = textColor,
+                fontWeight = if (isHighlighted || isDestructive) FontWeight.SemiBold else FontWeight.Normal,
+            )
         }
     }
 }

@@ -104,6 +104,8 @@ class CurrentlyPlayingFragment : Fragment() {
                         onChapterClick = viewModel::showChapterList,
                         onChapterSelected = viewModel::jumpToChapter,
                         onDismissChapterList = viewModel::hideChapterList,
+                        onSleepTimerSelected = viewModel::handleSleepTimerOption,
+                        onDismissSleepTimer = viewModel::hideSleepTimer,
                     )
                 }
             }
