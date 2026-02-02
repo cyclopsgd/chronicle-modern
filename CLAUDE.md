@@ -12,38 +12,45 @@
 
 **If user says "continue", give a rundown of this section.**
 
-### Main Branch Status
+### Main Branch Status (v0.60.20)
 
-Main branch is up to date with UI modernization. Next priority: **Media3 Migration**.
+Media3 migration is ON MAIN and working. Recent fixes:
+- ✅ Chapter loading from Plex (syncAudiobook properly awaited)
+- ✅ Play button resumes from saved position (library list + home screen)
+- ✅ Duplicate LazyColumn key crash fixed (composite keys)
+- ✅ Haptic feedback on all playback controls
+
+### ⚠️ GitHub Actions Issue
+
+Release workflows (v0.60.18, v0.60.19, v0.60.20) are stuck in "Queued" status.
+- Check: https://github.com/cyclopsgd/chronicle-modern/settings/actions
+- May need to manually trigger or check runner availability
+- Alternative: Build release APK locally with `./gradlew assembleRelease`
 
 ### 🧪 Testing Needed
 
-The following features were just merged and need user testing:
-- [ ] Compose mini player - cover image loading
-- [ ] Compose mini player - progress bar updates during playback
-- [ ] Compose bottom navigation bar - tab switching
-- [ ] Car mode - remaining time display (should decrease)
-- [ ] Settings/Collections/Book Details Compose screens
+- [ ] Chapter skip next/previous buttons
+- [ ] Chapter selection from chapter list
+- [ ] Play from library list (should resume + load chapters)
+- [ ] Haptic feedback on speed button and playback controls
+- [ ] Position tracker updating during playback
 
-### 🚀 Next: Media3 Migration
+### 🐛 Known Bugs (Lower Priority)
 
-See `docs/MEDIA3_MIGRATION_PLAN.md` for the detailed migration plan.
+1. **Samsung Now Bar low-res artwork** - notification artwork is low resolution
+2. **App continues playing after close** - playback doesn't stop when app is closed
 
-**Why migrate:**
-- Fix chapter skip bug (async seek handling)
-- Modern MediaLibraryService for Android Auto
-- Better notification handling
-- Proper position tracking during seeks
+### 📋 Remaining Modernization (Optional)
 
-**Key resources:**
-- [Official Migration Guide](https://developer.android.com/media/media3/exoplayer/migration-guide)
-- Existing partial work in `feat/media3-migration` branch
+From the plan, these Compose migrations are NOT done yet:
+- Settings Screen (still XML preferences)
+- Collections Screens (list + details)
+- Book Details Screen
 
-### CI/CD
-
-- Debug Build workflow on `feat/**` and `fix/**` branches
-- Creates GitHub releases with APKs
-- Download from Releases page
+Other modern features mentioned:
+- Predictive back gesture (Android 14+)
+- Dynamic colors / Material You
+- Edge-to-edge (drawing behind system bars)
 
 ---
 
