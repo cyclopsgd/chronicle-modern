@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import local.oss.chronicle.features.player.MediaPlayerService
 import local.oss.chronicle.features.player.MediaServiceConnection
 import local.oss.chronicle.navigation.Navigator
 import local.oss.chronicle.ui.theme.OpusTheme
@@ -87,12 +88,17 @@ class ComposeHomeFragment : Fragment() {
     }
 
     private fun playBook(bookId: Int) {
+        // Use saved progress to resume from where the user left off
+        val extras = Bundle().apply {
+            putLong(MediaPlayerService.KEY_START_TIME_TRACK_OFFSET, MediaPlayerService.USE_SAVED_TRACK_PROGRESS)
+            putLong(MediaPlayerService.KEY_SEEK_TO_TRACK_WITH_ID, MediaPlayerService.ACTIVE_TRACK)
+        }
         // Connect to media service and play the book
         if (mediaServiceConnection.isConnected.value == true) {
-            mediaServiceConnection.transportControls?.playFromMediaId(bookId.toString(), null)
+            mediaServiceConnection.transportControls?.playFromMediaId(bookId.toString(), extras)
         } else {
             mediaServiceConnection.connect {
-                mediaServiceConnection.transportControls?.playFromMediaId(bookId.toString(), null)
+                mediaServiceConnection.transportControls?.playFromMediaId(bookId.toString(), extras)
             }
         }
     }

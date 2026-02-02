@@ -829,7 +829,10 @@ private fun ChapterListBottomSheet(
                         .fillMaxWidth()
                         .weight(1f, fill = false)
                 ) {
-                    itemsIndexed(chapters) { index, chapter ->
+                    itemsIndexed(
+                        items = chapters,
+                        key = { index, chapter -> "${chapter.id}_${chapter.startTimeOffset}" }
+                    ) { index, chapter ->
                         ChapterListItem(
                             chapter = chapter,
                             isCurrentChapter = index == currentChapterIndex,

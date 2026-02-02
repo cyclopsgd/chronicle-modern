@@ -241,10 +241,10 @@ fun BookDetailsScreen(
                             ChaptersStickyHeader()
                         }
 
-                        // Chapter list
+                        // Chapter list - use composite key to avoid collisions
                         items(
                             items = state.chapters,
-                            key = { it.id },
+                            key = { "${it.id}_${it.startTimeOffset}" },
                         ) { chapter ->
                             ChapterListItem(
                                 chapter = chapter,

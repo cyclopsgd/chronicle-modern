@@ -769,7 +769,6 @@ class Media3PlayerService : MediaLibraryService() {
                                         tracks.getDuration(),
                                         tracks.size
                                     )
-                                    bookRepository.syncAudiobook(book, tracks)
                                 }
                             }
 
@@ -777,6 +776,13 @@ class Media3PlayerService : MediaLibraryService() {
                                 Timber.w("Still no tracks for book $bookId after loading attempt")
                                 continue
                             }
+
+                            // Sync audiobook to load chapters from Plex and wait for completion
+                            val syncSuccess = bookRepository.syncAudiobook(book, tracks)
+                            Timber.i("onAddMediaItems: syncAudiobook completed: success=$syncSuccess")
+
+                            // Re-fetch book to get updated chapters
+                            val updatedBook = bookRepository.getAudiobookAsync(bookId) ?: book
 
                             // Pre-resolve streaming URLs
                             try {
@@ -795,12 +801,13 @@ class Media3PlayerService : MediaLibraryService() {
 
                             trackListStateManager.updatePosition(startingTrackIndex, startPositionMs)
 
-                            // Load chapters
-                            val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
+                            // Load chapters from updated book (which now has chapters from Plex sync)
+                            val chapters = updatedBook.chapters.ifEmpty { tracks.asChapterList() }
+                            Timber.i("onAddMediaItems: Loaded ${chapters.size} chapters for book '${updatedBook.title}' (from book: ${updatedBook.chapters.size}, from tracks: ${tracks.size})")
 
                             // Update playback state controller
                             playbackStateController.loadAudiobook(
-                                audiobook = book,
+                                audiobook = updatedBook,
                                 tracks = tracks,
                                 chapters = chapters,
                                 startTrackIndex = startingTrackIndex,
@@ -809,7 +816,7 @@ class Media3PlayerService : MediaLibraryService() {
 
                             // Update currently playing
                             currentlyPlaying.update(
-                                book = book,
+                                book = updatedBook,
                                 tracks = tracks,
                                 track = activeTrack.copy(progress = startPositionMs)
                             )
@@ -865,7 +872,6 @@ class Media3PlayerService : MediaLibraryService() {
                                             tracks.getDuration(),
                                             tracks.size
                                         )
-                                        bookRepository.syncAudiobook(book, tracks)
                                     }
                                 }
 
@@ -874,6 +880,13 @@ class Media3PlayerService : MediaLibraryService() {
                                         emptyList(), 0, 0L
                                     )
                                 }
+
+                                // Sync audiobook to load chapters from Plex and wait for completion
+                                val syncSuccess = bookRepository.syncAudiobook(book, tracks)
+                                Timber.i("syncAudiobook completed: success=$syncSuccess")
+
+                                // Re-fetch book to get updated chapters
+                                val updatedBook = bookRepository.getAudiobookAsync(bookId) ?: book
 
                                 // Pre-resolve streaming URLs
                                 try {
@@ -890,11 +903,11 @@ class Media3PlayerService : MediaLibraryService() {
 
                                 trackListStateManager.updatePosition(resolvedStartIndex, resolvedStartPos)
 
-                                val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
-                                Timber.i("Loaded ${chapters.size} chapters for book '${book.title}' (from book: ${book.chapters.size}, from tracks: ${tracks.size})")
+                                val chapters = updatedBook.chapters.ifEmpty { tracks.asChapterList() }
+                                Timber.i("Loaded ${chapters.size} chapters for book '${updatedBook.title}' (from book: ${updatedBook.chapters.size}, from tracks: ${tracks.size})")
 
                                 playbackStateController.loadAudiobook(
-                                    audiobook = book,
+                                    audiobook = updatedBook,
                                     tracks = tracks,
                                     chapters = chapters,
                                     startTrackIndex = resolvedStartIndex,
@@ -902,7 +915,7 @@ class Media3PlayerService : MediaLibraryService() {
                                 )
 
                                 currentlyPlaying.update(
-                                    book = book,
+                                    book = updatedBook,
                                     tracks = tracks,
                                     track = activeTrack.copy(progress = resolvedStartPos)
                                 )

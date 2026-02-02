@@ -1,5 +1,6 @@
 package local.oss.chronicle.features.library.compose
 
+import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,7 @@ import local.oss.chronicle.data.model.Audiobook.Companion.SORT_KEY_DURATION
 import local.oss.chronicle.data.model.Audiobook.Companion.SORT_KEY_TITLE
 import local.oss.chronicle.data.model.Audiobook.Companion.SORT_KEY_YEAR
 import local.oss.chronicle.data.sources.plex.PlexConfig
+import local.oss.chronicle.features.player.MediaPlayerService
 import local.oss.chronicle.features.player.MediaServiceConnection
 import timber.log.Timber
 import javax.inject.Inject
@@ -257,13 +259,18 @@ class ComposeLibraryViewModel @Inject constructor(
      */
     fun playBook(libraryBook: LibraryBook) {
         val transportControls = mediaServiceConnection.transportControls
+        // Use saved progress to resume from where the user left off
+        val extras = Bundle().apply {
+            putLong(MediaPlayerService.KEY_START_TIME_TRACK_OFFSET, MediaPlayerService.USE_SAVED_TRACK_PROGRESS)
+            putLong(MediaPlayerService.KEY_SEEK_TO_TRACK_WITH_ID, MediaPlayerService.ACTIVE_TRACK)
+        }
         if (transportControls != null) {
-            transportControls.playFromMediaId(libraryBook.id.toString(), null)
+            transportControls.playFromMediaId(libraryBook.id.toString(), extras)
             Timber.d("Starting playback of book: ${libraryBook.title}")
         } else {
             // Try to connect first, then play
             mediaServiceConnection.connect {
-                mediaServiceConnection.transportControls?.playFromMediaId(libraryBook.id.toString(), null)
+                mediaServiceConnection.transportControls?.playFromMediaId(libraryBook.id.toString(), extras)
                 Timber.d("Connected and starting playback of book: ${libraryBook.title}")
             }
         }
