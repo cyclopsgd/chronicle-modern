@@ -74,6 +74,7 @@ data class HomeBook(
     val title: String,
     val author: String,
     val coverUrl: String?,
+    val coverUrlHighRes: String? = null, // High-res version for featured section
     val progress: Float, // 0.0 to 1.0
     val duration: Long,
     val isDownloaded: Boolean = false,
@@ -253,17 +254,18 @@ private fun FeaturedBookSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp)
+            .height(300.dp)
             .clickable(onClick = onBookClick)
     ) {
-        // Background cover image with gradient
+        // Background cover image with gradient - use high-res, align from top
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(book.coverUrl)
+                .data(book.coverUrlHighRes ?: book.coverUrl)
                 .crossfade(true)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter, // Align from top to show book cover better
             modifier = Modifier.fillMaxSize()
         )
 
@@ -430,60 +432,61 @@ private fun BookCard(
 ) {
     Column(
         modifier = modifier
-            .width(120.dp)
+            .width(110.dp)
             .clickable(onClick = onClick)
     ) {
-        Box(
+        // Book cover with 1:1 aspect ratio (Audible-style square covers)
+        // Using a card-like appearance with shadow
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.7f)
-                .clip(RoundedCornerShape(8.dp))
+                .aspectRatio(1f), // Square like Audible
+            shape = RoundedCornerShape(8.dp),
+            shadowElevation = 4.dp,
+            color = OpusColors.Surface,
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(book.coverUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = book.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            Box {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(book.coverUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = book.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
 
-            // Downloaded indicator
-            if (book.isDownloaded) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .background(
-                            color = OpusColors.Background.copy(alpha = 0.8f),
-                            shape = RoundedCornerShape(4.dp)
+                // Downloaded indicator badge
+                if (book.isDownloaded) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                            .background(
+                                color = OpusColors.Secondary,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(3.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudDownload,
+                            contentDescription = "Downloaded",
+                            tint = OpusColors.Background,
+                            modifier = Modifier.size(12.dp)
                         )
-                        .padding(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CloudDownload,
-                        contentDescription = "Downloaded",
-                        tint = OpusColors.Secondary,
-                        modifier = Modifier.size(14.dp)
-                    )
+                    }
                 }
-            }
 
-            // Progress bar overlay
-            if (showProgress && book.progress > 0f) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                ) {
+                // Progress bar overlay at bottom
+                if (showProgress && book.progress > 0f) {
                     LinearProgressIndicator(
                         progress = { book.progress },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(3.dp),
+                            .height(3.dp)
+                            .align(Alignment.BottomCenter),
                         color = OpusColors.Primary,
-                        trackColor = OpusColors.Background.copy(alpha = 0.5f),
+                        trackColor = OpusColors.Background.copy(alpha = 0.6f),
                     )
                 }
             }
@@ -495,6 +498,7 @@ private fun BookCard(
             text = book.title,
             style = MaterialTheme.typography.bodySmall,
             color = OpusColors.TextPrimary,
+            fontWeight = FontWeight.Medium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             lineHeight = 16.sp,
@@ -639,15 +643,15 @@ private fun HomeScreenPreview() {
                     duration = 100000L,
                 ),
                 continueListening = listOf(
-                    HomeBook(1, "Project Hail Mary", "Andy Weir", null, 0.45f, 100000L),
-                    HomeBook(2, "The Martian", "Andy Weir", null, 0.2f, 80000L),
+                    HomeBook(id = 1, title = "Project Hail Mary", author = "Andy Weir", coverUrl = null, progress = 0.45f, duration = 100000L),
+                    HomeBook(id = 2, title = "The Martian", author = "Andy Weir", coverUrl = null, progress = 0.2f, duration = 80000L),
                 ),
                 recentlyAdded = listOf(
-                    HomeBook(3, "Dune", "Frank Herbert", null, 0f, 120000L),
-                    HomeBook(4, "Foundation", "Isaac Asimov", null, 0f, 90000L),
+                    HomeBook(id = 3, title = "Dune", author = "Frank Herbert", coverUrl = null, progress = 0f, duration = 120000L),
+                    HomeBook(id = 4, title = "Foundation", author = "Isaac Asimov", coverUrl = null, progress = 0f, duration = 90000L),
                 ),
                 downloaded = listOf(
-                    HomeBook(5, "Ender's Game", "Orson Scott Card", null, 0.8f, 70000L, true),
+                    HomeBook(id = 5, title = "Ender's Game", author = "Orson Scott Card", coverUrl = null, progress = 0.8f, duration = 70000L, isDownloaded = true),
                 ),
                 collections = listOf(
                     HomeCollection(1, "Sci-Fi Favorites", null, 12),

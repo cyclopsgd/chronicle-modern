@@ -141,6 +141,7 @@ class ComposeHomeViewModel @Inject constructor(
             title = title,
             author = author,
             coverUrl = thumb?.let { plexConfig.makeThumbUri(it).toString() },
+            coverUrlHighRes = thumb?.let { plexConfig.makeHighResThumbUri(it).toString() },
             progress = progressPercent,
             duration = duration,
             isDownloaded = isCached,
