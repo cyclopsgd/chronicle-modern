@@ -16,6 +16,7 @@ import local.oss.chronicle.features.carmode.CarModeFragment
 import local.oss.chronicle.features.collections.CollectionDetailsFragment
 import local.oss.chronicle.features.collections.CollectionsFragment
 import local.oss.chronicle.features.home.HomeFragment
+import local.oss.chronicle.features.home.compose.ComposeHomeFragment
 import local.oss.chronicle.features.library.compose.ComposeLibraryFragment
 import local.oss.chronicle.features.login.ChooseLibraryFragment
 import local.oss.chronicle.features.login.ChooseServerFragment
@@ -104,12 +105,12 @@ class Navigator
         fun showHome() {
             clearBackStack()
             // don't re-add home frag if it's already showing
-            if (isFragmentWithTagVisible(HomeFragment.TAG)) {
+            if (isFragmentWithTagVisible(ComposeHomeFragment.TAG)) {
                 return
             }
-            val homeFragment = HomeFragment.newInstance()
+            val homeFragment = ComposeHomeFragment.newInstance()
             fragmentManager.beginTransaction()
-                .replace(R.id.fragNavHost, homeFragment, HomeFragment.TAG)
+                .replace(R.id.fragNavHost, homeFragment, ComposeHomeFragment.TAG)
                 .commit()
         }
 
@@ -122,6 +123,12 @@ class Navigator
         fun showLibrary() {
             clearBackStack()
             val libraryFragment = ComposeLibraryFragment.newInstance()
+            fragmentManager.beginTransaction().replace(R.id.fragNavHost, libraryFragment).commit()
+        }
+
+        fun showLibraryWithFilter(filter: String) {
+            clearBackStack()
+            val libraryFragment = ComposeLibraryFragment.newInstance(filter)
             fragmentManager.beginTransaction().replace(R.id.fragNavHost, libraryFragment).commit()
         }
 

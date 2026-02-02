@@ -31,8 +31,17 @@ class ComposeLibraryFragment : Fragment() {
     lateinit var navigator: Navigator
 
     companion object {
-        fun newInstance() = ComposeLibraryFragment()
+        private const val ARG_INITIAL_FILTER = "initial_filter"
+
+        fun newInstance(initialFilter: String? = null) = ComposeLibraryFragment().apply {
+            arguments = Bundle().apply {
+                initialFilter?.let { putString(ARG_INITIAL_FILTER, it) }
+            }
+        }
     }
+
+    private val initialFilter: String?
+        get() = arguments?.getString(ARG_INITIAL_FILTER)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +54,17 @@ class ComposeLibraryFragment : Fragment() {
             setContent {
                 val viewModel: ComposeLibraryViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
+
+                // Apply initial filter if provided
+                androidx.compose.runtime.LaunchedEffect(Unit) {
+                    initialFilter?.let { filter ->
+                        when (filter) {
+                            "in_progress" -> viewModel.setProgressFilter(ProgressFilter.IN_PROGRESS)
+                            "downloaded" -> viewModel.setProgressFilter(ProgressFilter.DOWNLOADED)
+                            "recently_added" -> viewModel.setSortKey(SortKey.DATE_ADDED)
+                        }
+                    }
+                }
 
                 OpusTheme(darkTheme = true) {
                     LibraryScreen(
