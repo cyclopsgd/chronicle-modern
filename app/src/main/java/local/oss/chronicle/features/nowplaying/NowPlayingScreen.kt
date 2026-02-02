@@ -554,28 +554,36 @@ private fun PlaybackControlsSection(
     onSkipToPrevious: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Skip to previous
+        // Skip to previous chapter - slightly harder buzz
         ControlButton(
             icon = Icons.Default.SkipPrevious,
             contentDescription = "Previous track",
-            onClick = onSkipToPrevious,
+            onClick = {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                onSkipToPrevious()
+            },
             size = 32.dp,
         )
 
-        // Skip backward
+        // Skip backward seconds - light buzz
         ControlButton(
             icon = getReplayIcon(skipBackwardSeconds),
             contentDescription = "Rewind $skipBackwardSeconds seconds",
-            onClick = onSkipBackward,
+            onClick = {
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                onSkipBackward()
+            },
             size = 40.dp,
         )
 
-        // Play/Pause (center, larger)
+        // Play/Pause (center, larger) - light buzz
         Surface(
             color = OpusColors.PlayButtonBackground,
             shape = CircleShape,
@@ -583,7 +591,10 @@ private fun PlaybackControlsSection(
             modifier = Modifier
                 .size(72.dp)
                 .clip(CircleShape)
-                .clickable(onClick = onPlayPause)
+                .clickable(onClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    onPlayPause()
+                })
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -595,19 +606,25 @@ private fun PlaybackControlsSection(
             }
         }
 
-        // Skip forward
+        // Skip forward seconds - light buzz
         ControlButton(
             icon = getForwardIcon(skipForwardSeconds),
             contentDescription = "Forward $skipForwardSeconds seconds",
-            onClick = onSkipForward,
+            onClick = {
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                onSkipForward()
+            },
             size = 40.dp,
         )
 
-        // Skip to next
+        // Skip to next chapter - slightly harder buzz
         ControlButton(
             icon = Icons.Default.SkipNext,
             contentDescription = "Next track",
-            onClick = onSkipToNext,
+            onClick = {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                onSkipToNext()
+            },
             size = 32.dp,
         )
     }
