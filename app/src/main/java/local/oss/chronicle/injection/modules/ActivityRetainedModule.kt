@@ -9,8 +9,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import local.oss.chronicle.features.player.MediaPlayerService
 import local.oss.chronicle.features.player.MediaServiceConnection
+import local.oss.chronicle.features.player.media3.Media3PlayerService
 import local.oss.chronicle.util.ServiceUtils
 import timber.log.Timber
 
@@ -37,15 +37,17 @@ object ActivityRetainedModule {
     @Provides
     @ActivityRetainedScoped
     fun provideMediaServiceConnection(@ApplicationContext context: Context): MediaServiceConnection {
+        // Using Media3PlayerService instead of legacy MediaPlayerService
+        // Media3's MediaLibraryService provides backward compatibility with MediaBrowserCompat clients
         val conn = MediaServiceConnection(
             context,
-            ComponentName(context, MediaPlayerService::class.java),
+            ComponentName(context, Media3PlayerService::class.java),
         )
         val doesServiceExist = ServiceUtils.isServiceRunning(
             context,
-            MediaPlayerService::class.java,
+            Media3PlayerService::class.java,
         )
-        Timber.i("Connecting to existing service? $doesServiceExist")
+        Timber.i("Connecting to Media3 service? $doesServiceExist")
         if (doesServiceExist) {
             conn.connect()
         }
