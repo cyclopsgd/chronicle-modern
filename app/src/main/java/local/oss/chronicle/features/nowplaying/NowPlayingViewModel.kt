@@ -28,10 +28,10 @@ import local.oss.chronicle.data.model.Chapter
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingSingleton
 import local.oss.chronicle.features.player.MediaServiceConnection
-import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_SEEK_TO_TRACK_WITH_ID
-import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_START_TIME_TRACK_OFFSET
 import local.oss.chronicle.features.player.SKIP_BACKWARDS_STRING
 import local.oss.chronicle.features.player.SKIP_FORWARDS_STRING
+import local.oss.chronicle.features.player.SKIP_TO_NEXT_STRING
+import local.oss.chronicle.features.player.SKIP_TO_PREVIOUS_STRING
 import local.oss.chronicle.features.player.SleepTimer
 import local.oss.chronicle.features.player.SleepTimer.SleepTimerAction
 import timber.log.Timber
@@ -248,11 +248,15 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     fun skipToNext() {
-        mediaServiceConnection.transportControls?.skipToNext()
+        // Use custom action for chapter skip instead of track skip
+        val transportControls = mediaServiceConnection.transportControls ?: return
+        transportControls.sendCustomAction(SKIP_TO_NEXT_STRING, Bundle.EMPTY)
     }
 
     fun skipToPrevious() {
-        mediaServiceConnection.transportControls?.skipToPrevious()
+        // Use custom action for chapter skip instead of track skip
+        val transportControls = mediaServiceConnection.transportControls ?: return
+        transportControls.sendCustomAction(SKIP_TO_PREVIOUS_STRING, Bundle.EMPTY)
     }
 
     fun seekTo(progress: Float) {
@@ -394,13 +398,20 @@ class NowPlayingViewModel @Inject constructor(
         // Hide the chapter list
         hideChapterList()
 
-        // Jump to the chapter using playFromMediaId with track and offset in extras
-        if (currentBookId > 0) {
+        // Find chapter index and send custom action to seek to it
+        val chapters = _uiState.value.chapters
+        val chapterIndex = chapters.indexOfFirst {
+            it.trackId == chapter.trackId && it.startTimeOffset == chapter.startTimeOffset
+        }
+
+        if (chapterIndex >= 0) {
+            Timber.d("Jumping to chapter $chapterIndex: ${chapter.title}")
             val extras = Bundle().apply {
-                putLong(KEY_SEEK_TO_TRACK_WITH_ID, chapter.trackId)
-                putLong(KEY_START_TIME_TRACK_OFFSET, chapter.startTimeOffset)
+                putInt("CHAPTER_INDEX", chapterIndex)
             }
-            transportControls.playFromMediaId(currentBookId.toString(), extras)
+            transportControls.sendCustomAction("SEEK_TO_CHAPTER", extras)
+        } else {
+            Timber.w("Could not find chapter index for: ${chapter.title}")
         }
     }
 

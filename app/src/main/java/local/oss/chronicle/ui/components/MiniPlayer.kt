@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -74,8 +75,9 @@ fun MiniPlayer(
         modifier = modifier,
     ) {
         Surface(
-            color = OpusColors.Surface,
-            shadowElevation = 8.dp,
+            color = OpusColors.SurfaceVariant,
+            shadowElevation = 12.dp,
+            tonalElevation = 4.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(72.dp)
@@ -100,19 +102,22 @@ fun MiniPlayer(
                         .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // Cover art (56x56)
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(state.coverUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = state.bookTitle,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(OpusColors.Surface)
-                    )
+                    // Cover art (56x56) with subtle shadow
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        shadowElevation = 4.dp,
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(state.coverUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = state.bookTitle,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
 
                     Spacer(modifier = Modifier.width(12.dp))
 
@@ -173,8 +178,9 @@ fun MiniPlayerContent(
     if (!state.isVisible) return
 
     Surface(
-        color = OpusColors.Surface,
-        shadowElevation = 8.dp,
+        color = OpusColors.SurfaceVariant,
+        shadowElevation = 12.dp,
+        tonalElevation = 4.dp,
         modifier = modifier
             .fillMaxWidth()
             .height(72.dp)
@@ -249,15 +255,6 @@ fun MiniPlayerContent(
                         fontSize = 12.sp,
                     )
                 }
-
-                // Vertical divider before play/pause button
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                        .padding(vertical = 12.dp)
-                        .background(OpusColors.TextSecondary.copy(alpha = 0.3f))
-                )
 
                 IconButton(
                     onClick = onPlayPause,

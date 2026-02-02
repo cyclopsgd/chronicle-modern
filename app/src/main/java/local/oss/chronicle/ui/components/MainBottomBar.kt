@@ -75,10 +75,27 @@ fun MainBottomBar(
             onClick = onMiniPlayerClick,
         )
 
-        // Navigation Bar (56dp height)
+        // Subtle divider between mini player and nav bar
+        if (miniPlayerState.isVisible) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(OpusColors.TextSecondary.copy(alpha = 0.2f))
+            )
+        }
+
+        // Navigation Bar (56dp height) with subtle top border
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(OpusColors.SurfaceVariant)
+        )
         NavigationBar(
             containerColor = OpusColors.Surface,
             contentColor = OpusColors.TextPrimary,
+            tonalElevation = 0.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
@@ -125,9 +142,17 @@ fun MainNavigationBar(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
+        // Subtle top border for visual separation
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(OpusColors.SurfaceVariant)
+        )
         NavigationBar(
             containerColor = OpusColors.Surface,
             contentColor = OpusColors.TextPrimary,
+            tonalElevation = 0.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)

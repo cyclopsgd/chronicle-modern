@@ -247,8 +247,8 @@ fun LibraryScreen(
                     }
                     ViewMode.LIST -> {
                         LazyColumn(
-                            contentPadding = PaddingValues(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
                             lazyListItems(
@@ -511,8 +511,10 @@ private fun BookListItem(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        color = OpusColors.Surface,
-        shape = RoundedCornerShape(8.dp),
+        color = OpusColors.SurfaceVariant,
+        shape = RoundedCornerShape(12.dp),
+        shadowElevation = 4.dp,
+        tonalElevation = 2.dp,
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
@@ -520,58 +522,60 @@ private fun BookListItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Cover art
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(4.dp))
+            // Cover art with subtle shadow
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                shadowElevation = 6.dp,
+                modifier = Modifier.size(64.dp)
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(book.coverUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = book.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Progress bar at bottom of cover
-                if (book.progress > 0f) {
-                    LinearProgressIndicator(
-                        progress = { book.progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp)
-                            .align(Alignment.BottomCenter),
-                        color = OpusColors.Primary,
-                        trackColor = OpusColors.SliderTrack,
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(book.coverUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = book.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
-                }
 
-                // Downloaded indicator
-                if (book.isDownloaded) {
-                    Surface(
-                        color = OpusColors.Secondary.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(bottomEnd = 4.dp),
-                        modifier = Modifier.align(Alignment.TopStart)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Downloaded",
-                            tint = Color.White,
+                    // Progress bar at bottom of cover
+                    if (book.progress > 0f) {
+                        LinearProgressIndicator(
+                            progress = { book.progress },
                             modifier = Modifier
-                                .size(16.dp)
-                                .padding(2.dp)
+                                .fillMaxWidth()
+                                .height(3.dp)
+                                .align(Alignment.BottomCenter),
+                            color = OpusColors.Primary,
+                            trackColor = OpusColors.SliderTrack,
                         )
+                    }
+
+                    // Downloaded indicator
+                    if (book.isDownloaded) {
+                        Surface(
+                            color = OpusColors.Secondary.copy(alpha = 0.9f),
+                            shape = RoundedCornerShape(bottomEnd = 6.dp),
+                            modifier = Modifier.align(Alignment.TopStart)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Downloaded",
+                                tint = Color.White,
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .padding(2.dp)
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             // Title and author
             Column(
@@ -610,20 +614,21 @@ private fun BookListItem(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Play button
+            // Play button with shadow
             Surface(
                 color = OpusColors.Primary,
                 shape = RoundedCornerShape(50),
+                shadowElevation = 4.dp,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(44.dp)
                     .clickable(onClick = onPlayClick)
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Play ${book.title}",
                         tint = Color.Black,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }

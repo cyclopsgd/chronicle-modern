@@ -40,6 +40,7 @@ import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.PrefsRepo
+import local.oss.chronicle.data.model.Chapter
 import local.oss.chronicle.data.model.EMPTY_AUDIOBOOK
 import local.oss.chronicle.data.model.MediaItemTrack
 import local.oss.chronicle.data.model.asChapterList
@@ -96,6 +97,7 @@ class Media3PlayerService : MediaLibraryService() {
     private val trackListStateManager = TrackListStateManager()
 
     private var errorRetryCount = 0
+    private var positionObserverJob: kotlinx.coroutines.Job? = null
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable, "Coroutine exception in Media3PlayerService")
@@ -342,6 +344,12 @@ class Media3PlayerService : MediaLibraryService() {
             serviceScope.launch {
                 playbackStateController.updatePlayingState(isPlaying)
             }
+            // Start/stop position observer
+            if (isPlaying) {
+                startPositionObserver()
+            } else {
+                stopPositionObserver()
+            }
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -378,6 +386,41 @@ class Media3PlayerService : MediaLibraryService() {
         ) {
             if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION) {
                 Timber.i("Playing next track (auto transition)")
+            }
+        }
+    }
+
+    // ========== Position Observer ==========
+
+    private fun startPositionObserver() {
+        positionObserverJob?.cancel()
+        positionObserverJob = serviceScope.launch {
+            while (true) {
+                val p = player ?: break
+                if (!p.isPlaying) break
+
+                val trackIndex = p.currentMediaItemIndex
+                val position = p.currentPosition
+
+                // Update PlaybackStateController with current position
+                playbackStateController.updatePosition(trackIndex, position)
+
+                // Also update trackListStateManager for internal state
+                trackListStateManager.updatePosition(trackIndex, position)
+
+                kotlinx.coroutines.delay(500L) // Update every 500ms
+            }
+        }
+    }
+
+    private fun stopPositionObserver() {
+        positionObserverJob?.cancel()
+        positionObserverJob = null
+
+        // Final position update when stopping
+        player?.let { p ->
+            serviceScope.launch {
+                playbackStateController.updatePosition(p.currentMediaItemIndex, p.currentPosition)
             }
         }
     }
@@ -449,13 +492,13 @@ class Media3PlayerService : MediaLibraryService() {
 
                 LEGACY_SKIP_TO_NEXT -> {
                     Timber.i("Handling skip to next chapter command")
-                    player?.seekToNextMediaItem()
+                    handleSkipToNextChapter()
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
 
                 LEGACY_SKIP_TO_PREVIOUS -> {
                     Timber.i("Handling skip to previous chapter command")
-                    player?.seekToPreviousMediaItem()
+                    handleSkipToPreviousChapter()
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
 
@@ -848,6 +891,7 @@ class Media3PlayerService : MediaLibraryService() {
                                 trackListStateManager.updatePosition(resolvedStartIndex, resolvedStartPos)
 
                                 val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
+                                Timber.i("Loaded ${chapters.size} chapters for book '${book.title}' (from book: ${book.chapters.size}, from tracks: ${tracks.size})")
 
                                 playbackStateController.loadAudiobook(
                                     audiobook = book,
@@ -926,16 +970,94 @@ class Media3PlayerService : MediaLibraryService() {
     private fun handleSeekToChapter(chapterIndex: Int) {
         if (chapterIndex < 0) return
 
-        val chapters = currentlyPlaying.book.value.chapters
+        val chapters = playbackStateController.currentState.chapters
         if (chapterIndex >= chapters.size) return
 
         val chapter = chapters[chapterIndex]
-        val trackIndex = trackListStateManager.trackList.indexOfFirst {
-            it.id.toLong() == chapter.trackId
+        seekToChapter(chapter)
+    }
+
+    /**
+     * Skip to the next chapter based on current position.
+     * This works for M4B files with embedded chapters.
+     */
+    private fun handleSkipToNextChapter() {
+        val state = playbackStateController.currentState
+        val chapters = state.chapters
+        if (chapters.isEmpty()) {
+            // No chapters - fall back to track skip
+            player?.seekToNextMediaItem()
+            return
         }
 
+        val currentChapterIndex = state.currentChapterIndex
+        val nextChapterIndex = currentChapterIndex + 1
+
+        if (nextChapterIndex < chapters.size) {
+            val nextChapter = chapters[nextChapterIndex]
+            Timber.i("Skipping to next chapter: ${nextChapter.title} (index $nextChapterIndex)")
+            seekToChapter(nextChapter)
+        } else {
+            Timber.i("Already at last chapter")
+            // Optionally skip to next track if at last chapter
+            player?.seekToNextMediaItem()
+        }
+    }
+
+    /**
+     * Skip to the previous chapter based on current position.
+     * If more than 3 seconds into current chapter, restart it.
+     * Otherwise, go to previous chapter.
+     */
+    private fun handleSkipToPreviousChapter() {
+        val state = playbackStateController.currentState
+        val chapters = state.chapters
+        if (chapters.isEmpty()) {
+            // No chapters - fall back to track skip
+            player?.seekToPreviousMediaItem()
+            return
+        }
+
+        val currentChapterIndex = state.currentChapterIndex
+        val positionInChapter = state.currentChapterPositionMs
+
+        // If more than 3 seconds into chapter, restart current chapter
+        if (positionInChapter > 3000L) {
+            val currentChapter = chapters.getOrNull(currentChapterIndex)
+            if (currentChapter != null) {
+                Timber.i("Restarting current chapter: ${currentChapter.title}")
+                seekToChapter(currentChapter)
+                return
+            }
+        }
+
+        // Otherwise, go to previous chapter
+        val prevChapterIndex = currentChapterIndex - 1
+        if (prevChapterIndex >= 0) {
+            val prevChapter = chapters[prevChapterIndex]
+            Timber.i("Skipping to previous chapter: ${prevChapter.title} (index $prevChapterIndex)")
+            seekToChapter(prevChapter)
+        } else {
+            Timber.i("Already at first chapter, seeking to start")
+            // Seek to start of first chapter/track
+            player?.seekTo(0, 0L)
+        }
+    }
+
+    /**
+     * Seek to a specific chapter by finding its track and position.
+     */
+    private fun seekToChapter(chapter: Chapter) {
+        val tracks = trackListStateManager.trackList
+        val trackIndex = tracks.indexOfFirst { it.id.toLong() == chapter.trackId }
+
         if (trackIndex >= 0) {
+            Timber.i("Seeking to chapter '${chapter.title}' at track $trackIndex, position ${chapter.startTimeOffset}ms")
             player?.seekTo(trackIndex, chapter.startTimeOffset)
+        } else {
+            // Fallback: single track (M4B) - seek within current track
+            Timber.i("Seeking to chapter '${chapter.title}' at position ${chapter.startTimeOffset}ms (single track)")
+            player?.seekTo(chapter.startTimeOffset)
         }
     }
 
