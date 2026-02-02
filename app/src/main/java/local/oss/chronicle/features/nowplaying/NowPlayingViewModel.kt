@@ -314,8 +314,15 @@ class NowPlayingViewModel @Inject constructor(
             }
         }
 
-        // Also update global prefs (so it's used immediately by the player)
+        // Also update global prefs
         prefsRepo.playbackSpeed = clampedSpeed
+
+        // Send speed change to player service via custom action
+        val transportControls = mediaServiceConnection.transportControls ?: return
+        val bundle = Bundle().apply {
+            putFloat("PLAYBACK_SPEED", clampedSpeed)
+        }
+        transportControls.sendCustomAction("SET_PLAYBACK_SPEED", bundle)
     }
 
     private fun loadBookPlaybackSpeed(bookId: Int) {

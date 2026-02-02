@@ -102,13 +102,20 @@ class Media3PlayerService : MediaLibraryService() {
     }
 
     companion object {
-        // Custom command identifiers
+        // Custom command identifiers (Media3)
         const val COMMAND_SET_SLEEP_TIMER = "SET_SLEEP_TIMER"
         const val COMMAND_CANCEL_SLEEP_TIMER = "CANCEL_SLEEP_TIMER"
         const val COMMAND_SKIP_FORWARD_CUSTOM = "SKIP_FORWARD_CUSTOM"
         const val COMMAND_SKIP_BACKWARD_CUSTOM = "SKIP_BACKWARD_CUSTOM"
         const val COMMAND_SEEK_TO_CHAPTER = "SEEK_TO_CHAPTER"
         const val COMMAND_SET_PLAYBACK_SPEED = "SET_PLAYBACK_SPEED"
+
+        // Legacy custom action names (for backwards compatibility with MediaSessionCompat clients)
+        const val LEGACY_SKIP_FORWARDS = "Skip forwards"
+        const val LEGACY_SKIP_BACKWARDS = "Skip backwards"
+        const val LEGACY_SKIP_TO_NEXT = "Skip to next"
+        const val LEGACY_SKIP_TO_PREVIOUS = "Skip to previous"
+        const val LEGACY_SET_PLAYBACK_SPEED = "SET_PLAYBACK_SPEED"
 
         // Extra keys
         const val EXTRA_SLEEP_TIMER_DURATION = "SLEEP_TIMER_DURATION"
@@ -385,14 +392,21 @@ class Media3PlayerService : MediaLibraryService() {
         ): MediaSession.ConnectionResult {
             Timber.i("Media3 session connection from: ${controller.packageName}")
 
-            // Build available custom commands
+            // Build available custom commands (both Media3 and legacy)
             val sessionCommands = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+                // Media3 commands
                 .add(SessionCommand(COMMAND_SET_SLEEP_TIMER, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_CANCEL_SLEEP_TIMER, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_SKIP_FORWARD_CUSTOM, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_SKIP_BACKWARD_CUSTOM, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_SEEK_TO_CHAPTER, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_SET_PLAYBACK_SPEED, Bundle.EMPTY))
+                // Legacy commands for backwards compatibility
+                .add(SessionCommand(LEGACY_SKIP_FORWARDS, Bundle.EMPTY))
+                .add(SessionCommand(LEGACY_SKIP_BACKWARDS, Bundle.EMPTY))
+                .add(SessionCommand(LEGACY_SKIP_TO_NEXT, Bundle.EMPTY))
+                .add(SessionCommand(LEGACY_SKIP_TO_PREVIOUS, Bundle.EMPTY))
+                .add(SessionCommand(LEGACY_SET_PLAYBACK_SPEED, Bundle.EMPTY))
                 .build()
 
             return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
@@ -409,6 +423,7 @@ class Media3PlayerService : MediaLibraryService() {
             Timber.i("Custom command received: ${customCommand.customAction}")
 
             return when (customCommand.customAction) {
+                // Media3 commands
                 COMMAND_SET_SLEEP_TIMER -> {
                     val durationMs = args.getLong(EXTRA_SLEEP_TIMER_DURATION, 0L)
                     handleSetSleepTimer(durationMs)
@@ -420,13 +435,27 @@ class Media3PlayerService : MediaLibraryService() {
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
 
-                COMMAND_SKIP_FORWARD_CUSTOM -> {
+                COMMAND_SKIP_FORWARD_CUSTOM, LEGACY_SKIP_FORWARDS -> {
+                    Timber.i("Handling skip forward command")
                     handleSkipForward()
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
 
-                COMMAND_SKIP_BACKWARD_CUSTOM -> {
+                COMMAND_SKIP_BACKWARD_CUSTOM, LEGACY_SKIP_BACKWARDS -> {
+                    Timber.i("Handling skip backward command")
                     handleSkipBackward()
+                    Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                }
+
+                LEGACY_SKIP_TO_NEXT -> {
+                    Timber.i("Handling skip to next chapter command")
+                    player?.seekToNextMediaItem()
+                    Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                }
+
+                LEGACY_SKIP_TO_PREVIOUS -> {
+                    Timber.i("Handling skip to previous chapter command")
+                    player?.seekToPreviousMediaItem()
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
 
@@ -436,8 +465,9 @@ class Media3PlayerService : MediaLibraryService() {
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
 
-                COMMAND_SET_PLAYBACK_SPEED -> {
+                COMMAND_SET_PLAYBACK_SPEED, LEGACY_SET_PLAYBACK_SPEED -> {
                     val speed = args.getFloat(EXTRA_PLAYBACK_SPEED, 1.0f)
+                    Timber.i("Handling set playback speed command: $speed")
                     handleSetPlaybackSpeed(speed)
                     Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
