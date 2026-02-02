@@ -8,32 +8,83 @@
 
 ---
 
-## Current State (2026-02-01)
+## 🚨 CURRENT WORK IN PROGRESS (2026-02-02)
+
+**If user says "continue", give a rundown of this section.**
+
+### Active Branches
+
+| Branch | Status | What to Do |
+|--------|--------|------------|
+| `feat/media3-migration` | ⚠️ Needs debugging | Playback not starting - needs logcat investigation |
+| `feat/home-screen` | ✅ Ready to test | New Compose home screen with categories |
+
+### feat/media3-migration - Media3 MediaSession Migration
+
+**Problem:** Books load into UI but playback doesn't start. ExoPlayer isn't playing.
+
+**What's implemented:**
+- `Media3PlayerService.kt` - MediaLibraryService with Android Auto browsing
+- `Media3ServiceConnection.kt` - Client-side MediaController
+- `PlaybackController.kt` - Interface for abstraction
+- Wired as primary service (legacy disabled in manifest)
+
+**To debug:**
+1. Install APK: https://github.com/cyclopsgd/chronicle-modern/releases/tag/media3-test-v1
+2. Filter logcat: `Media3PlayerService`, `ExoPlayer`, `onSetMediaItems`
+3. Look for errors when tapping play
+
+**Key files:**
+- `app/src/main/java/local/oss/chronicle/features/player/media3/Media3PlayerService.kt`
+- `app/src/main/java/local/oss/chronicle/injection/modules/ActivityRetainedModule.kt`
+
+**Rollback:** In `AndroidManifest.xml`, set `MediaPlayerService` enabled=true and `Media3PlayerService` enabled=false
+
+### feat/home-screen - New Compose Home Screen
+
+**Status:** Working, builds successfully
+
+**Features:**
+- Featured hero section with high-res cover, top-aligned with gradient
+- Continue Listening with progress bars
+- Recently Added, Downloaded, Collections sections
+- Pull-to-refresh, offline mode banner
+- Square Audible-style book covers
+
+**Files:**
+- `app/src/main/java/local/oss/chronicle/features/home/compose/HomeScreen.kt`
+- `app/src/main/java/local/oss/chronicle/features/home/compose/ComposeHomeViewModel.kt`
+- `app/src/main/java/local/oss/chronicle/features/home/compose/ComposeHomeFragment.kt`
+
+**To test:** Download APK from GitHub Actions: https://github.com/cyclopsgd/chronicle-modern/actions (Debug Build workflow → Artifacts)
+
+### CI/CD
+
+- Debug Build workflow on `feat/**` branches
+- Uploads APK as artifact (14 days retention)
+- Download: Actions tab → select run → Artifacts → debug-apk
+
+---
+
+## Current State (2026-02-02)
 
 ### ✅ Completed Phases
 - **Phase 1.1**: Multi-module architecture
 - **Phase 1.2**: Hilt 2.54 migration (complete)
 - **Phase 1.3**: Core reliability fixes (smart rewind, error recovery, position persistence)
 - **Phase 2**: Now-Playing Screen (complete)
-  - Compose speed selector with slider + presets (0.5x-3.0x)
-  - Per-book playback speed memory (Room)
-  - Audible-style persistent mini player
 - **Phase 3**: Library Screen (complete)
-  - Compose grid view with cover art
-  - Progress filters (All/Not Started/In Progress/Finished/Downloaded)
-  - Sort options with direction toggle
-  - Search with real-time filtering
+- **Phase 6**: Car Mode (complete)
 
 ### 🚧 In Progress
-- **Phase 4**: Downloads & Offline (next up)
+- **Home Screen**: New Compose home with categories (`feat/home-screen`)
+- **Media3 Migration**: Modernizing playback service (`feat/media3-migration`)
 
 ### 📋 Backlog (see `todo.md`)
-- PNG launcher icons (vector done, PNG fallbacks needed)
-- User profile images not loading
 - Phase 4: Downloads & Offline
 - Phase 5: Progress Sync
-- Phase 6: Car Mode
 - Phase 7: Stats & Polish
+- List view toggle for library (uncommitted on main)
 
 ---
 
