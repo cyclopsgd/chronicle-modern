@@ -1,6 +1,9 @@
 package local.oss.chronicle.data.model
 
 import android.support.v4.media.MediaMetadataCompat
+import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import dagger.hilt.EntryPoints
@@ -316,3 +319,28 @@ fun MediaItemTrack.uniqueId(): Int {
 }
 
 val EMPTY_TRACK = MediaItemTrack(id = TRACK_NOT_FOUND)
+
+/**
+ * Converts a MediaItemTrack to a Media3 [MediaItem] for playback.
+ * This is the Media3 equivalent of [toMediaMetadata].
+ */
+fun MediaItemTrack.toMedia3MediaItem(plexConfig: PlexConfig): MediaItem {
+    val metadata = MediaMetadata.Builder()
+        .setTitle(title)
+        .setArtist(artist)
+        .setAlbumTitle(album)
+        .setGenre(genre)
+        .setArtworkUri(plexConfig.makeThumbUri(thumb ?: ""))
+        .setTrackNumber(index)
+        .setDiscNumber(discNumber)
+        .setIsBrowsable(false)
+        .setIsPlayable(true)
+        .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+        .build()
+
+    return MediaItem.Builder()
+        .setMediaId(id.toString())
+        .setUri(getTrackSource().toUri())
+        .setMediaMetadata(metadata)
+        .build()
+}

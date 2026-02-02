@@ -14,6 +14,9 @@ import local.oss.chronicle.data.sources.SourceManager
 import local.oss.chronicle.data.sources.plex.*
 import local.oss.chronicle.data.sources.plex.model.PlexDirectory
 import local.oss.chronicle.features.player.*
+import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -197,3 +200,32 @@ fun Audiobook.uniqueId(): Int {
 const val NO_AUDIOBOOK_FOUND_ID = -22321
 const val NO_AUDIOBOOK_FOUND_TITLE = "No audiobook found"
 val EMPTY_AUDIOBOOK = Audiobook(NO_AUDIOBOOK_FOUND_ID, NO_SOURCE_FOUND, NO_AUDIOBOOK_FOUND_TITLE)
+
+/**
+ * Converts an Audiobook to a Media3 [MediaItem] for use in MediaLibraryService browsing
+ * and playback. This is the Media3 equivalent of [toMediaItem].
+ */
+fun Audiobook.toMedia3MediaItem(plexConfig: PlexConfig): MediaItem {
+    val metadata = MediaMetadata.Builder()
+        .setTitle(title)
+        .setArtist(author)
+        .setAlbumTitle(title)
+        .setArtworkUri(plexConfig.makeThumbUri(thumb))
+        .setIsBrowsable(false)
+        .setIsPlayable(true)
+        // Use MEDIA_TYPE_ALBUM_TITLE as closest approximation for audiobooks
+        .setMediaType(MediaMetadata.MEDIA_TYPE_ALBUM)
+        .setExtras(Bundle().apply {
+            putBoolean(EXTRA_IS_DOWNLOADED, isCached)
+            putInt(
+                EXTRA_PLAY_COMPLETION_STATE,
+                if (progress == 0L) STATUS_NOT_PLAYED else STATUS_PARTIALLY_PLAYED
+            )
+        })
+        .build()
+
+    return MediaItem.Builder()
+        .setMediaId(id.toString())
+        .setMediaMetadata(metadata)
+        .build()
+}

@@ -41,6 +41,7 @@
         </activity>
 
 
+        <!-- Legacy MediaBrowserServiceCompat - kept for backward compatibility during migration -->
         <service
             android:name="local.oss.chronicle.features.player.MediaPlayerService"
             android:enabled="true"
@@ -52,6 +53,18 @@
 
                 <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
+        <!-- New Media3 MediaLibraryService - modern implementation -->
+        <service
+            android:name="local.oss.chronicle.features.player.media3.Media3PlayerService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
 
