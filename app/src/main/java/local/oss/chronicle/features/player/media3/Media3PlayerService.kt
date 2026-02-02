@@ -623,28 +623,195 @@ class Media3PlayerService : MediaLibraryService() {
             controller: MediaSession.ControllerInfo,
             mediaItems: List<MediaItem>
         ): ListenableFuture<List<MediaItem>> {
-            Timber.d("onAddMediaItems: ${mediaItems.map { it.mediaId }}")
+            Timber.i("onAddMediaItems: ${mediaItems.map { it.mediaId }}")
 
             return Futures.immediateFuture(
                 runBlocking(Dispatchers.IO) {
-                    mediaItems.mapNotNull { item ->
-                        try {
-                            val bookId = item.mediaId.toIntOrNull() ?: return@mapNotNull null
-                            bookRepository.getAudiobookAsync(bookId) ?: return@mapNotNull null
-                            val tracks = trackRepository.getTracksForAudiobookAsync(bookId)
+                    val allResolvedItems = mutableListOf<MediaItem>()
 
-                            // Return resolved track items
-                            if (tracks.isNotEmpty()) {
-                                tracks.first().toMedia3MediaItem(plexConfig)
-                            } else {
-                                null
+                    for (item in mediaItems) {
+                        try {
+                            val bookId = item.mediaId.toIntOrNull()
+                            if (bookId == null) {
+                                Timber.w("Invalid mediaId (not an integer): ${item.mediaId}")
+                                continue
                             }
+
+                            val book = bookRepository.getAudiobookAsync(bookId)
+                            if (book == null || book == EMPTY_AUDIOBOOK) {
+                                Timber.w("Book not found for mediaId: $bookId")
+                                continue
+                            }
+
+                            var tracks = trackRepository.getTracksForAudiobookAsync(bookId)
+
+                            // If no tracks, try to load them
+                            if (tracks.isEmpty()) {
+                                Timber.i("No tracks found for book $bookId, attempting to load...")
+                                val result = trackRepository.loadTracksForAudiobook(bookId)
+                                if (result is com.github.michaelbull.result.Ok) {
+                                    tracks = result.value
+                                    bookRepository.updateTrackData(
+                                        bookId,
+                                        tracks.getProgress(),
+                                        tracks.getDuration(),
+                                        tracks.size
+                                    )
+                                    bookRepository.syncAudiobook(book, tracks)
+                                }
+                            }
+
+                            if (tracks.isEmpty()) {
+                                Timber.w("Still no tracks for book $bookId after loading attempt")
+                                continue
+                            }
+
+                            // Pre-resolve streaming URLs
+                            try {
+                                Timber.i("Pre-resolving streaming URLs for ${tracks.size} tracks...")
+                                playbackUrlResolver.preResolveUrls(tracks)
+                            } catch (e: Exception) {
+                                Timber.w(e, "Failed to pre-resolve URLs, continuing anyway")
+                            }
+
+                            // Update internal state
+                            trackListStateManager.trackList = tracks
+
+                            val activeTrack = tracks.getActiveTrack()
+                            val startingTrackIndex = tracks.sorted().indexOf(activeTrack).coerceAtLeast(0)
+                            val startPositionMs = activeTrack.progress
+
+                            trackListStateManager.updatePosition(startingTrackIndex, startPositionMs)
+
+                            // Load chapters
+                            val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
+
+                            // Update playback state controller
+                            playbackStateController.loadAudiobook(
+                                audiobook = book,
+                                tracks = tracks,
+                                chapters = chapters,
+                                startTrackIndex = startingTrackIndex,
+                                startPositionMs = startPositionMs
+                            )
+
+                            // Update currently playing
+                            currentlyPlaying.update(
+                                book = book,
+                                tracks = tracks,
+                                track = activeTrack.copy(progress = startPositionMs)
+                            )
+
+                            // Return ALL track items for this book
+                            val trackItems = tracks.map { it.toMedia3MediaItem(plexConfig) }
+                            allResolvedItems.addAll(trackItems)
+
+                            Timber.i("Resolved book '${book.title}' with ${tracks.size} tracks, starting at index $startingTrackIndex, position $startPositionMs")
+
                         } catch (e: Exception) {
                             Timber.e(e, "Error resolving media item: ${item.mediaId}")
-                            null
                         }
                     }
+
+                    allResolvedItems
                 }
+            )
+        }
+
+        override fun onSetMediaItems(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            mediaItems: List<MediaItem>,
+            startIndex: Int,
+            startPositionMs: Long
+        ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
+            Timber.i("onSetMediaItems: ${mediaItems.size} items, startIndex=$startIndex, startPos=$startPositionMs")
+
+            // Check if this is a book ID that needs to be resolved
+            if (mediaItems.size == 1) {
+                val bookId = mediaItems.first().mediaId.toIntOrNull()
+                if (bookId != null) {
+                    return Futures.immediateFuture(
+                        runBlocking(Dispatchers.IO) {
+                            try {
+                                val book = bookRepository.getAudiobookAsync(bookId)
+                                if (book == null || book == EMPTY_AUDIOBOOK) {
+                                    return@runBlocking MediaSession.MediaItemsWithStartPosition(
+                                        mediaItems, startIndex, startPositionMs
+                                    )
+                                }
+
+                                var tracks = trackRepository.getTracksForAudiobookAsync(bookId)
+
+                                if (tracks.isEmpty()) {
+                                    val result = trackRepository.loadTracksForAudiobook(bookId)
+                                    if (result is com.github.michaelbull.result.Ok) {
+                                        tracks = result.value
+                                        bookRepository.updateTrackData(
+                                            bookId,
+                                            tracks.getProgress(),
+                                            tracks.getDuration(),
+                                            tracks.size
+                                        )
+                                        bookRepository.syncAudiobook(book, tracks)
+                                    }
+                                }
+
+                                if (tracks.isEmpty()) {
+                                    return@runBlocking MediaSession.MediaItemsWithStartPosition(
+                                        emptyList(), 0, 0L
+                                    )
+                                }
+
+                                // Pre-resolve streaming URLs
+                                try {
+                                    playbackUrlResolver.preResolveUrls(tracks)
+                                } catch (e: Exception) {
+                                    Timber.w(e, "Failed to pre-resolve URLs")
+                                }
+
+                                trackListStateManager.trackList = tracks
+
+                                val activeTrack = tracks.getActiveTrack()
+                                val resolvedStartIndex = tracks.sorted().indexOf(activeTrack).coerceAtLeast(0)
+                                val resolvedStartPos = activeTrack.progress
+
+                                trackListStateManager.updatePosition(resolvedStartIndex, resolvedStartPos)
+
+                                val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
+
+                                playbackStateController.loadAudiobook(
+                                    audiobook = book,
+                                    tracks = tracks,
+                                    chapters = chapters,
+                                    startTrackIndex = resolvedStartIndex,
+                                    startPositionMs = resolvedStartPos
+                                )
+
+                                currentlyPlaying.update(
+                                    book = book,
+                                    tracks = tracks,
+                                    track = activeTrack.copy(progress = resolvedStartPos)
+                                )
+
+                                val trackItems = tracks.map { it.toMedia3MediaItem(plexConfig) }
+                                Timber.i("onSetMediaItems resolved: ${trackItems.size} tracks, start=$resolvedStartIndex, pos=$resolvedStartPos")
+
+                                MediaSession.MediaItemsWithStartPosition(
+                                    trackItems, resolvedStartIndex, resolvedStartPos
+                                )
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error in onSetMediaItems")
+                                MediaSession.MediaItemsWithStartPosition(mediaItems, startIndex, startPositionMs)
+                            }
+                        }
+                    )
+                }
+            }
+
+            // Fallback to default behavior
+            return Futures.immediateFuture(
+                MediaSession.MediaItemsWithStartPosition(mediaItems, startIndex, startPositionMs)
             )
         }
     }
