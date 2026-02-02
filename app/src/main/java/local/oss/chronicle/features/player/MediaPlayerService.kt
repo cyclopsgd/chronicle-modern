@@ -728,7 +728,7 @@ class MediaPlayerService :
                                         NOT_LOGGED_IN -> {
                                             makeMessageItem(
                                                 title = getString(R.string.auto_access_error_not_logged_in),
-                                                subtitle = "Open the Chronicle app on your phone to log in",
+                                                subtitle = "Open the Opus app on your phone to log in",
                                                 iconRes = R.drawable.ic_lock_white_24dp,
                                                 mediaId = "__error_not_logged_in__",
                                             )
@@ -756,7 +756,7 @@ class MediaPlayerService :
                                         }
                                         else -> {
                                             makeMessageItem(
-                                                title = "Please open Chronicle app to complete setup",
+                                                title = "Please open Opus app to complete setup",
                                                 iconRes = R.drawable.ic_error_outline_white,
                                                 mediaId = "__error_unknown__",
                                             )

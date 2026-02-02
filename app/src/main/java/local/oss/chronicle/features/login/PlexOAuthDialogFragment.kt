@@ -149,8 +149,8 @@ class PlexOAuthDialogFragment : DialogFragment() {
 
     private fun buildUserAgent(): String {
         val defaultAgent = WebView(requireContext()).settings.userAgentString
-        // Append Chronicle identifier but keep browser-like agent to avoid blocking
-        return "$defaultAgent Chronicle/Android"
+        // Append Opus identifier but keep browser-like agent to avoid blocking
+        return "$defaultAgent Opus/Android"
     }
 
     private fun observeAuthState() {
