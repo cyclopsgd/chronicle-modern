@@ -41,17 +41,31 @@
         </activity>
 
 
+        <!-- Legacy Media Service - DISABLED for Media3 migration -->
         <service
             android:name="local.oss.chronicle.features.player.MediaPlayerService"
-            android:enabled="true"
+            android:enabled="false"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
+        <!-- Media3 MediaLibraryService - Primary playback service -->
+        <service
+            android:name="local.oss.chronicle.features.player.media3.Media3PlayerService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <!-- Media3 session interface -->
+                <action android:name="androidx.media3.session.MediaLibraryService"/>
+                <!-- Legacy MediaBrowserService for backwards compatibility -->
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
 

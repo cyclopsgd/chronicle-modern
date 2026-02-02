@@ -99,6 +99,9 @@
   - syncAudiobook may not be getting called with proper track list
 - [ ] **Samsung Now Bar shows low-res artwork** - Notification artwork appears pixelated on Samsung devices
   - May need higher resolution or different image loading approach for Samsung's media notification
+- [ ] **App continues playing after being closed** - Playback should stop when user swipes app away
+  - Consider adding option in settings: "Stop playback when app closed"
+  - Or stop playback in onTaskRemoved() of MediaPlayerService
   - Chapter data from Plex API not being populated into PlaybackState
   - AudiobookMediaSessionCallback.handlePlayBookWithNoTracks() investigated but issue persists
 

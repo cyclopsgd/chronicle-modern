@@ -9,8 +9,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityRetainedScoped
-import local.oss.chronicle.features.player.MediaPlayerService
 import local.oss.chronicle.features.player.MediaServiceConnection
+import local.oss.chronicle.features.player.media3.Media3PlayerService
 import local.oss.chronicle.util.ServiceUtils
 import timber.log.Timber
 
@@ -34,18 +34,25 @@ object ActivityRetainedModule {
     fun provideLocalBroadcastManager(@ApplicationContext context: Context): LocalBroadcastManager =
         LocalBroadcastManager.getInstance(context)
 
+    /**
+     * Provides MediaServiceConnection that connects to Media3PlayerService.
+     *
+     * Media3's MediaLibraryService is backwards compatible with legacy MediaBrowserCompat
+     * clients, so existing ViewModels continue to work without changes.
+     */
     @Provides
     @ActivityRetainedScoped
     fun provideMediaServiceConnection(@ApplicationContext context: Context): MediaServiceConnection {
         val conn = MediaServiceConnection(
             context,
-            ComponentName(context, MediaPlayerService::class.java),
+            // Connect to Media3PlayerService instead of legacy MediaPlayerService
+            ComponentName(context, Media3PlayerService::class.java),
         )
         val doesServiceExist = ServiceUtils.isServiceRunning(
             context,
-            MediaPlayerService::class.java,
+            Media3PlayerService::class.java,
         )
-        Timber.i("Connecting to existing service? $doesServiceExist")
+        Timber.i("Connecting to existing Media3 service? $doesServiceExist")
         if (doesServiceExist) {
             conn.connect()
         }

@@ -197,3 +197,32 @@ fun Audiobook.uniqueId(): Int {
 const val NO_AUDIOBOOK_FOUND_ID = -22321
 const val NO_AUDIOBOOK_FOUND_TITLE = "No audiobook found"
 val EMPTY_AUDIOBOOK = Audiobook(NO_AUDIOBOOK_FOUND_ID, NO_SOURCE_FOUND, NO_AUDIOBOOK_FOUND_TITLE)
+
+/**
+ * Converts an Audiobook to a Media3 MediaItem for use with MediaLibraryService.
+ *
+ * This is used for Android Auto browsing. The returned item is browsable but not
+ * directly playable - selecting it will trigger onAddMediaItems/onSetMediaItems
+ * which resolves the book to its tracks.
+ */
+fun Audiobook.toMedia3MediaItem(plexConfig: PlexConfig): androidx.media3.common.MediaItem? {
+    if (this == EMPTY_AUDIOBOOK) return null
+
+    val artworkUri = plexConfig.makeThumbUri(thumb)
+
+    val metadata = androidx.media3.common.MediaMetadata.Builder()
+        .setTitle(title)
+        .setArtist(author)
+        .setGenre(genre)
+        .setArtworkUri(artworkUri)
+        .setTotalTrackCount(leafCount.toInt())
+        .setMediaType(androidx.media3.common.MediaMetadata.MEDIA_TYPE_AUDIO_BOOK)
+        .setIsPlayable(true) // Selecting a book starts playback
+        .setIsBrowsable(false)
+        .build()
+
+    return androidx.media3.common.MediaItem.Builder()
+        .setMediaId(id.toString())
+        .setMediaMetadata(metadata)
+        .build()
+}

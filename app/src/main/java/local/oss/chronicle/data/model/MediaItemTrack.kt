@@ -310,6 +310,36 @@ fun MediaItemTrack.asChapter(startOffset: Long): Chapter {
     )
 }
 
+/**
+ * Converts a MediaItemTrack to a Media3 MediaItem for use with MediaLibraryService.
+ *
+ * IMPORTANT: The MediaItem must include a valid URI for playback to work.
+ * This uses getTrackSource() which handles both cached files and streaming URLs.
+ */
+fun MediaItemTrack.toMedia3MediaItem(plexConfig: PlexConfig): androidx.media3.common.MediaItem {
+    val trackUri = android.net.Uri.parse(getTrackSource())
+    val artworkUri = plexConfig.makeThumbUri(thumb ?: "")
+
+    val metadata = androidx.media3.common.MediaMetadata.Builder()
+        .setTitle(title)
+        .setArtist(artist)
+        .setAlbumTitle(album)
+        .setGenre(genre)
+        .setArtworkUri(artworkUri)
+        .setTrackNumber(index)
+        .setDiscNumber(discNumber)
+        .setMediaType(androidx.media3.common.MediaMetadata.MEDIA_TYPE_AUDIO_BOOK_CHAPTER)
+        .setIsPlayable(true)
+        .setIsBrowsable(false)
+        .build()
+
+    return androidx.media3.common.MediaItem.Builder()
+        .setMediaId(id.toString())
+        .setUri(trackUri)
+        .setMediaMetadata(metadata)
+        .build()
+}
+
 // Produces an ID unique to a track and source
 // TODO: after merging multiple sources branch: make this a hash of source and track id
 fun MediaItemTrack.uniqueId(): Int {
