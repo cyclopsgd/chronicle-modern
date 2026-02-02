@@ -69,7 +69,7 @@ The chapter offset semantics may be mismatched - need to investigate if `startTi
 
 ---
 
-## Part 3: Media3 Migration (STARTING)
+## Part 3: Media3 Migration (IN PROGRESS)
 
 ### Why Migrate?
 1. ExoPlayer is now part of AndroidX Media3 - the standalone ExoPlayer library is deprecated
@@ -78,11 +78,62 @@ The chapter offset semantics may be mismatched - need to investigate if `startTi
 4. Future-proofs the codebase
 
 ### Current State
-- Using: `com.google.android.exoplayer:exoplayer:2.x`
-- Target: `androidx.media3:media3-exoplayer:1.x`
+- App already uses: `androidx.media3:media3-exoplayer:1.5.0`
+- Legacy: Uses `MediaBrowserServiceCompat` and `MediaSessionCompat`
+- Target: `MediaLibraryService` with native `MediaSession`
 
 ### Migration Branch
 `feat/media3-migration`
+
+### Migration Progress
+
+#### Phase 1: Core Service - ✅ COMPLETED
+- Created `Media3PlayerService` extending `MediaLibraryService`
+- Implemented `MediaLibrarySession.Callback` for Android Auto browsing
+- Added custom commands for sleep timer, chapter seek, playback speed
+- Registered service in AndroidManifest (parallel to legacy service)
+- Files:
+  - `app/src/main/java/local/oss/chronicle/features/player/media3/Media3PlayerService.kt`
+  - `app/src/main/AndroidManifest.xml`
+
+#### Phase 2: Client Connection - ✅ COMPLETED
+- Created `Media3ServiceConnection` using `SessionToken` + `MediaController.Builder`
+- Implemented StateFlow-based state observation
+- Added LiveData wrappers for backward compatibility
+- Direct Player interface access (no TransportControls)
+- Files:
+  - `app/src/main/java/local/oss/chronicle/features/player/media3/Media3ServiceConnection.kt`
+
+#### Phase 3: Model Extensions - ✅ COMPLETED
+- Added `Audiobook.toMedia3MediaItem()` extension function
+- Added `MediaItemTrack.toMedia3MediaItem()` extension function
+- Files:
+  - `app/src/main/java/local/oss/chronicle/data/model/Audiobook.kt`
+  - `app/src/main/java/local/oss/chronicle/data/model/MediaItemTrack.kt`
+
+#### Phase 4: Notification Handling - ✅ COMPLETED (Auto)
+- Media3 handles notifications automatically via MediaLibrarySession
+- No additional code needed - built into the framework
+
+#### Phase 5: ViewModel Migration - 🚧 IN PROGRESS
+- Need to update ViewModels to use Media3ServiceConnection
+- Create adapter/bridge for gradual migration
+- Files to update:
+  - `MainActivityViewModel.kt`
+  - `NowPlayingViewModel.kt`
+  - `CurrentlyPlayingViewModel.kt`
+  - `AudiobookDetailsViewModel.kt`
+  - `CarModeViewModel.kt`
+
+#### Phase 6: Testing - PENDING
+- Test Android Auto browsing
+- Test notification controls
+- Test playback resumption
+- Test chapter navigation
+
+### Commits Made
+1. `feat: implement Media3 MediaLibraryService for audiobook playback`
+2. `feat: add Media3ServiceConnection for client-side controller`
 
 ---
 
@@ -104,8 +155,13 @@ The chapter offset semantics may be mismatched - need to investigate if `startTi
 ### Debug Logging
 - `app/src/main/java/local/oss/chronicle/features/player/PlayerExt.kt`
 
-### CI/CD (pending token update)
-- `.github/workflows/debug-build.yml` (created but not pushed - needs workflow scope)
+### Media3 Migration (feat/media3-migration branch)
+- `app/src/main/AndroidManifest.xml`
+- `app/src/main/java/local/oss/chronicle/data/model/Audiobook.kt`
+- `app/src/main/java/local/oss/chronicle/data/model/MediaItemTrack.kt`
+- `app/src/main/java/local/oss/chronicle/features/player/media3/Media3PlayerService.kt` (NEW)
+- `app/src/main/java/local/oss/chronicle/features/player/media3/Media3ServiceConnection.kt` (NEW)
+- `docs/MEDIA3_MIGRATION_PLAN.md` (NEW)
 
 ---
 
@@ -122,4 +178,37 @@ Debug APK with chapter loading fix:
 To continue this work:
 1. **Chapter Skip Bug**: Wait for user to test with debug logging, analyze logs
 2. **Media3 Migration**: Continue from `feat/media3-migration` branch
+   - Next: Update ActivityRetainedModule to provide Media3ServiceConnection
+   - Then: Create ViewModel adapter or update ViewModels directly
 3. **CI/CD Workflow**: User needs to add `workflow` scope to GitHub token, then push `.github/workflows/debug-build.yml`
+
+---
+
+## Architecture Notes
+
+### Service Architecture After Migration
+```
+[UI/ViewModels]
+      |
+      v
+[Media3ServiceConnection]  <-- New (StateFlow-based)
+      |
+      v
+[MediaController]
+      |
+      v
+[Media3PlayerService]  <-- New (MediaLibraryService)
+      |
+      v
+[ExoPlayer]
+```
+
+### Feature Flags for Migration
+Both services are registered in AndroidManifest. To switch:
+1. Update `ActivityRetainedModule.provideMediaServiceConnection()` to use Media3
+2. Update service component name references
+
+### Backward Compatibility
+- LiveData wrappers in Media3ServiceConnection for existing observers
+- Both services can run in parallel during testing
+- Legacy service kept until migration verified
