@@ -13,7 +13,7 @@ import com.facebook.imagepipeline.systrace.FrescoSystrace
  * Thin replacement for Fresco's deprecated [com.facebook.drawee.view.GenericDraweeView].
  * It inflates a [GenericDraweeHierarchy] from XML attributes without extending the deprecated class.
  */
-class ChronicleDraweeView : DraweeView<GenericDraweeHierarchy> {
+class OpusDraweeView : DraweeView<GenericDraweeHierarchy> {
     constructor(context: Context, hierarchy: GenericDraweeHierarchy) : super(context) {
         setHierarchy(hierarchy)
     }
@@ -32,7 +32,7 @@ class ChronicleDraweeView : DraweeView<GenericDraweeHierarchy> {
         context: Context,
         attrs: AttributeSet?,
     ) {
-        val traceTag = "ChronicleDraweeView#inflateHierarchy"
+        val traceTag = "OpusDraweeView#inflateHierarchy"
         val tracing = FrescoSystrace.isTracing()
         if (tracing) {
             FrescoSystrace.beginSection(traceTag)

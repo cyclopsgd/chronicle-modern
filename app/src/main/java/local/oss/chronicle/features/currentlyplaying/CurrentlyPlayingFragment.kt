@@ -72,7 +72,7 @@ class CurrentlyPlayingFragment : Fragment() {
                         onSkipToPrevious = viewModel::skipToPrevious,
                         onSeekTo = viewModel::seekTo,
                         onSpeedClick = viewModel::cycleSpeedForward,
-                        onSpeedLongClick = viewModel::cycleSpeedBackward,
+                        onSpeedLongClick = viewModel::resetSpeedTo1x,
                         onSpeedSelected = viewModel::setPlaybackSpeed,
                         onDismissSpeedSelector = viewModel::hideSpeedSelector,
                         onSleepTimerClick = viewModel::showSleepTimerOptions,

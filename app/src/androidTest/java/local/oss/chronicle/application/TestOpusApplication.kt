@@ -7,7 +7,7 @@ import timber.log.Timber
 import javax.inject.Singleton
 
 @Singleton
-class TestChronicleApplication : ChronicleApplication() {
+class TestOpusApplication : OpusApplication() {
     override fun initializeComponent(): AppComponent {
         Timber.i("Test chronicle application component")
         return DaggerUITestAppComponent.builder()

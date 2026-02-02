@@ -279,8 +279,10 @@ private fun ProgressSection(
                 color = CarModeColors.TextSecondary,
                 fontSize = 16.sp,
             )
+            // Show remaining time (with minus sign like the main player)
+            val remainingMs = (durationMs - currentPositionMs).coerceAtLeast(0)
             Text(
-                text = formatTime(durationMs),
+                text = "-${formatTime(remainingMs)}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = CarModeColors.TextSecondary,
                 fontSize = 16.sp,

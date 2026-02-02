@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import local.oss.chronicle.application.ChronicleApplication
+import local.oss.chronicle.application.OpusApplication
 import local.oss.chronicle.data.local.PrefsRepo
 import local.oss.chronicle.databinding.OnboardingLoginBinding
 import dagger.hilt.android.AndroidEntryPoint

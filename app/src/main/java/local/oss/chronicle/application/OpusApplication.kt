@@ -27,7 +27,7 @@ import javax.inject.Inject
 // a singleton
 @Suppress("LeakingThis")
 @HiltAndroidApp
-open class ChronicleApplication : Application() {
+open class OpusApplication : Application() {
     init {
         INSTANCE = this
     }
@@ -48,7 +48,7 @@ open class ChronicleApplication : Application() {
     lateinit var prefsRepo: PrefsRepo
 
     @Inject
-    lateinit var billingManager: ChronicleBillingManager
+    lateinit var billingManager: OpusBillingManager
 
     @Inject
     lateinit var unhandledExceptionHandler: CoroutineExceptionHandler
@@ -99,7 +99,7 @@ open class ChronicleApplication : Application() {
         // TODO: remove in a future version
         applicationScope.launch {
             withContext(Dispatchers.IO) {
-                Glide.get(this@ChronicleApplication).clearDiskCache()
+                Glide.get(this@OpusApplication).clearDiskCache()
             }
         }
     }
@@ -116,10 +116,10 @@ open class ChronicleApplication : Application() {
     }
 
     companion object {
-        private var INSTANCE: ChronicleApplication? = null
+        private var INSTANCE: OpusApplication? = null
 
         @JvmStatic
-        fun get(): ChronicleApplication = INSTANCE!!
+        fun get(): OpusApplication = INSTANCE!!
     }
 
     /**
@@ -222,7 +222,7 @@ open class ChronicleApplication : Application() {
                         Timber.i("Connection to server!")
                         plexConfig.connectToServer(plexMediaService)
                     } catch (t: Throwable) {
-                        Timber.e("Exception in chooseViableConnections in ChronicleApplication: $t")
+                        Timber.e("Exception in chooseViableConnections in OpusApplication: $t")
                     }
                 }
             } else {
@@ -233,7 +233,7 @@ open class ChronicleApplication : Application() {
                         Timber.i("Connection to server!")
                         plexConfig.connectToServer(plexMediaService)
                     } catch (t: Throwable) {
-                        Timber.e("Exception in chooseViableConnections in ChronicleApplication: $t")
+                        Timber.e("Exception in chooseViableConnections in OpusApplication: $t")
                     }
                 }
             }

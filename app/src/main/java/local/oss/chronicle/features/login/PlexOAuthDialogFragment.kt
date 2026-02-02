@@ -18,7 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import local.oss.chronicle.R
-import local.oss.chronicle.application.ChronicleApplication
+import local.oss.chronicle.application.OpusApplication
 import local.oss.chronicle.databinding.FragmentPlexOauthBinding
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber

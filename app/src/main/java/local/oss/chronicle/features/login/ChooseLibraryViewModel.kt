@@ -83,7 +83,7 @@ class ChooseLibraryViewModel
         init {
             viewModelScope.launch {
                 // chooseViableConnections must be called here because it won't be called in
-                // ChronicleApplication if we have just logged in
+                // OpusApplication if we have just logged in
                 try {
                     plexConfig.connectToServer(plexMediaService)
                 } catch (t: Throwable) {

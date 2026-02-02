@@ -13,7 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dagger.hilt.android.AndroidEntryPoint
-import local.oss.chronicle.application.ChronicleBillingManager
+import local.oss.chronicle.application.OpusBillingManager
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.PrefsRepo
@@ -43,7 +43,7 @@ class SettingsFragment : Fragment() {
     lateinit var plexLoginRepo: IPlexLoginRepo
 
     @Inject
-    lateinit var chronicleBillingManager: ChronicleBillingManager
+    lateinit var chronicleBillingManager: OpusBillingManager
 
     @Inject
     lateinit var cachedFileManager: ICachedFileManager

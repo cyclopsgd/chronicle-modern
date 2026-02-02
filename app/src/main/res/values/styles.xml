@@ -137,21 +137,22 @@
         <item name="fontWeight">600</item>
     </style>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation - Modern Material 3 style -->
     <style name="Widget.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
-        <item name="backgroundTint">@color/colorSurfaceVariant</item>
+        <item name="backgroundTint">@color/colorSurface</item>
         <item name="itemIconTint">@color/bottom_nav_item_color</item>
         <item name="itemTextColor">@color/bottom_nav_item_color</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="itemIconSize">24dp</item>
-        <item name="itemPaddingTop">12dp</item>
-        <item name="itemPaddingBottom">0dp</item>
+        <item name="itemPaddingTop">4dp</item>
+        <item name="itemPaddingBottom">8dp</item>
         <item name="android:minHeight">56dp</item>
-        <item name="fontFamily">@font/lato_bold</item>
+        <item name="fontFamily">@font/lato</item>
         <!-- Reduce space between icon and label -->
         <item name="itemSpacing">0dp</item>
-        <!-- Disable the pill-shaped active indicator -->
+        <!-- No active indicator - just icon/text color change -->
         <item name="itemActiveIndicatorStyle">@null</item>
+        <item name="elevation">0dp</item>
     </style>
 
     <!-- Full-screen dialog for OAuth login -->

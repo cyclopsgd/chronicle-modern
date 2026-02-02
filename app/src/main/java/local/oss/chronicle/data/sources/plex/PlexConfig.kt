@@ -117,14 +117,20 @@ class PlexConfig
         suspend fun getBitmapFromServer(
             thumb: String?,
             requireCached: Boolean = false,
+            highRes: Boolean = true,
         ): Bitmap? {
             if (thumb.isNullOrEmpty()) {
                 return null
             }
 
-            // Retrieve cached album art from Glide if available
+            // Retrieve cached album art from Fresco if available
+            // Use high res for notifications/lock screen, smaller for thumbnails
             val appContext = context
-            val imageSize = appContext.resources.getDimension(R.dimen.audiobook_image_width).toInt()
+            val imageSize = if (highRes) {
+                appContext.resources.getDimension(R.dimen.notification_artwork_size).toInt()
+            } else {
+                appContext.resources.getDimension(R.dimen.audiobook_image_width).toInt()
+            }
             val uri =
                 if (thumb.startsWith("http")) {
                     thumb.toUri()

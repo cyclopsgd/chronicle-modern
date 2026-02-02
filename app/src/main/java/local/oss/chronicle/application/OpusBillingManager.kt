@@ -15,7 +15,7 @@ import javax.inject.Singleton
  * TODO: use a more sophisticated method to prevent cheats
  */
 @Singleton
-class ChronicleBillingManager
+class OpusBillingManager
     @Inject
     constructor(
         @ApplicationContext applicationContext: Context,

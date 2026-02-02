@@ -6,15 +6,22 @@ import android.support.v4.media.session.PlaybackStateCompat.STATE_NONE
 import android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
 import androidx.lifecycle.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import local.oss.chronicle.application.MainActivityViewModel.BottomSheetState.*
+import local.oss.chronicle.ui.components.MainTab
+import local.oss.chronicle.ui.components.MiniPlayerState
 import local.oss.chronicle.data.local.CollectionsRepository
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.model.*
 import local.oss.chronicle.data.sources.plex.IPlexLoginRepo
 import local.oss.chronicle.data.sources.plex.IPlexLoginRepo.LoginState.LOGGED_IN_FULLY
+import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
 import local.oss.chronicle.features.player.MediaServiceConnection
 import local.oss.chronicle.features.player.id
@@ -35,6 +42,7 @@ class MainActivityViewModel(
     collectionsRepository: CollectionsRepository,
     private val currentlyPlaying: CurrentlyPlaying,
     private val exceptionHandler: kotlinx.coroutines.CoroutineExceptionHandler,
+    private val plexConfig: PlexConfig,
 ) : ViewModel(), MainActivity.CurrentlyPlayingInterface {
     @Suppress("UNCHECKED_CAST")
     class Factory
@@ -47,6 +55,7 @@ class MainActivityViewModel(
             private val collectionsRepository: CollectionsRepository,
             private val currentlyPlaying: CurrentlyPlaying,
             private val exceptionHandler: kotlinx.coroutines.CoroutineExceptionHandler,
+            private val plexConfig: PlexConfig,
         ) : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(MainActivityViewModel::class.java)) {
@@ -58,6 +67,7 @@ class MainActivityViewModel(
                         collectionsRepository,
                         currentlyPlaying,
                         exceptionHandler,
+                        plexConfig,
                     ) as T
                 } else {
                     throw IllegalArgumentException(
@@ -154,6 +164,45 @@ class MainActivityViewModel(
             it.isPlaying
         }
 
+    // Compose state for bottom navigation
+    private val _currentTab = MutableStateFlow(MainTab.HOME)
+    val currentTab: StateFlow<MainTab> = _currentTab.asStateFlow()
+
+    // Compose state for mini player
+    private val _miniPlayerState = MutableStateFlow(MiniPlayerState())
+    val miniPlayerState: StateFlow<MiniPlayerState> = _miniPlayerState.asStateFlow()
+
+    fun setCurrentTab(tab: MainTab) {
+        _currentTab.value = tab
+    }
+
+    private fun updateMiniPlayerState() {
+        val book = audiobook.value ?: EMPTY_AUDIOBOOK
+        val chapter = currentChapterTitle.value ?: "No track playing"
+        val progress = bookProgressPercent.value ?: 0
+        val playing = mediaServiceConnection.playbackState.value?.isPlaying == true
+        val visible = _currentlyPlayingLayoutState.value != HIDDEN &&
+            _currentlyPlayingLayoutState.value != EXPANDED
+
+        // Build full image URL using PlexConfig (same method as HomeScreen)
+        val coverUrl = if (book.thumb.isNotEmpty()) {
+            plexConfig.makeThumbUri(book.thumb).toString()
+        } else {
+            null
+        }
+
+        Timber.d("MiniPlayer state update: visible=$visible, book=${book.title}, thumb=${book.thumb}, coverUrl=$coverUrl, progress=$progress")
+
+        _miniPlayerState.value = MiniPlayerState(
+            isVisible = visible,
+            bookTitle = book.title,
+            chapterTitle = chapter,
+            coverUrl = coverUrl,
+            progress = progress / 100f,
+            isPlaying = playing,
+        )
+    }
+
     private val metadataObserver =
         Observer<MediaMetadataCompat> { metadata ->
             metadata.id?.let { trackId ->
@@ -187,9 +236,20 @@ class MainActivityViewModel(
             }
         }
 
+    private val audiobookObserver = Observer<Audiobook> { updateMiniPlayerState() }
+    private val chapterTitleObserver = Observer<String> { updateMiniPlayerState() }
+    private val progressObserver = Observer<Int> { updateMiniPlayerState() }
+    private val layoutStateObserver = Observer<BottomSheetState> { updateMiniPlayerState() }
+
     init {
         mediaServiceConnection.nowPlaying.observeForever(metadataObserver)
         mediaServiceConnection.playbackState.observeForever(playbackObserver)
+
+        // Observe state changes for mini player updates
+        audiobook.observeForever(audiobookObserver)
+        currentChapterTitle.observeForever(chapterTitleObserver)
+        bookProgressPercent.observeForever(progressObserver)
+        _currentlyPlayingLayoutState.observeForever(layoutStateObserver)
 
         // Load most recently played book on app start (Audible-style mini player)
         viewModelScope.launch(exceptionHandler) {
@@ -257,6 +317,10 @@ class MainActivityViewModel(
     override fun onCleared() {
         mediaServiceConnection.nowPlaying.removeObserver(metadataObserver)
         mediaServiceConnection.playbackState.removeObserver(playbackObserver)
+        audiobook.removeObserver(audiobookObserver)
+        currentChapterTitle.removeObserver(chapterTitleObserver)
+        bookProgressPercent.removeObserver(progressObserver)
+        _currentlyPlayingLayoutState.removeObserver(layoutStateObserver)
         super.onCleared()
     }
 

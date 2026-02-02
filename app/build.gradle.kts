@@ -30,7 +30,7 @@ android {
         versionCode = 43
         versionName = "0.60.18-SNAPSHOT"
 
-        testInstrumentationRunner = "local.oss.chronicle.application.ChronicleTestRunner"
+        testInstrumentationRunner = "local.oss.chronicle.application.OpusTestRunner"
     }
 
     signingConfigs {
@@ -151,6 +151,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.compose.activity)
     implementation(libs.compose.lifecycle.viewmodel)
+    implementation(libs.compose.runtime.livedata)
     implementation(libs.coil.compose)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)

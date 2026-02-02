@@ -120,6 +120,7 @@ fun bindTag(
 /**
  * Sets the width of a progress bar View based on a percentage (0-100).
  * Used for the mini player book progress bar.
+ * Works with ConstraintLayout by setting the width_percent constraint.
  */
 @BindingAdapter("bookProgressPercent")
 fun bindBookProgressPercent(
@@ -127,10 +128,20 @@ fun bindBookProgressPercent(
     percent: Int?,
 ) {
     val progress = (percent ?: 0).coerceIn(0, 100)
-    view.post {
-        val parent = view.parent as? View ?: return@post
-        val params = view.layoutParams
-        params.width = (parent.width * progress / 100f).toInt()
-        view.layoutParams = params
+    val parent = view.parent as? androidx.constraintlayout.widget.ConstraintLayout
+    if (parent != null) {
+        // For ConstraintLayout, update the width percent constraint
+        val constraintSet = androidx.constraintlayout.widget.ConstraintSet()
+        constraintSet.clone(parent)
+        constraintSet.constrainPercentWidth(view.id, progress / 100f)
+        constraintSet.applyTo(parent)
+    } else {
+        // Fallback for non-ConstraintLayout parents
+        view.post {
+            val parentView = view.parent as? View ?: return@post
+            val params = view.layoutParams
+            params.width = (parentView.width * progress / 100f).toInt()
+            view.layoutParams = params
+        }
     }
 }

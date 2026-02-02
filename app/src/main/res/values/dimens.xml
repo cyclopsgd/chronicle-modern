@@ -32,6 +32,9 @@
     <dimen name="bottom_sheet_handle_height">72dp</dimen>
     <dimen name="bottom_sheet_radius">8dp</dimen>
 
+    <!-- Notification / media session artwork (needs to be high res for lock screen) -->
+    <dimen name="notification_artwork_size">512dp</dimen>
+
     <!-- Audiobook item -->
     <dimen name="audiobook_match_parent">-1dp</dimen>
     <dimen name="audiobook_item_width">128dp</dimen>

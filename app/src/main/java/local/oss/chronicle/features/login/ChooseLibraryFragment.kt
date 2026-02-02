@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import local.oss.chronicle.application.ChronicleApplication
+import local.oss.chronicle.application.OpusApplication
 import local.oss.chronicle.data.model.PlexLibrary
 import local.oss.chronicle.data.sources.plex.IPlexLoginRepo
 import local.oss.chronicle.data.sources.plex.PlexConfig

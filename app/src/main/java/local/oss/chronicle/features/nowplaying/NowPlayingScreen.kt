@@ -1,6 +1,8 @@
 package local.oss.chronicle.features.nowplaying
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -57,6 +59,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,6 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -628,6 +632,78 @@ private fun ControlButton(
     }
 }
 
+/**
+ * Speed button with flash animation on tap.
+ * Tap cycles forward through speeds, long-press resets to 1.0x.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SpeedButton(
+    playbackSpeed: Float,
+    onSpeedClick: () -> Unit,
+    onSpeedLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Flash animation state - tracks when we need to animate
+    var animationTrigger by remember { mutableIntStateOf(0) }
+    var isAnimating by remember { mutableStateOf(false) }
+
+    // Animate scale: spring up to 1.15, then back to 1.0
+    val scale by animateFloatAsState(
+        targetValue = if (isAnimating) 1.15f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = 0.5f,
+            stiffness = 500f
+        ),
+        finishedListener = { isAnimating = false },
+        label = "speedButtonScale"
+    )
+
+    // Trigger animation when playback speed changes
+    LaunchedEffect(playbackSpeed) {
+        if (animationTrigger > 0) {
+            isAnimating = true
+        }
+        animationTrigger++
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = OpusColors.ControlsBackground,
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .scale(scale)
+                .combinedClickable(
+                    onClick = onSpeedClick,
+                    onLongClick = onSpeedLongClick,
+                )
+        ) {
+            Box {
+                Text(
+                    text = formatSpeed(playbackSpeed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = OpusColors.TextPrimary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                )
+
+                // Flash overlay on animation
+                if (isAnimating) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(OpusColors.Primary.copy(alpha = 0.3f))
+                    )
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomControlsSection(
@@ -646,23 +722,12 @@ private fun BottomControlsSection(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Speed button - tap to cycle forward, long-press to cycle backward
-        Surface(
-            color = OpusColors.ControlsBackground,
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.combinedClickable(
-                onClick = onSpeedClick,
-                onLongClick = onSpeedLongClick,
-            )
-        ) {
-            Text(
-                text = formatSpeed(playbackSpeed),
-                style = MaterialTheme.typography.bodyMedium,
-                color = OpusColors.TextPrimary,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-            )
-        }
+        // Speed button - tap to cycle forward, long-press to reset to 1.0x
+        SpeedButton(
+            playbackSpeed = playbackSpeed,
+            onSpeedClick = onSpeedClick,
+            onSpeedLongClick = onSpeedLongClick,
+        )
 
         // Sleep timer button
         IconButton(onClick = onSleepTimerClick) {

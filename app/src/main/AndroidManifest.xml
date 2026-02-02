@@ -17,7 +17,7 @@
     <uses-configuration android:name="com.android.vending.BILLING" />
 
     <application
-        android:name="local.oss.chronicle.application.ChronicleApplication"
+        android:name="local.oss.chronicle.application.OpusApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"

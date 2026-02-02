@@ -70,14 +70,28 @@ fun Player.skipToNext(
         Timber.d(
             "NEXT CHAPTER: index=$nextChapterIndex id=${nextChapter.id} trackId=${nextChapter.trackId} offset=${nextChapter.startTimeOffset} title=${nextChapter.title}",
         )
-        val containingTrack =
-            trackListStateManager.trackList
-                .firstOrNull {
-                    it.id.toLong() == nextChapter.trackId
-                }
-        val containingTrackIndex = trackListStateManager.trackList.indexOf(containingTrack)
+
+        // Try to find the track containing this chapter
+        var containingTrackIndex = trackListStateManager.trackList.indexOfFirst {
+            it.id.toLong() == nextChapter.trackId
+        }
+
+        // If track not found by trackId, try using current track (for single-file M4B books)
+        if (containingTrackIndex < 0 && trackListStateManager.trackList.size == 1) {
+            Timber.d("skipToNext: Single track book, using track index 0")
+            containingTrackIndex = 0
+        }
+
+        // If still not found, use current media item index
+        if (containingTrackIndex < 0) {
+            Timber.w("skipToNext: Could not find track for chapter, using currentMediaItemIndex")
+            containingTrackIndex = currentMediaItemIndex
+        }
+
+        Timber.d("skipToNext: seeking to trackIndex=$containingTrackIndex, offset=${nextChapter.startTimeOffset}")
         seekTo(containingTrackIndex, nextChapter.startTimeOffset + 300)
-        progressUpdater.updateProgressWithoutParameters()
+        // Don't call progressUpdater here - the seek is async and position won't be updated yet
+        // The player's onPositionDiscontinuity callback will handle updating progress
     } else {
         val toast =
             Toast.makeText(
@@ -116,9 +130,23 @@ fun Player.skipToPrevious(
 
     Timber.d("skipToPrevious: currentChapterIndex=$currentChapterIndex, chaptersSize=${chapters.size}, trackListSize=${trackListStateManager.trackList.size}")
     Timber.d("skipToPrevious trackList IDs: ${trackListStateManager.trackList.map { it.id }}")
+    Timber.d("skipToPrevious chapter trackIds: ${chapters.map { it.trackId }}")
 
     if (currentChapterIndex < 0) {
-        Timber.w("Could not find current chapter in list, aborting skip")
+        Timber.w("Could not find current chapter in list, trying by index...")
+        // Fallback: find chapter by time position
+        val chapterByTime = chapters.indexOfFirst {
+            currentPosition >= it.startTimeOffset && currentPosition < it.endTimeOffset
+        }
+        if (chapterByTime >= 0) {
+            Timber.d("skipToPrevious: Found chapter by time position: $chapterByTime")
+            // Seek to start of this chapter
+            val chapter = chapters[chapterByTime]
+            seekTo(currentMediaItemIndex, chapter.startTimeOffset)
+            progressUpdater.updateProgressWithoutParameters()
+            return
+        }
+        Timber.w("Could not find current chapter by any method, aborting skip")
         return
     }
 
@@ -136,17 +164,30 @@ fun Player.skipToPrevious(
     Timber.d(
         "PREVIOUS CHAPTER: index=$previousChapterIndex id=${previousChapter.id} trackId=${previousChapter.trackId} offset=${previousChapter.startTimeOffset} title=${previousChapter.title}",
     )
-    val containingTrack =
-        trackListStateManager.trackList
-            .firstOrNull {
-                it.id.toLong() == previousChapter.trackId
-            }
-    val containingTrackIndex = trackListStateManager.trackList.indexOf(containingTrack)
+
+    // Try to find the track containing this chapter
+    var containingTrackIndex = trackListStateManager.trackList.indexOfFirst {
+        it.id.toLong() == previousChapter.trackId
+    }
+
+    // If track not found by trackId, try using current track (for single-file M4B books)
+    if (containingTrackIndex < 0 && trackListStateManager.trackList.size == 1) {
+        Timber.d("skipToPrevious: Single track book, using track index 0")
+        containingTrackIndex = 0
+    }
+
+    // If still not found, use current media item index
+    if (containingTrackIndex < 0) {
+        Timber.w("skipToPrevious: Could not find track for chapter, using currentMediaItemIndex")
+        containingTrackIndex = currentMediaItemIndex
+    }
+
     Timber.i(
         "skipToPrevious SEEK: trackIndex=$containingTrackIndex, targetPosition=${previousChapter.startTimeOffset}, " +
-            "currentPosition=$currentPosition, trackFound=${containingTrack != null}",
+            "currentPosition=$currentPosition",
     )
     seekTo(containingTrackIndex, previousChapter.startTimeOffset)
     Timber.i("skipToPrevious AFTER SEEK: newPosition=$currentPosition")
-    progressUpdater.updateProgressWithoutParameters()
+    // Don't call progressUpdater here - the seek is async and position won't be updated yet
+    // The player's onPositionDiscontinuity callback will handle updating progress
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <!-- Dark background matching app theme -->
-    <solid android:color="@color/colorSurfaceVariant" />
+    <!-- Darker background matching app surface -->
+    <solid android:color="@color/colorSurface" />
 </shape>

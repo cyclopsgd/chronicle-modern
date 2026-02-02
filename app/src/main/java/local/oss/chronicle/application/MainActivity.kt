@@ -1,18 +1,18 @@
 package local.oss.chronicle.application
 
-import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -42,6 +42,10 @@ import local.oss.chronicle.features.player.MediaPlayerService.Companion.ACTION_P
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.PLAYBACK_ERROR_MESSAGE
 import local.oss.chronicle.features.player.MediaServiceConnection
 import local.oss.chronicle.navigation.Navigator
+import local.oss.chronicle.ui.components.MainNavigationBar
+import local.oss.chronicle.ui.components.MainTab
+import local.oss.chronicle.ui.components.MiniPlayerContent
+import local.oss.chronicle.ui.theme.OpusTheme
 import local.oss.chronicle.util.observeEvent
 import timber.log.Timber
 import javax.inject.Inject
@@ -94,36 +98,50 @@ class MainActivity : AppCompatActivity() {
         binding.viewModel = viewModel
         binding.plexConfig = plexConfig
 
-        // Apply window insets to bottom navigation for edge-to-edge
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePadding(bottom = insets.bottom)
-            WindowInsetsCompat.CONSUMED
+        // Set up Compose-based bottom navigation bar
+        binding.bottomNav.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val currentTab by viewModel.currentTab.collectAsState()
+                val hasCollections by viewModel.hasCollections.observeAsState(initial = true)
+
+                OpusTheme(darkTheme = true) {
+                    MainNavigationBar(
+                        currentTab = currentTab,
+                        showCollections = hasCollections,
+                        onTabSelect = { tab ->
+                            viewModel.setCurrentTab(tab)
+                            viewModel.minimizeCurrentlyPlaying()
+                            when (tab) {
+                                MainTab.HOME -> navigator.showHome()
+                                MainTab.LIBRARY -> navigator.showLibrary()
+                                MainTab.COLLECTIONS -> navigator.showCollections()
+                                MainTab.SETTINGS -> navigator.showSettings()
+                            }
+                        },
+                    )
+                }
+            }
         }
 
-        binding.currentlyPlayingHandle.setOnClickListener {
-            viewModel.onCurrentlyPlayingClicked()
+        // Set up Compose-based mini player
+        binding.currentlyPlayingHandle.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val miniPlayerState by viewModel.miniPlayerState.collectAsState()
+
+                OpusTheme(darkTheme = true) {
+                    MiniPlayerContent(
+                        state = miniPlayerState,
+                        onPlayPause = { viewModel.pausePlayButtonClicked() },
+                        onClick = { viewModel.onCurrentlyPlayingClicked() },
+                    )
+                }
+            }
         }
 
         viewModel.errorMessage.observeEvent(this) { errorMessage ->
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-        }
-
-        // TODO: show/hide this item on launch more performantly
-        viewModel.hasCollections.observe(this) {
-            binding.bottomNav.menu.findItem(R.id.nav_collections).isVisible = it
-        }
-
-        binding.bottomNav.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.nav_settings -> navigator.showSettings()
-                R.id.nav_library -> navigator.showLibrary()
-                R.id.nav_collections -> navigator.showCollections()
-                R.id.nav_home -> navigator.showHome()
-                else -> throw NoWhenBranchMatchedException("Unknown bottom tab id: ${it.itemId}")
-            }
-            viewModel.minimizeCurrentlyPlaying()
-            return@setOnItemSelectedListener true
         }
 
         if (savedInstanceState == null) {
@@ -151,9 +169,9 @@ class MainActivity : AppCompatActivity() {
                     if (!navigator.onBackPressed()) {
                         Timber.i("MainActivity handleOnBackPressed()")
                         if (supportFragmentManager.backStackEntryCount == 0) {
-                            // The prevent Q+ from leaking the activity internally, don't call
-                            // super.onBackPressed() if at base fragment, manually end...
-                            finishAfterTransition()
+                            // At base fragment (home screen) - navigate to home instead of exiting
+                            // This prevents accidentally closing the app
+                            navigator.showHome()
                         } else {
                             // Let the system handle the back press
                             isEnabled = false
@@ -176,7 +194,6 @@ class MainActivity : AppCompatActivity() {
         handleNotificationIntent(intent)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private fun setupCurrentlyPlaying() {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(
@@ -184,28 +201,8 @@ class MainActivity : AppCompatActivity() {
             CurrentlyPlayingFragment.newInstance(),
         )
         transaction.commit()
-        val handle = findViewById<View>(R.id.currently_playing_handle)
-        val gd =
-            GestureDetector(
-                this,
-                object : GestureDetector.SimpleOnGestureListener() {
-                    override fun onScroll(
-                        e1: MotionEvent?,
-                        e2: MotionEvent,
-                        distanceX: Float,
-                        distanceY: Float,
-                    ): Boolean {
-                        if (distanceY > distanceX) {
-                            viewModel.onCurrentlyPlayingHandleDragged()
-                        }
-                        return super.onScroll(e1, e2, distanceX, distanceY)
-                    }
-                },
-            )
-        handle.setOnTouchListener { v, event ->
-            gd.onTouchEvent(event)
-            v.onTouchEvent(event)
-        }
+        // Note: Mini player tap handling is done via Compose onClick
+        // Swipe-up gesture could be added to MiniPlayer composable if needed
     }
 
     interface CurrentlyPlayingInterface {

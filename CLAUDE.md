@@ -1,7 +1,7 @@
 # Opus - Audiobook Player (Development Guide)
 
 > **App Name**: Opus - Audiobook Player
-> **Package**: `local.oss.chronicle` (legacy, may change)
+> **Package**: `local.oss.chronicle` (legacy package path, class names use Opus)
 > **Branding**: See `docs/Logos/` for SVG assets
 
 > See `DESIGN_SPEC.md` for full design specification and `todo.md` for current task tracking.
@@ -235,7 +235,7 @@ password TOKEN
 
 ## What NOT to Change
 
-- Keep the app ID as `local.oss.chronicle` for now
+- Package path remains `local.oss.chronicle` (class names use Opus branding)
 - Don't remove existing features that work
 - Don't break Plex authentication flow
 - Keep GPL-3.0 license

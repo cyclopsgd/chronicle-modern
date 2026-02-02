@@ -15,7 +15,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import local.oss.chronicle.R
 import local.oss.chronicle.application.FullAppTest.Companion.VALID_PASSWORD
 import local.oss.chronicle.application.FullAppTest.Companion.VALID_USERNAME
-import local.oss.chronicle.application.TestChronicleApplication
+import local.oss.chronicle.application.TestOpusApplication
 import local.oss.chronicle.injection.components.UITestAppComponent
 import org.junit.Before
 import org.junit.Rule
@@ -36,7 +36,7 @@ class OnboardingActivityTest {
     @Before
     fun exposeDependencies() {
         val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-        val app = instrumentation.targetContext.applicationContext as TestChronicleApplication
+        val app = instrumentation.targetContext.applicationContext as TestOpusApplication
         component = app.appComponent as UITestAppComponent
     }
 

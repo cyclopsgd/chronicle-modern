@@ -1,6 +1,5 @@
 package local.oss.chronicle.navigation
 
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
@@ -8,21 +7,17 @@ import local.oss.chronicle.R
 import local.oss.chronicle.data.sources.plex.IPlexLoginRepo
 import local.oss.chronicle.data.sources.plex.IPlexLoginRepo.LoginState.*
 import local.oss.chronicle.data.sources.plex.PlexConfig
-import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment
-import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Companion.ARG_AUDIOBOOK_ID
-import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Companion.ARG_AUDIOBOOK_TITLE
-import local.oss.chronicle.features.bookdetails.AudiobookDetailsFragment.Companion.ARG_IS_AUDIOBOOK_CACHED
+import local.oss.chronicle.features.bookdetails.compose.ComposeBookDetailsFragment
 import local.oss.chronicle.features.carmode.CarModeFragment
-import local.oss.chronicle.features.collections.CollectionDetailsFragment
-import local.oss.chronicle.features.collections.CollectionsFragment
-import local.oss.chronicle.features.home.HomeFragment
+import local.oss.chronicle.features.collections.compose.ComposeCollectionDetailsFragment
+import local.oss.chronicle.features.collections.compose.ComposeCollectionsFragment
 import local.oss.chronicle.features.home.compose.ComposeHomeFragment
 import local.oss.chronicle.features.library.compose.ComposeLibraryFragment
 import local.oss.chronicle.features.login.ChooseLibraryFragment
 import local.oss.chronicle.features.login.ChooseServerFragment
 import local.oss.chronicle.features.login.ChooseUserFragment
 import local.oss.chronicle.features.login.LoginFragment
-import local.oss.chronicle.features.settings.SettingsFragment
+import local.oss.chronicle.features.settings.compose.ComposeSettingsFragment
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -134,17 +129,22 @@ class Navigator
 
         fun showCollections() {
             clearBackStack()
-            val collectionsFragment = CollectionsFragment.newInstance()
+            val collectionsFragment = ComposeCollectionsFragment.newInstance()
             fragmentManager.beginTransaction().replace(
                 R.id.fragNavHost,
                 collectionsFragment,
+                ComposeCollectionsFragment.TAG,
             ).commit()
         }
 
         fun showSettings() {
             clearBackStack()
-            val settingsFragment = SettingsFragment.newInstance()
-            fragmentManager.beginTransaction().replace(R.id.fragNavHost, settingsFragment).commit()
+            val settingsFragment = ComposeSettingsFragment.newInstance()
+            fragmentManager.beginTransaction().replace(
+                R.id.fragNavHost,
+                settingsFragment,
+                ComposeSettingsFragment.TAG,
+            ).commit()
         }
 
         fun showDetails(
@@ -152,26 +152,22 @@ class Navigator
             audiobookTitle: String,
             isAudiobookCached: Boolean,
         ) {
-            val detailsFrag =
-                AudiobookDetailsFragment.newInstance().apply {
-                    if (arguments == null) {
-                        arguments = Bundle()
-                    }
-                    requireArguments().putInt(ARG_AUDIOBOOK_ID, audiobookId)
-                    requireArguments().putString(ARG_AUDIOBOOK_TITLE, audiobookTitle)
-                    requireArguments().putBoolean(ARG_IS_AUDIOBOOK_CACHED, isAudiobookCached)
-                }
+            val detailsFrag = ComposeBookDetailsFragment.newInstance(
+                audiobookId,
+                audiobookTitle,
+                isAudiobookCached,
+            )
             fragmentManager.beginTransaction()
                 .replace(R.id.fragNavHost, detailsFrag)
-                .addToBackStack(AudiobookDetailsFragment.TAG)
+                .addToBackStack(ComposeBookDetailsFragment.TAG)
                 .commit()
         }
 
         fun showCollectionDetails(collectionId: Int) {
-            val collectionDetails = CollectionDetailsFragment.newInstance(collectionId)
+            val collectionDetails = ComposeCollectionDetailsFragment.newInstance(collectionId)
             fragmentManager.beginTransaction()
                 .replace(R.id.fragNavHost, collectionDetails)
-                .addToBackStack(CollectionDetailsFragment.TAG)
+                .addToBackStack(ComposeCollectionDetailsFragment.TAG)
                 .commit()
         }
 

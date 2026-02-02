@@ -34,7 +34,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.*
 import local.oss.chronicle.BuildConfig
 import local.oss.chronicle.R
-import local.oss.chronicle.application.ChronicleApplication
+import local.oss.chronicle.application.OpusApplication
 import local.oss.chronicle.data.local.IBookRepository
 import local.oss.chronicle.data.local.ITrackRepository
 import local.oss.chronicle.data.local.ITrackRepository.Companion.TRACK_NOT_FOUND

@@ -1,13 +1,15 @@
 package local.oss.chronicle.features.currentlyplaying
 
+import android.transition.ChangeBounds
+import android.transition.Fade
 import android.transition.TransitionManager
+import android.transition.TransitionSet
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.*
 import androidx.databinding.BindingAdapter
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
-import androidx.transition.AutoTransition
 import com.google.android.material.slider.Slider
 import local.oss.chronicle.R
 import local.oss.chronicle.application.MainActivityViewModel
@@ -28,11 +30,19 @@ fun setBottomSheetState(
         HIDDEN -> hideConstraint(constraints)
     }
 
-    val transition = AutoTransition()
-    transition.interpolator = FastOutSlowInInterpolator()
-    transition.duration = parent.context.resources.getInteger(R.integer.short_animation_ms).toLong()
-    TransitionManager.beginDelayedTransition(parent)
-    parent.setConstraintSet(constraints)
+    // Create a smooth transition with proper easing
+    val transition = TransitionSet().apply {
+        addTransition(ChangeBounds().apply {
+            duration = 350
+            interpolator = DecelerateInterpolator(2f)
+        })
+        addTransition(Fade().apply {
+            duration = 200
+        })
+        ordering = TransitionSet.ORDERING_TOGETHER
+    }
+
+    TransitionManager.beginDelayedTransition(parent, transition)
     constraints.applyTo(parent)
 
     // Hide mini player handle when not collapsed
@@ -61,14 +71,12 @@ fun setCarModeActive(
 ) {
     Timber.i("Car mode active: $isActive")
 
-    if (isActive) {
-        val bottomNav = parent.findViewById<View>(R.id.bottom_nav)
-        val bottomNavDivider = parent.findViewById<View>(R.id.bottom_nav_top_divider)
-        val miniPlayerHandle = parent.findViewById<View>(R.id.currently_playing_handle)
+    val bottomNav = parent.findViewById<View>(R.id.bottom_nav)
+    val miniPlayerHandle = parent.findViewById<View>(R.id.currently_playing_handle)
 
+    if (isActive) {
         // Hide bottom nav and mini player for full-screen car mode
         bottomNav?.visibility = View.GONE
-        bottomNavDivider?.visibility = View.GONE
         miniPlayerHandle?.visibility = View.GONE
 
         // Update constraints so fragNavHost extends to bottom when car mode is active
@@ -83,8 +91,24 @@ fun setCarModeActive(
         constraints.connect(R.id.currently_playing_container, BOTTOM, PARENT_ID, BOTTOM)
 
         constraints.applyTo(parent)
+    } else {
+        // Exiting car mode - restore bottom nav and mini player visibility
+        bottomNav?.visibility = View.VISIBLE
+        miniPlayerHandle?.visibility = View.VISIBLE
+
+        // Restore constraints to normal collapsed state
+        val constraints = ConstraintSet()
+        constraints.clone(parent)
+
+        // Restore fragment container to stop above currently_playing_container
+        constraints.connect(R.id.fragNavHost, BOTTOM, R.id.currently_playing_container, TOP)
+
+        // Restore currently_playing_container to collapsed position
+        constraints.connect(R.id.currently_playing_container, TOP, R.id.currently_playing_collapsed_top, BOTTOM)
+        constraints.connect(R.id.currently_playing_container, BOTTOM, R.id.bottom_nav, TOP)
+
+        constraints.applyTo(parent)
     }
-    // When isActive=false, do nothing - let bottomSheetState binding handle the layout
 }
 
 private fun collapseConstraint(constraintSet: ConstraintSet) {

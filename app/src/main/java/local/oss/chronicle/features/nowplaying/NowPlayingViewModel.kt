@@ -295,17 +295,10 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     /**
-     * Cycle to the previous speed in the preset list (long-press behavior).
+     * Reset playback speed to 1.0x (long-press behavior).
      */
-    fun cycleSpeedBackward() {
-        val currentSpeed = _uiState.value.playbackSpeed
-        val currentIndex = SPEED_PRESETS.indexOfFirst { kotlin.math.abs(it - currentSpeed) < 0.01f }
-        val prevIndex = if (currentIndex == -1 || currentIndex <= 0) {
-            SPEED_PRESETS.lastIndex // Wrap to end
-        } else {
-            currentIndex - 1
-        }
-        setPlaybackSpeed(SPEED_PRESETS[prevIndex])
+    fun resetSpeedTo1x() {
+        setPlaybackSpeed(1.0f)
     }
 
     fun setPlaybackSpeed(speed: Float) {
