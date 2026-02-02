@@ -8,13 +8,75 @@
 
 ---
 
-## Current State (2026-02-01)
+## 🚨 CURRENT WORK IN PROGRESS (2026-02-02)
+
+**If user says "continue", give a rundown of this section.**
+
+### Primary Branch: `fix/chapter-skip-debug`
+
+This branch combines:
+- List view toggle for library
+- New Compose home screen with categories
+- Chapter skip debugging work
+
+### Other Branches
+
+| Branch | Status | What to Do |
+|--------|--------|------------|
+| `feat/media3-migration` | ⚠️ Needs debugging | Playback not starting - needs logcat investigation |
+| `feat/home-screen` | ✅ Merged | New Compose home screen (now in fix/chapter-skip-debug) |
+
+### feat/media3-migration - Media3 MediaSession Migration
+
+**Problem:** Books load into UI but playback doesn't start. ExoPlayer isn't playing.
+
+**What's implemented:**
+- `Media3PlayerService.kt` - MediaLibraryService with Android Auto browsing
+- `Media3ServiceConnection.kt` - Client-side MediaController
+- `PlaybackController.kt` - Interface for abstraction
+- Wired as primary service (legacy disabled in manifest)
+
+**To debug:**
+1. Install APK: https://github.com/cyclopsgd/chronicle-modern/releases/tag/media3-test-v1
+2. Filter logcat: `Media3PlayerService`, `ExoPlayer`, `onSetMediaItems`
+3. Look for errors when tapping play
+
+**Key files:**
+- `app/src/main/java/local/oss/chronicle/features/player/media3/Media3PlayerService.kt`
+- `app/src/main/java/local/oss/chronicle/injection/modules/ActivityRetainedModule.kt`
+
+**Rollback:** In `AndroidManifest.xml`, set `MediaPlayerService` enabled=true and `Media3PlayerService` enabled=false
+
+### Home Screen Features
+
+- Featured hero section with high-res cover, top-aligned with gradient
+- Continue Listening with progress bars
+- Recently Added, Downloaded, Collections sections
+- Pull-to-refresh, offline mode banner
+- Square Audible-style book covers
+
+**Files:**
+- `app/src/main/java/local/oss/chronicle/features/home/compose/HomeScreen.kt`
+- `app/src/main/java/local/oss/chronicle/features/home/compose/ComposeHomeViewModel.kt`
+- `app/src/main/java/local/oss/chronicle/features/home/compose/ComposeHomeFragment.kt`
+
+### CI/CD
+
+- Debug Build workflow on `feat/**` and `fix/**` branches
+- Creates GitHub releases with APKs
+- Download from Releases page
+
+---
+
+## Current State (2026-02-02)
 
 ### ✅ Completed Phases
 - **Phase 1.1**: Multi-module architecture
 - **Phase 1.2**: Hilt 2.54 migration (complete)
 - **Phase 1.3**: Core reliability fixes (smart rewind, error recovery, position persistence)
-- **Phase 2.1**: Now-Playing Screen (mostly complete)
+- **Phase 2**: Now-Playing Screen (complete)
+- **Phase 3**: Library Screen (complete) - includes list view toggle
+- **Phase 6**: Car Mode (complete)
 
 ### 🐛 Known Bugs (Needs Investigation)
 Two critical playback bugs were investigated but not yet fixed:
@@ -32,21 +94,13 @@ Two critical playback bugs were investigated but not yet fixed:
    - File touched: `AudiobookMediaSessionCallback.handlePlayBookWithNoTracks()`
    - Chapter data from Plex API not populating into PlaybackState
 
-### 🚧 Next Steps
-- Consider Media3 migration (may resolve both chapter issues above)
-- Alternative: Deeper investigation into chapter offset handling architecture
-- Key files for chapter handling:
-  - `PlaybackState.kt` - currentChapter, currentChapterIndex computed properties
-  - `PlayerExt.kt` - skipToNext(), skipToPrevious() functions
-  - `TrackListStateManager.kt` - manages track/chapter state
-  - `AudiobookMediaSessionCallback.kt` - handles play commands from media session
+### 🚧 In Progress
+- **Home Screen**: New Compose home with categories (merged from feat/home-screen)
+- **Media3 Migration**: Modernizing playback service (`feat/media3-migration`)
 
 ### 📋 Backlog (see `todo.md`)
-- PNG launcher icons (vector done, PNG fallbacks needed)
-- Phase 3: Car Mode
-- Phase 4: Library Screen
-- Phase 5: Downloads
-- Phase 6: Advanced Features
+- Phase 4: Downloads & Offline
+- Phase 5: Progress Sync
 - Phase 7: Stats & Polish
 
 ---
