@@ -97,6 +97,8 @@
   - May require Media3 migration for proper fix
 - [ ] **Play from library list doesn't load chapter metadata** - Books started from library show no chapters
   - syncAudiobook may not be getting called with proper track list
+- [ ] **Samsung Now Bar shows low-res artwork** - Notification artwork appears pixelated on Samsung devices
+  - May need higher resolution or different image loading approach for Samsung's media notification
   - Chapter data from Plex API not being populated into PlaybackState
   - AudiobookMediaSessionCallback.handlePlayBookWithNoTracks() investigated but issue persists
 

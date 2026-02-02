@@ -125,14 +125,6 @@ fun MainNavigationBar(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        // Subtle divider above nav bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(OpusColors.Divider)
-        )
-
         NavigationBar(
             containerColor = OpusColors.Surface,
             contentColor = OpusColors.TextPrimary,
