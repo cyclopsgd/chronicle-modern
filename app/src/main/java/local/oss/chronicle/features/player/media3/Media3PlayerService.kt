@@ -797,6 +797,19 @@ class Media3PlayerService : MediaLibraryService() {
                                 val trackItems = tracks.map { it.toMedia3MediaItem(plexConfig) }
                                 Timber.i("onSetMediaItems resolved: ${trackItems.size} tracks, start=$resolvedStartIndex, pos=$resolvedStartPos")
 
+                                // Schedule playback to start after items are set
+                                serviceScope.launch {
+                                    // Small delay to ensure items are set on player
+                                    kotlinx.coroutines.delay(100)
+                                    player?.let { p ->
+                                        if (p.mediaItemCount > 0 && !p.isPlaying) {
+                                            Timber.i("Starting playback after item resolution")
+                                            p.prepare()
+                                            p.play()
+                                        }
+                                    }
+                                }
+
                                 MediaSession.MediaItemsWithStartPosition(
                                     trackItems, resolvedStartIndex, resolvedStartPos
                                 )
