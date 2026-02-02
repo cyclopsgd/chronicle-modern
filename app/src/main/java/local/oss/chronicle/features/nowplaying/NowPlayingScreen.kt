@@ -1,5 +1,6 @@
 package local.oss.chronicle.features.nowplaying
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -74,6 +75,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -644,6 +646,8 @@ private fun SpeedButton(
     onSpeedLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val view = LocalView.current
+
     // Flash animation state - tracks when we need to animate
     var animationTrigger by remember { mutableIntStateOf(0) }
     var isAnimating by remember { mutableStateOf(false) }
@@ -677,8 +681,16 @@ private fun SpeedButton(
             modifier = Modifier
                 .scale(scale)
                 .combinedClickable(
-                    onClick = onSpeedClick,
-                    onLongClick = onSpeedLongClick,
+                    onClick = {
+                        // Short haptic tick for speed change
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onSpeedClick()
+                    },
+                    onLongClick = {
+                        // Longer haptic feedback for reset to 1x
+                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        onSpeedLongClick()
+                    },
                 )
         ) {
             Box {
