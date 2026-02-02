@@ -1,0 +1,89 @@
+name: Debug Build
+
+on:
+  push:
+    branches: [ feat/*, fix/* ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Get branch name and short SHA
+        id: vars
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          BRANCH_SLUG=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g')
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          echo "branch_slug=$BRANCH_SLUG" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "tag_name=debug-$BRANCH_SLUG-$SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Rename APK
+        run: |
+          mkdir -p release-artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             release-artifacts/opus-debug-${{ steps.vars.outputs.branch_slug }}-${{ steps.vars.outputs.short_sha }}.apk
+
+      - name: Delete existing debug release for this branch
+        continue-on-error: true
+        run: |
+          # Delete any existing release with the same branch prefix
+          gh release list --json tagName -q '.[].tagName' | \
+            grep "^debug-${{ steps.vars.outputs.branch_slug }}" | \
+            xargs -I {} gh release delete {} --yes --cleanup-tag || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Debug Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          name: "Debug: ${{ steps.vars.outputs.branch_slug }} (${{ steps.vars.outputs.short_sha }})"
+          prerelease: true
+          files: release-artifacts/*.apk
+          body: |
+            ## Debug Build
+
+            **Branch:** `${{ github.ref_name }}`
+            **Commit:** ${{ github.sha }}
+            **Built:** ${{ steps.vars.outputs.timestamp }}
+
+            This is an automated debug build. Download the APK below to test.
+
+            > ⚠️ This is a pre-release debug build - not for production use.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment download link
+        run: |
+          echo "## 📱 Debug APK Ready!"
+          echo ""
+          echo "Download: https://github.com/${{ github.repository }}/releases/download/${{ steps.vars.outputs.tag_name }}/opus-debug-${{ steps.vars.outputs.branch_slug }}-${{ steps.vars.outputs.short_sha }}.apk"
