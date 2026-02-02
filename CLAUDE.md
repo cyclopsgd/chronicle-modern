@@ -12,53 +12,32 @@
 
 **If user says "continue", give a rundown of this section.**
 
-### Primary Branch: `fix/chapter-skip-debug`
+### Main Branch Status
 
-This branch combines:
-- List view toggle for library
-- New Compose home screen with categories
-- Chapter skip debugging work
+Main branch is up to date with UI modernization. Next priority: **Media3 Migration**.
 
-### Other Branches
+### 🧪 Testing Needed
 
-| Branch | Status | What to Do |
-|--------|--------|------------|
-| `feat/media3-migration` | ⚠️ Needs debugging | Playback not starting - needs logcat investigation |
-| `feat/home-screen` | ✅ Merged | New Compose home screen (now in fix/chapter-skip-debug) |
+The following features were just merged and need user testing:
+- [ ] Compose mini player - cover image loading
+- [ ] Compose mini player - progress bar updates during playback
+- [ ] Compose bottom navigation bar - tab switching
+- [ ] Car mode - remaining time display (should decrease)
+- [ ] Settings/Collections/Book Details Compose screens
 
-### feat/media3-migration - Media3 MediaSession Migration
+### 🚀 Next: Media3 Migration
 
-**Problem:** Books load into UI but playback doesn't start. ExoPlayer isn't playing.
+See `docs/MEDIA3_MIGRATION_PLAN.md` for the detailed migration plan.
 
-**What's implemented:**
-- `Media3PlayerService.kt` - MediaLibraryService with Android Auto browsing
-- `Media3ServiceConnection.kt` - Client-side MediaController
-- `PlaybackController.kt` - Interface for abstraction
-- Wired as primary service (legacy disabled in manifest)
+**Why migrate:**
+- Fix chapter skip bug (async seek handling)
+- Modern MediaLibraryService for Android Auto
+- Better notification handling
+- Proper position tracking during seeks
 
-**To debug:**
-1. Install APK: https://github.com/cyclopsgd/chronicle-modern/releases/tag/media3-test-v1
-2. Filter logcat: `Media3PlayerService`, `ExoPlayer`, `onSetMediaItems`
-3. Look for errors when tapping play
-
-**Key files:**
-- `app/src/main/java/local/oss/chronicle/features/player/media3/Media3PlayerService.kt`
-- `app/src/main/java/local/oss/chronicle/injection/modules/ActivityRetainedModule.kt`
-
-**Rollback:** In `AndroidManifest.xml`, set `MediaPlayerService` enabled=true and `Media3PlayerService` enabled=false
-
-### Home Screen Features
-
-- Featured hero section with high-res cover, top-aligned with gradient
-- Continue Listening with progress bars
-- Recently Added, Downloaded, Collections sections
-- Pull-to-refresh, offline mode banner
-- Square Audible-style book covers
-
-**Files:**
-- `app/src/main/java/local/oss/chronicle/features/home/compose/HomeScreen.kt`
-- `app/src/main/java/local/oss/chronicle/features/home/compose/ComposeHomeViewModel.kt`
-- `app/src/main/java/local/oss/chronicle/features/home/compose/ComposeHomeFragment.kt`
+**Key resources:**
+- [Official Migration Guide](https://developer.android.com/media/media3/exoplayer/migration-guide)
+- Existing partial work in `feat/media3-migration` branch
 
 ### CI/CD
 
@@ -77,6 +56,7 @@ This branch combines:
 - **Phase 2**: Now-Playing Screen (complete)
 - **Phase 3**: Library Screen (complete) - includes list view toggle
 - **Phase 6**: Car Mode (complete)
+- **UI Modernization**: Compose nav bar, mini player, settings, collections, book details
 
 ### 🐛 Known Bugs (Needs Investigation)
 Two critical playback bugs were investigated but not yet fixed:
