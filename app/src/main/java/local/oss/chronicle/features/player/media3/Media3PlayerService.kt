@@ -12,8 +12,12 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import local.oss.chronicle.BuildConfig
+import local.oss.chronicle.data.sources.plex.APP_NAME
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
@@ -156,8 +160,14 @@ class Media3PlayerService : MediaLibraryService() {
             )
             .build()
 
+        // Create DataSource factory with Plex authentication headers
+        val dataSourceFactory = createPlexDataSourceFactory()
+        val mediaSourceFactory = DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(dataSourceFactory)
+
         player = ExoPlayer.Builder(this)
             .setLoadControl(loadControl)
+            .setMediaSourceFactory(mediaSourceFactory)
             .setAudioAttributes(buildAudioAttributes(), true)
             .setHandleAudioBecomingNoisy(true)
             .build()
@@ -168,6 +178,34 @@ class Media3PlayerService : MediaLibraryService() {
                 )
                 exoPlayer.skipSilenceEnabled = prefsRepo.skipSilence
             }
+    }
+
+    /**
+     * Creates a DataSource factory with Plex authentication headers.
+     * This is required for ExoPlayer to access Plex media files.
+     */
+    private fun createPlexDataSourceFactory(): DefaultHttpDataSource.Factory {
+        val authToken = plexPrefs.server?.accessToken
+            ?: plexPrefs.user?.authToken
+            ?: plexPrefs.accountAuthToken
+
+        return DefaultHttpDataSource.Factory()
+            .setUserAgent("$APP_NAME/${BuildConfig.VERSION_NAME}")
+            .setDefaultRequestProperties(
+                mapOf(
+                    "X-Plex-Platform" to "Android",
+                    "X-Plex-Provides" to "player",
+                    "X-Plex-Client-Name" to APP_NAME,
+                    "X-Plex-Client-Identifier" to plexPrefs.uuid,
+                    "X-Plex-Version" to BuildConfig.VERSION_NAME,
+                    "X-Plex-Product" to APP_NAME,
+                    "X-Plex-Platform-Version" to android.os.Build.VERSION.RELEASE,
+                    "X-Plex-Device" to android.os.Build.MODEL,
+                    "X-Plex-Device-Name" to android.os.Build.MODEL,
+                    "X-Plex-Token" to authToken,
+                    "X-Plex-Session-Identifier" to plexPrefs.uuid,
+                )
+            )
     }
 
     private fun buildAudioAttributes(): AudioAttributes {
