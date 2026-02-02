@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.61.0] - 2026-02-01
 
+### Investigated (Not Yet Fixed)
+- **Skip chapter navigation** - Investigated chapter offset semantics mismatch
+  - `Chapter.startTimeOffset` is track-relative for M4B chapters from Plex
+  - Updated `PlaybackState.currentChapter` to use track-aware lookup
+  - Updated `PlayerExt.skipToNext/skipToPrevious` to get chapters from PlaybackStateController
+  - Issue persists - may need deeper architectural work or Media3 migration
+- **Play from library list missing chapters** - Investigated chapter loading flow
+  - Fixed `AudiobookMediaSessionCallback.handlePlayBookWithNoTracks()` to pass loaded tracks to syncAudiobook
+  - Fixed `MediaItemTrack.asChapterList()` to use track-relative offsets
+  - Issue persists - syncAudiobook/chapter population needs further investigation
+
 ### Branding
 - **Rebranded to Opus** - New app name "Opus - Audiobook Player"
 - New color scheme: Amber primary (#FFAB40), dark background (#121212)
@@ -59,13 +70,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cover art quality** - Added `makeHighResThumbUri()` for crisp cover display
 - **DI Architecture** - Added `ActivityRetainedModule` for ViewModel-accessible dependencies
 - **Bottom navigation styling** - Reduced height (56dp), removed pill indicator, dark theme
-- **Mini player** - 72dp height with accent top border
+- **Mini player progress bar** - Replaced static orange accent line with book progress indicator
+  - Shows overall book progress as amber bar at top of mini player
+  - Subtle track background with solid progress foreground
+- **Mini player** - 72dp height
 - **Settings** - Added auto-enter car mode toggle in Playback settings
+- **UI polish** - Added subtle divider line between bottom nav and mini player
+- **Speed toggle** - Tap to cycle through speeds (0.75x → 1x → 1.25x → 1.5x → 1.75x → 2x → 2.5x → 3x)
+  - Long-press to cycle backward through speeds
+  - Replaces bottom sheet with quicker one-tap control
+- **Library view toggle** - Switch between grid and list views
+  - Grid view: 3-column cover art layout (existing)
+  - List view: Cover on left, title/author in middle, play button on right
+  - Toggle button in library top bar
 
 ### Fixed
 - MediaBrowser connection callback not firing (added missing `setSessionToken()`)
 - Cover art not displaying (auth token was missing from URL)
 - Progress showing whole book instead of chapter time
+- User profile images not loading on choose user screen (empty URI handling)
 
 ### Technical
 - Moved `MediaServiceConnection` and `LocalBroadcastManager` to `ActivityRetainedComponent`

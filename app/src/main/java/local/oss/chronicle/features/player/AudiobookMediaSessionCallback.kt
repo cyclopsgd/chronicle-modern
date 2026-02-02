@@ -409,13 +409,27 @@ class AudiobookMediaSessionCallback
                 )
                 trackListStateManager.updatePosition(startingTrackIndex, trueStartTimeOffsetMillis)
 
-                val book =
+                var book =
                     withContext(Dispatchers.IO) {
                         return@withContext bookRepository.getAudiobookAsync(bookId.toInt())
                     }
                 if (book == null || book.id == NO_AUDIOBOOK_FOUND_ID) {
                     // Return if no book found- no reason to setup playback if there's no book
                     return@launch
+                }
+
+                // If book has no chapters loaded, sync them from Plex API
+                // This happens when playing from library list without first opening book details
+                if (book.chapters.isEmpty()) {
+                    Timber.i("Book ${book.id} has no chapters - syncing from Plex API")
+                    withContext(Dispatchers.IO) {
+                        bookRepository.syncAudiobook(book, tracks)
+                    }
+                    // Re-fetch the book to get the newly loaded chapters
+                    book = withContext(Dispatchers.IO) {
+                        bookRepository.getAudiobookAsync(bookId.toInt())
+                    } ?: book
+                    Timber.i("Synced chapters for book ${book.id}: ${book.chapters.size} chapters found")
                 }
 
                 // Auto-rewind depending on last listened time for the book. Don't rewind if we're
@@ -502,15 +516,18 @@ class AudiobookMediaSessionCallback
                     trackRepository.loadTracksForAudiobook(bookId.toInt())
                 }
             if (networkTracks is Ok) {
+                val loadedTracks = networkTracks.value
                 bookRepository.updateTrackData(
                     bookId.toInt(),
-                    networkTracks.value.getProgress(),
-                    networkTracks.value.getDuration(),
-                    networkTracks.value.size,
+                    loadedTracks.getProgress(),
+                    loadedTracks.getDuration(),
+                    loadedTracks.size,
                 )
                 val audiobook = bookRepository.getAudiobookAsync(bookId.toInt())
                 if (audiobook != null) {
-                    bookRepository.syncAudiobook(audiobook, tracks)
+                    // BUG FIX: Pass the newly loaded tracks, not the empty tracks parameter!
+                    // This ensures chapters are properly synced when playing from library list
+                    bookRepository.syncAudiobook(audiobook, loadedTracks)
                 }
                 playBook(bookId, extras, playWhenReady)
             }

@@ -116,3 +116,21 @@ fun bindTag(
 ) {
     view.tag = o
 }
+
+/**
+ * Sets the width of a progress bar View based on a percentage (0-100).
+ * Used for the mini player book progress bar.
+ */
+@BindingAdapter("bookProgressPercent")
+fun bindBookProgressPercent(
+    view: View,
+    percent: Int?,
+) {
+    val progress = (percent ?: 0).coerceIn(0, 100)
+    view.post {
+        val parent = view.parent as? View ?: return@post
+        val params = view.layoutParams
+        params.width = (parent.width * progress / 100f).toInt()
+        view.layoutParams = params
+    }
+}

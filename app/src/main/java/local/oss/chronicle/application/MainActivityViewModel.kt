@@ -83,6 +83,10 @@ class MainActivityViewModel(
     val currentlyPlayingLayoutState: LiveData<BottomSheetState>
         get() = _currentlyPlayingLayoutState
 
+    private var _isCarModeActive = MutableLiveData(false)
+    val isCarModeActive: LiveData<Boolean>
+        get() = _isCarModeActive
+
     private var audiobookId = MutableLiveData(NO_AUDIOBOOK_FOUND_ID)
 
     val audiobook =
@@ -134,6 +138,16 @@ class MainActivityViewModel(
                 }
             }
             .asLiveData(viewModelScope.coroutineContext)
+
+    /** Book progress as a percentage (0-100) for the mini player progress bar */
+    val bookProgressPercent: LiveData<Int> =
+        audiobook.map { book ->
+            if (book.duration > 0) {
+                ((book.progress.toFloat() / book.duration.toFloat()) * 100).toInt().coerceIn(0, 100)
+            } else {
+                0
+            }
+        }
 
     val isPlaying =
         mediaServiceConnection.playbackState.map {
@@ -248,6 +262,10 @@ class MainActivityViewModel(
 
     override fun setBottomSheetState(state: BottomSheetState) {
         _currentlyPlayingLayoutState.postValue(state)
+    }
+
+    override fun setCarModeActive(active: Boolean) {
+        _isCarModeActive.postValue(active)
     }
 
     fun showUserMessage(errorMessage: String) {

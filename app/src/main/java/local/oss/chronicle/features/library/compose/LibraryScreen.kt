@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items as lazyListItems
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,7 +30,10 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -73,6 +78,14 @@ import local.oss.chronicle.ui.theme.OpusColors
 import local.oss.chronicle.ui.theme.OpusTheme
 
 /**
+ * View mode for the library display.
+ */
+enum class ViewMode {
+    GRID,
+    LIST,
+}
+
+/**
  * UI State for the Library screen.
  */
 data class LibraryUiState(
@@ -85,6 +98,7 @@ data class LibraryUiState(
     val sortDescending: Boolean = true,
     val progressFilter: ProgressFilter = ProgressFilter.ALL,
     val showFilterSheet: Boolean = false,
+    val viewMode: ViewMode = ViewMode.LIST,
 )
 
 enum class ProgressFilter(val displayName: String) {
@@ -126,6 +140,7 @@ enum class SortKey(val displayName: String) {
 fun LibraryScreen(
     state: LibraryUiState,
     onBookClick: (LibraryBook) -> Unit = {},
+    onBookPlayClick: (LibraryBook) -> Unit = {},
     onSearchQueryChange: (String) -> Unit = {},
     onSearchActiveChange: (Boolean) -> Unit = {},
     onRefresh: () -> Unit = {},
@@ -134,6 +149,7 @@ fun LibraryScreen(
     onSortKeyChange: (SortKey) -> Unit = {},
     onSortDirectionToggle: () -> Unit = {},
     onProgressFilterChange: (ProgressFilter) -> Unit = {},
+    onViewModeToggle: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
@@ -168,9 +184,11 @@ fun LibraryScreen(
             searchQuery = state.searchQuery,
             isSearchActive = state.isSearchActive,
             bookCount = state.books.size,
+            viewMode = state.viewMode,
             onSearchQueryChange = onSearchQueryChange,
             onSearchActiveChange = onSearchActiveChange,
             onFilterClick = onFilterClick,
+            onViewModeToggle = onViewModeToggle,
         )
 
         // Book grid with pull-to-refresh
@@ -206,22 +224,44 @@ fun LibraryScreen(
                     )
                 }
             } else {
-                // Book grid
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(
-                        items = state.books,
-                        key = { it.id }
-                    ) { book ->
-                        BookGridItem(
-                            book = book,
-                            onClick = { onBookClick(book) }
-                        )
+                // Book grid or list based on view mode
+                when (state.viewMode) {
+                    ViewMode.GRID -> {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(3),
+                            contentPadding = PaddingValues(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(
+                                items = state.books,
+                                key = { it.id }
+                            ) { book ->
+                                BookGridItem(
+                                    book = book,
+                                    onClick = { onBookClick(book) }
+                                )
+                            }
+                        }
+                    }
+                    ViewMode.LIST -> {
+                        LazyColumn(
+                            contentPadding = PaddingValues(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            lazyListItems(
+                                items = state.books,
+                                key = { it.id }
+                            ) { book ->
+                                BookListItem(
+                                    book = book,
+                                    onClick = { onBookClick(book) },
+                                    onPlayClick = { onBookPlayClick(book) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -235,9 +275,11 @@ private fun LibraryTopBar(
     searchQuery: String,
     isSearchActive: Boolean,
     bookCount: Int,
+    viewMode: ViewMode,
     onSearchQueryChange: (String) -> Unit,
     onSearchActiveChange: (Boolean) -> Unit,
     onFilterClick: () -> Unit,
+    onViewModeToggle: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -306,6 +348,14 @@ private fun LibraryTopBar(
                                 tint = OpusColors.TextPrimary
                             )
                         }
+                    }
+                    // View mode toggle (grid/list)
+                    IconButton(onClick = onViewModeToggle) {
+                        Icon(
+                            imageVector = if (viewMode == ViewMode.GRID) Icons.AutoMirrored.Filled.ViewList else Icons.Default.GridView,
+                            contentDescription = if (viewMode == ViewMode.GRID) "Switch to list view" else "Switch to grid view",
+                            tint = OpusColors.TextPrimary
+                        )
                     }
                     IconButton(onClick = onFilterClick) {
                         Icon(
@@ -447,6 +497,137 @@ private fun BookGridItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+}
+
+/**
+ * List view item for a book - cover on left, title/author in middle, play button on right.
+ */
+@Composable
+private fun BookListItem(
+    book: LibraryBook,
+    onClick: () -> Unit,
+    onPlayClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        color = OpusColors.Surface,
+        shape = RoundedCornerShape(8.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Cover art
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(book.coverUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = book.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Progress bar at bottom of cover
+                if (book.progress > 0f) {
+                    LinearProgressIndicator(
+                        progress = { book.progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp)
+                            .align(Alignment.BottomCenter),
+                        color = OpusColors.Primary,
+                        trackColor = OpusColors.SliderTrack,
+                    )
+                }
+
+                // Downloaded indicator
+                if (book.isDownloaded) {
+                    Surface(
+                        color = OpusColors.Secondary.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(bottomEnd = 4.dp),
+                        modifier = Modifier.align(Alignment.TopStart)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Downloaded",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(2.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Title and author
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = book.title,
+                    color = OpusColors.TextPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp,
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = book.author,
+                    color = OpusColors.TextSecondary,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // Progress text if in progress
+                if (book.progress > 0f && book.progress < 1f) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${(book.progress * 100).toInt()}% complete",
+                        color = OpusColors.Primary,
+                        fontSize = 10.sp,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Play button
+            Surface(
+                color = OpusColors.Primary,
+                shape = RoundedCornerShape(50),
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onPlayClick)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play ${book.title}",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
     }
 }
 

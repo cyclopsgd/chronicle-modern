@@ -24,7 +24,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "local.oss.chronicle"
+        applicationId = "local.oss.opus"
         minSdk = 26
         targetSdk = 35
         versionCode = 43

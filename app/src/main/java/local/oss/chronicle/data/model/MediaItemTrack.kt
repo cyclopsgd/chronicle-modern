@@ -286,14 +286,15 @@ fun MediaItemTrack.toMediaMetadata(plexConfig: PlexConfig): MediaMetadataCompat 
     return metadataBuilder.build()
 }
 
+/**
+ * Converts a list of tracks to a list of chapters (one chapter per track).
+ * Each chapter has track-relative offsets (startTimeOffset = 0, endTimeOffset = track duration).
+ */
 fun List<MediaItemTrack>.asChapterList(): List<Chapter> {
-    val outList = mutableListOf<Chapter>()
-    var cumStartOffset = 0L
-    for (track in this) {
-        outList.add(track.asChapter(cumStartOffset))
-        cumStartOffset += track.duration
+    return this.map { track ->
+        // Each track becomes one chapter with track-relative offset (0 = start of track)
+        track.asChapter(0L)
     }
-    return outList
 }
 
 fun MediaItemTrack.asChapter(startOffset: Long): Chapter {

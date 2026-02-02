@@ -210,6 +210,7 @@ class MainActivity : AppCompatActivity() {
 
     interface CurrentlyPlayingInterface {
         fun setBottomSheetState(state: MainActivityViewModel.BottomSheetState)
+        fun setCarModeActive(active: Boolean)
     }
 
     fun getCurrentlyPlayingInterface(): CurrentlyPlayingInterface {

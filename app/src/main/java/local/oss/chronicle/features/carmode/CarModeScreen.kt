@@ -406,8 +406,8 @@ private object CarModeColors {
     val Background = Color(0xFF000000) // Pure black for AMOLED
     val TextPrimary = Color(0xFFFFFFFF) // Pure white
     val TextSecondary = Color(0xFFB0B0B0) // Light gray
-    val Accent = Color(0xFF4CAF50) // Green for visibility
-    val PlayButtonBackground = Color(0xFFE0E0E0) // Light gray play button
+    val Accent = Color(0xFFFFAB40) // Amber to match Opus branding
+    val PlayButtonBackground = Color(0xFFFFAB40) // Amber play button
     val ControlBackground = Color(0xFF2A2A2A) // Dark gray
     val ProgressTrack = Color(0xFF3A3A3A) // Progress track
 }

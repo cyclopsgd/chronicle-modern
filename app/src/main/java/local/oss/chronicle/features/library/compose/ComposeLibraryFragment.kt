@@ -57,6 +57,10 @@ class ComposeLibraryFragment : Fragment() {
                                 isAudiobookCached = book.isDownloaded,
                             )
                         },
+                        onBookPlayClick = { book ->
+                            // Start playback directly - mini player will show
+                            viewModel.playBook(book)
+                        },
                         onSearchQueryChange = viewModel::setSearchQuery,
                         onSearchActiveChange = viewModel::setSearchActive,
                         onRefresh = viewModel::refresh,
@@ -65,6 +69,7 @@ class ComposeLibraryFragment : Fragment() {
                         onSortKeyChange = viewModel::setSortKey,
                         onSortDirectionToggle = viewModel::toggleSortDirection,
                         onProgressFilterChange = viewModel::setProgressFilter,
+                        onViewModeToggle = viewModel::toggleViewMode,
                     )
                 }
             }

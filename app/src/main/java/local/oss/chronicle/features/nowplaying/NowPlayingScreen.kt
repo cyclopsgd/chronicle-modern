@@ -4,7 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,7 +117,7 @@ data class NowPlayingUiState(
  * Displays the currently playing audiobook with cover art, playback controls,
  * and progress information.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun NowPlayingScreen(
     state: NowPlayingUiState,
@@ -127,6 +129,7 @@ fun NowPlayingScreen(
     onSkipToPrevious: () -> Unit = {},
     onSeekTo: (Float) -> Unit = {},
     onSpeedClick: () -> Unit = {},
+    onSpeedLongClick: () -> Unit = {},
     onSpeedSelected: (Float) -> Unit = {},
     onDismissSpeedSelector: () -> Unit = {},
     onSleepTimerClick: () -> Unit = {},
@@ -318,6 +321,7 @@ fun NowPlayingScreen(
                     isSleepTimerActive = state.isSleepTimerActive,
                     isBookmarked = state.isBookmarked,
                     onSpeedClick = onSpeedClick,
+                    onSpeedLongClick = onSpeedLongClick,
                     onSleepTimerClick = onSleepTimerClick,
                     onCarModeClick = onCarModeClick,
                     onBookmarkClick = onBookmarkClick,
@@ -624,12 +628,14 @@ private fun ControlButton(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomControlsSection(
     playbackSpeed: Float,
     isSleepTimerActive: Boolean,
     isBookmarked: Boolean,
     onSpeedClick: () -> Unit,
+    onSpeedLongClick: () -> Unit,
     onSleepTimerClick: () -> Unit,
     onCarModeClick: () -> Unit,
     onBookmarkClick: () -> Unit,
@@ -640,11 +646,14 @@ private fun BottomControlsSection(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Speed button
+        // Speed button - tap to cycle forward, long-press to cycle backward
         Surface(
             color = OpusColors.ControlsBackground,
             shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.clickable(onClick = onSpeedClick)
+            modifier = Modifier.combinedClickable(
+                onClick = onSpeedClick,
+                onLongClick = onSpeedLongClick,
+            )
         ) {
             Text(
                 text = formatSpeed(playbackSpeed),

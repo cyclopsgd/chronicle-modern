@@ -1,5 +1,6 @@
 package local.oss.chronicle.features.login
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.net.toUri
@@ -33,7 +34,13 @@ class UserListAdapter(val clickListener: UserClickListener) :
                 clickListener: UserClickListener,
             ) {
                 binding.user = user
-                binding.userThumb.setImageURI(user.thumb?.toUri())
+                // Only set URI if thumb is not empty, otherwise Fresco shows nothing
+                // (the placeholder in XML will show instead)
+                if (user.thumb.isNotEmpty()) {
+                    binding.userThumb.setImageURI(user.thumb.toUri())
+                } else {
+                    binding.userThumb.setImageURI(null as Uri?)
+                }
                 binding.clickListener = clickListener
                 binding.executePendingBindings()
             }

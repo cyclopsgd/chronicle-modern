@@ -44,6 +44,49 @@ fun setBottomSheetState(
     bottomNav?.visibility = if (state == EXPANDED) View.GONE else View.VISIBLE
 }
 
+/**
+ * Binding adapter to hide bottom navigation and mini player when car mode is active.
+ * This provides a full-screen experience in car mode by:
+ * 1. Hiding bottom nav, divider, and mini player handle
+ * 2. Making the currently playing container height 0 (not GONE to preserve state)
+ * 3. Extending the fragment container to the bottom of the screen
+ *
+ * NOTE: This adapter only takes action when entering car mode (isActive=true).
+ * When exiting car mode, it triggers a refresh of the bottomSheetState to restore proper layout.
+ */
+@BindingAdapter("carModeActive")
+fun setCarModeActive(
+    parent: ConstraintLayout,
+    isActive: Boolean,
+) {
+    Timber.i("Car mode active: $isActive")
+
+    if (isActive) {
+        val bottomNav = parent.findViewById<View>(R.id.bottom_nav)
+        val bottomNavDivider = parent.findViewById<View>(R.id.bottom_nav_top_divider)
+        val miniPlayerHandle = parent.findViewById<View>(R.id.currently_playing_handle)
+
+        // Hide bottom nav and mini player for full-screen car mode
+        bottomNav?.visibility = View.GONE
+        bottomNavDivider?.visibility = View.GONE
+        miniPlayerHandle?.visibility = View.GONE
+
+        // Update constraints so fragNavHost extends to bottom when car mode is active
+        val constraints = ConstraintSet()
+        constraints.clone(parent)
+
+        // Extend fragment container to bottom of parent
+        constraints.connect(R.id.fragNavHost, BOTTOM, PARENT_ID, BOTTOM)
+
+        // Collapse the currently_playing_container to zero height (preserves internal state)
+        constraints.connect(R.id.currently_playing_container, TOP, PARENT_ID, BOTTOM)
+        constraints.connect(R.id.currently_playing_container, BOTTOM, PARENT_ID, BOTTOM)
+
+        constraints.applyTo(parent)
+    }
+    // When isActive=false, do nothing - let bottomSheetState binding handle the layout
+}
+
 private fun collapseConstraint(constraintSet: ConstraintSet) {
     constraintSet.connect(
         R.id.currently_playing_container,

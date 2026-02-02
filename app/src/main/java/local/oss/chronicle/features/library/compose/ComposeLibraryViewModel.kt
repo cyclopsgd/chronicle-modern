@@ -20,6 +20,7 @@ import local.oss.chronicle.data.model.Audiobook.Companion.SORT_KEY_DURATION
 import local.oss.chronicle.data.model.Audiobook.Companion.SORT_KEY_TITLE
 import local.oss.chronicle.data.model.Audiobook.Companion.SORT_KEY_YEAR
 import local.oss.chronicle.data.sources.plex.PlexConfig
+import local.oss.chronicle.features.player.MediaServiceConnection
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -35,6 +36,7 @@ class ComposeLibraryViewModel @Inject constructor(
     private val librarySyncRepository: LibrarySyncRepository,
     private val prefsRepo: PrefsRepo,
     private val plexConfig: PlexConfig,
+    private val mediaServiceConnection: MediaServiceConnection,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LibraryUiState(isLoading = true))
@@ -236,8 +238,34 @@ class ComposeLibraryViewModel @Inject constructor(
         applyFiltersAndSort()
     }
 
+    fun toggleViewMode() {
+        _uiState.update { current ->
+            current.copy(
+                viewMode = if (current.viewMode == ViewMode.GRID) ViewMode.LIST else ViewMode.GRID
+            )
+        }
+    }
+
     /**
      * Get the audiobook ID for navigation to details.
      */
     fun getAudiobookId(libraryBook: LibraryBook): Int = libraryBook.id
+
+    /**
+     * Start playback of a book directly from the library.
+     * The mini player will show and start playing.
+     */
+    fun playBook(libraryBook: LibraryBook) {
+        val transportControls = mediaServiceConnection.transportControls
+        if (transportControls != null) {
+            transportControls.playFromMediaId(libraryBook.id.toString(), null)
+            Timber.d("Starting playback of book: ${libraryBook.title}")
+        } else {
+            // Try to connect first, then play
+            mediaServiceConnection.connect {
+                mediaServiceConnection.transportControls?.playFromMediaId(libraryBook.id.toString(), null)
+                Timber.d("Connected and starting playback of book: ${libraryBook.title}")
+            }
+        }
+    }
 }

@@ -121,26 +121,35 @@ class NowPlayingViewModel @Inject constructor(
     }
 
     private fun observePlaybackState() {
-        // Use LiveData observer for MediaServiceConnection
+        // Use LiveData observer for MediaServiceConnection - only for isPlaying state
         mediaServiceConnection.playbackState.observeForever { state ->
             val isPlaying = state?.state == PlaybackStateCompat.STATE_PLAYING
-            val absolutePosition = state?.position ?: 0L
-
-            // Convert to chapter-relative position
-            val chapter = currentlyPlaying.chapter.value
-            val chapterRelativePosition = (absolutePosition - chapter.startTimeOffset)
-                .coerceAtLeast(0L)
-
             _uiState.update { current ->
-                current.copy(
-                    isPlaying = isPlaying,
-                    currentPositionMs = chapterRelativePosition,
-                )
+                current.copy(isPlaying = isPlaying)
             }
         }
 
         mediaServiceConnection.isConnected.observeForever { connected ->
             Timber.d("NowPlayingViewModel: MediaService connected = $connected")
+        }
+
+        // Observe position from PlaybackStateController via CurrentlyPlayingSingleton
+        // This ensures chapter and position are always in sync
+        if (currentlyPlaying is CurrentlyPlayingSingleton) {
+            viewModelScope.launch {
+                currentlyPlaying.state.collect { playbackState ->
+                    // Use the controller's computed chapter-relative position
+                    val chapterPositionMs = playbackState.currentChapterPositionMs
+                    val chapterDurationMs = playbackState.currentChapterDurationMs
+
+                    _uiState.update { current ->
+                        current.copy(
+                            currentPositionMs = chapterPositionMs,
+                            durationMs = chapterDurationMs,
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -173,13 +182,11 @@ class NowPlayingViewModel @Inject constructor(
 
         viewModelScope.launch {
             currentlyPlaying.chapter.collect { chapter ->
-                // Use chapter duration for progress display (not track/book duration)
-                val chapterDuration = chapter.endTimeOffset - chapter.startTimeOffset
+                // Update chapter title and index (duration is handled by state observer)
                 _uiState.update { current ->
                     current.copy(
                         chapterTitle = chapter.title,
                         currentChapterIndex = chapter.index.toInt(),
-                        durationMs = chapterDuration,
                     )
                 }
             }
@@ -260,12 +267,45 @@ class NowPlayingViewModel @Inject constructor(
         transportControls.seekTo(absolutePosition)
     }
 
+    companion object {
+        // Preset speeds for cycling through
+        val SPEED_PRESETS = listOf(0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f, 2.5f, 3.0f)
+    }
+
     fun showSpeedSelector() {
         _uiState.update { it.copy(showSpeedSelector = true) }
     }
 
     fun hideSpeedSelector() {
         _uiState.update { it.copy(showSpeedSelector = false) }
+    }
+
+    /**
+     * Cycle to the next speed in the preset list (tap behavior).
+     */
+    fun cycleSpeedForward() {
+        val currentSpeed = _uiState.value.playbackSpeed
+        val currentIndex = SPEED_PRESETS.indexOfFirst { kotlin.math.abs(it - currentSpeed) < 0.01f }
+        val nextIndex = if (currentIndex == -1 || currentIndex >= SPEED_PRESETS.lastIndex) {
+            0 // Wrap to beginning
+        } else {
+            currentIndex + 1
+        }
+        setPlaybackSpeed(SPEED_PRESETS[nextIndex])
+    }
+
+    /**
+     * Cycle to the previous speed in the preset list (long-press behavior).
+     */
+    fun cycleSpeedBackward() {
+        val currentSpeed = _uiState.value.playbackSpeed
+        val currentIndex = SPEED_PRESETS.indexOfFirst { kotlin.math.abs(it - currentSpeed) < 0.01f }
+        val prevIndex = if (currentIndex == -1 || currentIndex <= 0) {
+            SPEED_PRESETS.lastIndex // Wrap to end
+        } else {
+            currentIndex - 1
+        }
+        setPlaybackSpeed(SPEED_PRESETS[prevIndex])
     }
 
     fun setPlaybackSpeed(speed: Float) {

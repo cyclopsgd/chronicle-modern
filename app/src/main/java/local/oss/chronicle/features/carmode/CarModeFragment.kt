@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import local.oss.chronicle.application.MainActivity
 import local.oss.chronicle.navigation.Navigator
 import local.oss.chronicle.ui.theme.OpusTheme
 import javax.inject.Inject
@@ -37,6 +38,9 @@ class CarModeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        // Enable full-screen car mode (hide bottom nav and mini player)
+        (activity as? MainActivity)?.getCurrentlyPlayingInterface()?.setCarModeActive(true)
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
@@ -54,6 +58,8 @@ class CarModeFragment : Fragment() {
                         state = uiState,
                         onExitCarMode = {
                             viewModel.exitCarMode()
+                            // Disable full-screen car mode before navigating back
+                            (activity as? MainActivity)?.getCurrentlyPlayingInterface()?.setCarModeActive(false)
                             navigator.goBack()
                         },
                         onPlayPause = viewModel::playPause,
@@ -67,4 +73,10 @@ class CarModeFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        // Ensure car mode is disabled when the fragment is destroyed
+        // (e.g., when user presses back button or navigates away)
+        (activity as? MainActivity)?.getCurrentlyPlayingInterface()?.setCarModeActive(false)
+        super.onDestroyView()
+    }
 }

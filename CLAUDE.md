@@ -14,25 +14,39 @@
 - **Phase 1.1**: Multi-module architecture
 - **Phase 1.2**: Hilt 2.54 migration (complete)
 - **Phase 1.3**: Core reliability fixes (smart rewind, error recovery, position persistence)
-- **Phase 2**: Now-Playing Screen (complete)
-  - Compose speed selector with slider + presets (0.5x-3.0x)
-  - Per-book playback speed memory (Room)
-  - Audible-style persistent mini player
-- **Phase 3**: Library Screen (complete)
-  - Compose grid view with cover art
-  - Progress filters (All/Not Started/In Progress/Finished/Downloaded)
-  - Sort options with direction toggle
-  - Search with real-time filtering
+- **Phase 2.1**: Now-Playing Screen (mostly complete)
 
-### 🚧 In Progress
-- **Phase 4**: Downloads & Offline (next up)
+### 🐛 Known Bugs (Needs Investigation)
+Two critical playback bugs were investigated but not yet fixed:
+
+1. **Skip chapter navigation not working**
+   - Skip forward/back buttons don't navigate between chapters
+   - Root cause: Chapter offset semantics mismatch
+   - `Chapter.startTimeOffset` is track-relative for M4B chapters from Plex
+   - Files touched: `PlaybackState.kt`, `PlayerExt.kt`, `MediaItemTrack.kt`
+   - May require Media3 migration for proper fix
+
+2. **Play from library list doesn't load chapter metadata**
+   - Books started from library grid show no chapters in the chapter list
+   - `syncAudiobook` not getting called with proper track list
+   - File touched: `AudiobookMediaSessionCallback.handlePlayBookWithNoTracks()`
+   - Chapter data from Plex API not populating into PlaybackState
+
+### 🚧 Next Steps
+- Consider Media3 migration (may resolve both chapter issues above)
+- Alternative: Deeper investigation into chapter offset handling architecture
+- Key files for chapter handling:
+  - `PlaybackState.kt` - currentChapter, currentChapterIndex computed properties
+  - `PlayerExt.kt` - skipToNext(), skipToPrevious() functions
+  - `TrackListStateManager.kt` - manages track/chapter state
+  - `AudiobookMediaSessionCallback.kt` - handles play commands from media session
 
 ### 📋 Backlog (see `todo.md`)
 - PNG launcher icons (vector done, PNG fallbacks needed)
-- User profile images not loading
-- Phase 4: Downloads & Offline
-- Phase 5: Progress Sync
-- Phase 6: Car Mode
+- Phase 3: Car Mode
+- Phase 4: Library Screen
+- Phase 5: Downloads
+- Phase 6: Advanced Features
 - Phase 7: Stats & Polish
 
 ---

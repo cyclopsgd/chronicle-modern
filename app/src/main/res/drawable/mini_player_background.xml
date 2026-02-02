@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
     <!-- Dark background matching app theme -->
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/colorSurfaceVariant" />
-        </shape>
-    </item>
-
-    <!-- Top accent border line -->
-    <item android:bottom="-2dp" android:left="-2dp" android:right="-2dp">
-        <shape android:shape="rectangle">
-            <stroke android:width="2dp" android:color="@color/colorPrimary" />
-            <solid android:color="@android:color/transparent" />
-        </shape>
-    </item>
-</layer-list>
+    <solid android:color="@color/colorSurfaceVariant" />
+</shape>

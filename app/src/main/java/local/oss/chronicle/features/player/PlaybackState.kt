@@ -79,25 +79,44 @@ data class PlaybackState(
         get() = tracks.getOrNull(currentTrackIndex)
 
     /**
-     * The current chapter based on book position, or null if no chapters or position is invalid.
+     * The current chapter based on track position, or null if no chapters or position is invalid.
+     *
+     * Chapter startTimeOffset is track-relative (offset from start of containing track),
+     * so we need to find chapters for the current track and compare against track position.
      */
     val currentChapter: Chapter?
         get() {
             if (chapters.isEmpty()) return null
-            val bookPos = bookPositionMs
-            return chapters.lastOrNull { it.startTimeOffset <= bookPos }
-                ?: chapters.firstOrNull()
+            val track = currentTrack ?: return chapters.firstOrNull()
+            val trackId = track.id.toLong()
+            val trackPos = currentTrackPositionMs
+
+            // Find chapters belonging to current track
+            val trackChapters = chapters.filter { it.trackId == trackId }
+            if (trackChapters.isEmpty()) {
+                // Fallback: maybe chapters don't have proper trackId set, use book-relative logic
+                val bookPos = bookPositionMs
+                return chapters.lastOrNull { it.startTimeOffset <= bookPos }
+                    ?: chapters.firstOrNull()
+            }
+
+            // Find the chapter containing current track position
+            return trackChapters.lastOrNull { trackPos >= it.startTimeOffset }
+                ?: trackChapters.firstOrNull()
         }
 
     /**
      * Index of the current chapter (0-based), or -1 if no chapter found.
+     * This returns the index in the full chapters list, not just the track's chapters.
      */
     val currentChapterIndex: Int
         get() {
             if (chapters.isEmpty()) return -1
-            val bookPos = bookPositionMs
-            return chapters.indexOfLast { it.startTimeOffset <= bookPos }
-                .takeIf { it >= 0 } ?: 0
+            val chapter = currentChapter ?: return 0
+            // Find the index of this chapter in the full list
+            return chapters.indexOfFirst {
+                it.trackId == chapter.trackId && it.startTimeOffset == chapter.startTimeOffset
+            }.takeIf { it >= 0 } ?: 0
         }
 
     /**
@@ -132,20 +151,18 @@ data class PlaybackState(
     val currentChapterDurationMs: Long
         get() {
             val chapter = currentChapter ?: return 0L
-            val chapterIdx = currentChapterIndex
-            val nextChapterStart =
-                chapters.getOrNull(chapterIdx + 1)?.startTimeOffset
-                    ?: bookDurationMs
-            return nextChapterStart - chapter.startTimeOffset
+            // Chapter endTimeOffset - startTimeOffset gives the duration
+            return (chapter.endTimeOffset - chapter.startTimeOffset).coerceAtLeast(0L)
         }
 
     /**
      * Position within the current chapter in milliseconds.
+     * Since chapter offsets are track-relative, we compare against track position.
      */
     val currentChapterPositionMs: Long
         get() {
             val chapter = currentChapter ?: return 0L
-            return (bookPositionMs - chapter.startTimeOffset).coerceAtLeast(0L)
+            return (currentTrackPositionMs - chapter.startTimeOffset).coerceAtLeast(0L)
         }
 
     /**

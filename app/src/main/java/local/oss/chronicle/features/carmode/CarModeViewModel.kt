@@ -26,6 +26,7 @@ import local.oss.chronicle.data.model.Chapter
 import local.oss.chronicle.data.model.EMPTY_AUDIOBOOK
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
+import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingSingleton
 import local.oss.chronicle.features.player.MediaServiceConnection
 import local.oss.chronicle.features.player.SKIP_BACKWARDS_STRING
 import local.oss.chronicle.features.player.SKIP_FORWARDS_STRING
@@ -140,25 +141,33 @@ class CarModeViewModel @Inject constructor(
 
         viewModelScope.launch {
             currentlyPlaying.chapter.collect { chapter: Chapter ->
+                // Update chapter title only (position/duration handled by state observer)
                 _uiState.update { it.copy(chapterTitle = chapter.title) }
             }
         }
 
-        // Use MediaServiceConnection's playbackState for both isPlaying and position
+        // Use MediaServiceConnection's playbackState only for isPlaying
         mediaServiceConnection.playbackState.observeForever { state ->
             val isPlaying = state?.state == android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
-            val absolutePosition = state?.position ?: 0L
+            _uiState.update { it.copy(isPlaying = isPlaying) }
+        }
 
-            // Convert to chapter-relative position
-            val chapter = currentlyPlaying.chapter.value
-            val chapterRelativePosition = (absolutePosition - chapter.startTimeOffset)
-                .coerceAtLeast(0L)
+        // Observe position from PlaybackStateController via CurrentlyPlayingSingleton
+        // This ensures chapter and position are always in sync
+        if (currentlyPlaying is CurrentlyPlayingSingleton) {
+            viewModelScope.launch {
+                (currentlyPlaying as CurrentlyPlayingSingleton).state.collect { playbackState ->
+                    // Use the controller's computed chapter-relative position
+                    val chapterPositionMs = playbackState.currentChapterPositionMs
+                    val chapterDurationMs = playbackState.currentChapterDurationMs
 
-            _uiState.update {
-                it.copy(
-                    isPlaying = isPlaying,
-                    currentPositionMs = chapterRelativePosition,
-                )
+                    _uiState.update {
+                        it.copy(
+                            currentPositionMs = chapterPositionMs,
+                            durationMs = chapterDurationMs,
+                        )
+                    }
+                }
             }
         }
     }
@@ -175,7 +184,7 @@ class CarModeViewModel @Inject constructor(
                 bookTitle = book.title,
                 author = book.author,
                 coverArtUrl = coverUrl,
-                durationMs = book.duration,
+                // Duration is set from chapter collector, not book
             )
         }
     }

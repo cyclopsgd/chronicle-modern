@@ -59,8 +59,11 @@
 ### Technical Debt
 - [ ] Migrate remaining LiveData to StateFlow
 - [ ] Replace Fresco with Coil throughout
-- [ ] Full Media3 migration (MediaSessionService)
+- [ ] **Full Media3 migration (MediaSessionService)** - May resolve chapter navigation and playback issues
+  - Current MediaSessionCompat has complex chapter offset handling
+  - Media3's MediaSession has cleaner API for chapter/timeline support
 - [ ] Update package name from `local.oss.chronicle` to new name (breaking change)
+- [ ] Clean up PlayerExt.kt - remove CurrentlyPlayingSingleton cast, simplify chapter lookup
 
 ### Phase 7: Home Screen Redesign & Polish
 - [ ] **Home page categorization** (Netflix/Audible style)
@@ -88,6 +91,14 @@
 
 ### High Priority
 - [x] MediaBrowser onConnected callback not firing (fixed: setSessionToken was missing)
+- [ ] **Skip chapter navigation not working** - Skip forward/back buttons don't navigate chapters correctly
+  - Chapter offset semantics mismatch: `startTimeOffset` is track-relative for M4B files
+  - PlayerExt.kt skipToNext/skipToPrevious need architectural review
+  - May require Media3 migration for proper fix
+- [ ] **Play from library list doesn't load chapter metadata** - Books started from library show no chapters
+  - syncAudiobook may not be getting called with proper track list
+  - Chapter data from Plex API not being populated into PlaybackState
+  - AudiobookMediaSessionCallback.handlePlayBookWithNoTracks() investigated but issue persists
 
 ### Medium Priority
 - [ ] Mini player loses audiobook link after app restart (shows "no audiobook found" when clicked)
@@ -95,8 +106,8 @@
 - [ ] Notification doesn't update on chapter change
 - [ ] Large libraries slow to load (needs incremental loading)
 - [ ] Playback progress in library not real-time
-- [ ] User profile images not loading on choose user screen
-- [ ] Profile picture shows black/orange square on selection screen
+- [x] User profile images not loading on choose user screen (fixed: empty URI handling)
+- [x] Profile picture shows black/orange square on selection screen (fixed with above)
 
 ### Low Priority
 - [ ] Sleep timer "end of chapter" doesn't account for playback speed
@@ -123,6 +134,16 @@
 - [x] Chapter-relative progress tracking
 - [x] Dark background throughout app (all fragments updated)
 - [x] Hilt DI reorganization (ActivityRetainedModule for ViewModel access)
+- [x] Mini player progress bar (book progress indicator replacing static orange line)
+- [x] Subtle divider between navbar and mini player
+- [x] Rename "Chronicle" to "Opus" in all user-facing strings
+- [x] Download button repositioned and resized
+- [x] "Don't show again" option for chapter jump warning
+- [x] Fix chapter selection from bottom sheet
+- [x] Reduce spacing between nav bar icons and text
+- [x] Speed toggle (tap to cycle forward, long-press to go back)
+- [x] Library grid/list view toggle
+- [x] Fix user profile images not loading
 
 ### Previous: Hilt Migration
 - [x] Complete Hilt 2.54 migration
