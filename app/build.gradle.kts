@@ -27,8 +27,8 @@ android {
         applicationId = "local.oss.opus"
         minSdk = 26
         targetSdk = 35
-        versionCode = 47
-        versionName = "0.60.22"
+        versionCode = 48
+        versionName = "0.60.23"
 
         testInstrumentationRunner = "local.oss.chronicle.application.OpusTestRunner"
     }
