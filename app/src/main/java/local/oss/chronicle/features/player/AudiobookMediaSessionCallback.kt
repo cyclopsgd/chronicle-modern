@@ -507,13 +507,6 @@ class AudiobookMediaSessionCallback
                     else -> throw NoWhenBranchMatchedException("Unknown media player")
                 }
 
-                // Keep calling currentlyPlaying.update() for backward compatibility
-                currentlyPlaying.update(
-                    book = book,
-                    tracks = tracks,
-                    track = startingTrack.copy(progress = trackListStateManager.currentTrackProgress),
-                )
-
                 mediaSession.setQueueTitle(book.title)
                 mediaSession.setMetadata(metadataList[startingTrackIndex])
 

@@ -239,14 +239,6 @@ class SimpleProgressUpdater
                     )
                 }
 
-                // Keep calling currentlyPlaying.update() for backward compatibility
-                // This will be a no-op once CurrentlyPlayingSingleton fully observes the controller
-                currentlyPlaying.update(
-                    book = book ?: EMPTY_AUDIOBOOK,
-                    track = trackWithCurrentProgress,
-                    tracks = tracks,
-                )
-
                 // Update local DB
                 if (!prefsRepo.debugOnlyDisableLocalProgressTracking) {
                     updateLocalProgress(

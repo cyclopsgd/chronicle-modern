@@ -814,13 +814,6 @@ class Media3PlayerService : MediaLibraryService() {
                                 startPositionMs = startPositionMs
                             )
 
-                            // Update currently playing
-                            currentlyPlaying.update(
-                                book = updatedBook,
-                                tracks = tracks,
-                                track = activeTrack.copy(progress = startPositionMs)
-                            )
-
                             // Return ALL track items for this book
                             val trackItems = tracks.map { it.toMedia3MediaItem(plexConfig) }
                             allResolvedItems.addAll(trackItems)
@@ -912,12 +905,6 @@ class Media3PlayerService : MediaLibraryService() {
                                     chapters = chapters,
                                     startTrackIndex = resolvedStartIndex,
                                     startPositionMs = resolvedStartPos
-                                )
-
-                                currentlyPlaying.update(
-                                    book = updatedBook,
-                                    tracks = tracks,
-                                    track = activeTrack.copy(progress = resolvedStartPos)
                                 )
 
                                 val trackItems = tracks.map { it.toMedia3MediaItem(plexConfig) }
@@ -1167,13 +1154,6 @@ class Media3PlayerService : MediaLibraryService() {
                 chapters = chapters,
                 startTrackIndex = startingTrackIndex,
                 startPositionMs = startPositionMs
-            )
-
-            // Update currently playing
-            currentlyPlaying.update(
-                book = book,
-                tracks = tracks,
-                track = startingTrack.copy(progress = startPositionMs)
             )
 
             // Build Media3 MediaItems
