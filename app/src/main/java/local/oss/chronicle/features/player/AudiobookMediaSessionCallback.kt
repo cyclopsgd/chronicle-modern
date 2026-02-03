@@ -31,6 +31,8 @@ import local.oss.chronicle.features.player.MediaPlayerService.Companion.ACTIVE_T
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_SEEK_TO_TRACK_WITH_ID
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.KEY_START_TIME_TRACK_OFFSET
 import local.oss.chronicle.features.player.MediaPlayerService.Companion.USE_SAVED_TRACK_PROGRESS
+import local.oss.chronicle.features.player.SEEK_TO_CHAPTER_STRING
+import local.oss.chronicle.features.player.CHAPTER_INDEX_KEY
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -185,6 +187,33 @@ class AudiobookMediaSessionCallback
             )
         }
 
+        private fun seekToChapter(chapterIndex: Int) {
+            val chapters = playbackStateController.currentState.chapters
+            if (chapterIndex < 0 || chapterIndex >= chapters.size) {
+                Timber.w("Invalid chapter index $chapterIndex (chapters size: ${chapters.size})")
+                return
+            }
+
+            val chapter = chapters[chapterIndex]
+            Timber.i("Seeking to chapter $chapterIndex: ${chapter.title} at offset ${chapter.startTimeOffset}ms")
+
+            val tracks = trackListStateManager.trackList
+            // Find the track that contains this chapter
+            val trackIndex = tracks.indexOfFirst { it.id.toLong() == chapter.trackId }
+
+            if (trackIndex >= 0) {
+                // Multi-track book: seek to the track and position within it
+                trackListStateManager.updatePosition(trackIndex, chapter.startTimeOffset)
+                currentPlayer.seekTo(trackIndex, chapter.startTimeOffset)
+                Timber.i("Seeked to track $trackIndex at position ${chapter.startTimeOffset}ms")
+            } else {
+                // Single-track book (M4B): just seek to the position
+                trackListStateManager.updatePosition(0, chapter.startTimeOffset)
+                currentPlayer.seekTo(chapter.startTimeOffset)
+                Timber.i("Seeked to position ${chapter.startTimeOffset}ms (single track)")
+            }
+        }
+
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
             if (mediaButtonEvent == null) {
                 return false
@@ -272,6 +301,14 @@ class AudiobookMediaSessionCallback
                 SKIP_BACKWARDS_STRING -> skipBackwards()
                 SKIP_TO_NEXT_STRING -> skipToNext()
                 SKIP_TO_PREVIOUS_STRING -> skipToPrevious()
+                SEEK_TO_CHAPTER_STRING -> {
+                    val chapterIndex = extras?.getInt(CHAPTER_INDEX_KEY, -1) ?: -1
+                    if (chapterIndex >= 0) {
+                        seekToChapter(chapterIndex)
+                    } else {
+                        Timber.w("SEEK_TO_CHAPTER received with invalid chapter index: $chapterIndex")
+                    }
+                }
             }
         }
 
@@ -443,6 +480,18 @@ class AudiobookMediaSessionCallback
                 currentPlayer.playWhenReady = playWhenReady
                 val player = currentPlayer
 
+                // Load the audiobook into PlaybackStateController BEFORE preparing the player
+                // This ensures chapters are available before playback starts, avoiding race conditions
+                // where chapter selection could fail due to empty chapter list
+                val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
+                playbackStateController.loadAudiobook(
+                    audiobook = book,
+                    tracks = tracks,
+                    chapters = chapters,
+                    startTrackIndex = startingTrackIndex,
+                    startPositionMs = trackListStateManager.currentTrackProgress,
+                )
+
                 // NOTE: We used to refresh the auth token here by calling setDefaultRequestProperties,
                 // but that method REPLACES all headers (including X-Plex-Platform, X-Plex-Client-Identifier,
                 // X-Plex-Client-Profile-Extra, etc.) which causes 500 errors from Plex server.
@@ -456,18 +505,6 @@ class AudiobookMediaSessionCallback
                         player.prepare()
                     }
                     else -> throw NoWhenBranchMatchedException("Unknown media player")
-                }
-
-                // Load the audiobook into PlaybackStateController
-                val chapters = book.chapters.ifEmpty { tracks.asChapterList() }
-                serviceScope.launch {
-                    playbackStateController.loadAudiobook(
-                        audiobook = book,
-                        tracks = tracks,
-                        chapters = chapters,
-                        startTrackIndex = startingTrackIndex,
-                        startPositionMs = trackListStateManager.currentTrackProgress,
-                    )
                 }
 
                 // Keep calling currentlyPlaying.update() for backward compatibility
