@@ -50,7 +50,6 @@ import local.oss.chronicle.data.model.toMedia3MediaItem
 import local.oss.chronicle.data.sources.plex.PlexConfig
 import local.oss.chronicle.data.sources.plex.PlexPrefsRepo
 import local.oss.chronicle.data.sources.plex.model.getDuration
-import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
 import local.oss.chronicle.features.player.PlaybackErrorHandler
 import local.oss.chronicle.features.player.PlaybackNetworkCoordinator
 import local.oss.chronicle.features.player.PlaybackStateController
@@ -84,7 +83,6 @@ class Media3PlayerService : MediaLibraryService() {
     @Inject lateinit var plexConfig: PlexConfig
     @Inject lateinit var bookRepository: IBookRepository
     @Inject lateinit var trackRepository: ITrackRepository
-    @Inject lateinit var currentlyPlaying: CurrentlyPlaying
     @Inject lateinit var playbackStateController: PlaybackStateController
     @Inject lateinit var smartRewindCalculator: SmartRewindCalculator
     @Inject lateinit var playbackErrorHandler: PlaybackErrorHandler
