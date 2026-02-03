@@ -59,6 +59,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Set up JDK 17
+      if: matrix.language == 'java-kotlin'
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Remove local Java home override
+      if: matrix.language == 'java-kotlin'
+      run: sed -i '/org.gradle.java.home/d' gradle.properties
+
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
