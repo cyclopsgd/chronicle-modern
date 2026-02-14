@@ -504,6 +504,13 @@ class AudiobookMediaSessionCallback
                     is ExoPlayer -> {
                         val mediaSources = metadataList.toMediaSources(plexPrefsRepo, factory)
                         player.setMediaSources(mediaSources)
+                        // IMPORTANT: Seek BEFORE prepare() to ensure ExoPlayer starts at the correct position
+                        // If we seek after prepare(), the player may have already started buffering from 0:00
+                        // and the seek may be ignored or applied incorrectly
+                        player.seekTo(
+                            trackListStateManager.currentTrackIndex,
+                            trackListStateManager.currentTrackProgress,
+                        )
                         player.prepare()
                     }
                     else -> throw NoWhenBranchMatchedException("Unknown media player")
@@ -518,11 +525,6 @@ class AudiobookMediaSessionCallback
 
                 mediaSession.setQueueTitle(book.title)
                 mediaSession.setMetadata(metadataList[startingTrackIndex])
-
-                player.seekTo(
-                    trackListStateManager.currentTrackIndex,
-                    trackListStateManager.currentTrackProgress,
-                )
 
                 // Inform plex server that audio playback session has started
                 val serverId = plexPrefsRepo.server?.serverId
