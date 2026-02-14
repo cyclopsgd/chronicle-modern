@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.60.26] - 2026-02-14
+
+- chore: bump version to 0.60.26-SNAPSHOT and update CHANGELOG.md (3bf2cbc)
+- fix: handle SEEK_TO_CHAPTER action and fix race condition in chapter loading (d2b1e8b)
+- docs: update CLAUDE.md with release build status (9d0976c)
+- docs: add final completion plan with parallel agent strategy (25ed6d0)
+- Merge remote-tracking branch 'origin/claude/investigate-chapter-selection-4Ul14' (4be5def)
+- fix: comprehensive performance and bug fixes from 7-agent audit (e2c706e)
+- fix: critical bug fixes and code cleanup from autonomous agent work (94ccae6)
+- fix: chapter buffering - seek before prepare to avoid 0:00 start (17cf619)
+- docs: update README with February 2026 improvements (3833a8e)
+- chore: release v0.60.26 (772ad91)
+
 ## [0.60.25] - 2026-02-03
 
 - ci: fix Java home in CI and CodeQL workflows (1b465ba)
