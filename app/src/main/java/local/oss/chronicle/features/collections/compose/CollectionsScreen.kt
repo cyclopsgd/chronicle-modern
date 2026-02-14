@@ -39,6 +39,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +65,7 @@ import local.oss.chronicle.ui.theme.OpusTheme
 /**
  * UI State for the Collections screen.
  */
+@Immutable
 data class CollectionsUiState(
     val collections: List<CollectionItem> = emptyList(),
     val isLoading: Boolean = false,
@@ -77,6 +79,7 @@ data class CollectionsUiState(
 /**
  * Simplified collection model for the Collections UI.
  */
+@Immutable
 data class CollectionItem(
     val id: Int,
     val title: String,

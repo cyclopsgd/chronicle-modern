@@ -5,6 +5,7 @@ import android.text.format.DateUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,7 @@ import javax.inject.Inject
 /**
  * UI State for the Book Details screen.
  */
+@Immutable
 data class BookDetailsUiState(
     val book: BookDetail? = null,
     val chapters: List<ChapterItem> = emptyList(),
@@ -53,6 +55,7 @@ data class BookDetailsUiState(
 /**
  * Simplified book model for the Book Details UI.
  */
+@Immutable
 data class BookDetail(
     val id: Int,
     val title: String,
@@ -67,6 +70,7 @@ data class BookDetail(
 /**
  * Chapter item model for the chapter list.
  */
+@Immutable
 data class ChapterItem(
     val id: Long,
     val trackId: Long,

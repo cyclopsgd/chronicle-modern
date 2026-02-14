@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +56,7 @@ import local.oss.chronicle.ui.theme.OpusTheme
 /**
  * UI State for the Home screen.
  */
+@Immutable
 data class HomeUiState(
     val continueListening: List<HomeBook> = emptyList(),
     val recentlyAdded: List<HomeBook> = emptyList(),
@@ -69,6 +71,7 @@ data class HomeUiState(
 /**
  * Simplified book model for the Home UI.
  */
+@Immutable
 data class HomeBook(
     val id: Int,
     val title: String,
@@ -84,6 +87,7 @@ data class HomeBook(
 /**
  * Collection model for the Home UI.
  */
+@Immutable
 data class HomeCollection(
     val id: Int,
     val title: String,

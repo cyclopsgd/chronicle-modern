@@ -1,0 +1,37 @@
+# Baseline Profile for Opus Audiobook Player
+# This file contains critical code paths that should be pre-compiled
+# for improved startup and runtime performance in release builds.
+
+# Core Application Classes
+Llocal/oss/chronicle/application/OpusApplication;
+Llocal/oss/chronicle/application/MainActivity;
+
+# Compose UI - Home and Navigation
+Llocal/oss/chronicle/features/home/compose/HomeScreenKt;
+Llocal/oss/chronicle/features/home/compose/HomeViewModel;
+
+# Compose UI - Library
+Llocal/oss/chronicle/features/library/compose/LibraryScreenKt;
+Llocal/oss/chronicle/features/library/compose/ComposeLibraryViewModel;
+
+# Compose UI - Now Playing (most frequently used)
+Llocal/oss/chronicle/features/nowplaying/NowPlayingScreenKt;
+Llocal/oss/chronicle/features/nowplaying/NowPlayingViewModel;
+
+# Playback Engine - Critical Path
+Llocal/oss/chronicle/features/player/MediaPlayerService;
+Llocal/oss/chronicle/features/player/PlaybackStateController;
+Llocal/oss/chronicle/features/player/MediaServiceConnection;
+
+# Theme and UI Foundation
+Llocal/oss/chronicle/ui/theme/OpusThemeKt;
+Llocal/oss/chronicle/ui/theme/OpusColors;
+
+# Data Layer - Frequently accessed
+Llocal/oss/chronicle/data/model/Audiobook;
+Llocal/oss/chronicle/data/model/Chapter;
+Llocal/oss/chronicle/data/model/PlaybackState;
+
+# Dependency Injection - Early initialization
+Llocal/oss/chronicle/di/ActivityRetainedModule;
+Llocal/oss/chronicle/di/AppModule;

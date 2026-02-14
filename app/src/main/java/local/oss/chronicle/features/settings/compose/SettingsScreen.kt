@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,7 @@ import local.oss.chronicle.ui.theme.OpusTheme
 /**
  * UI State for the Settings screen.
  */
+@Immutable
 data class SettingsUiState(
     val preferences: List<SettingsItem> = emptyList(),
     val showOptionsSheet: Boolean = false,

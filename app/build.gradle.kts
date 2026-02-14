@@ -205,6 +205,9 @@ dependencies {
     implementation(libs.media3.datasource)
     implementation(libs.media3.cast)
 
+    // Baseline Profiles for improved startup performance
+    implementation("androidx.profileinstaller:profileinstaller:1.3.1")
+
     /*
      * Local Tests
      */

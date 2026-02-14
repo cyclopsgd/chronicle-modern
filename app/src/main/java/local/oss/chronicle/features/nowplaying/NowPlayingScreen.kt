@@ -57,6 +57,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -92,6 +93,7 @@ import local.oss.chronicle.ui.theme.OpusTheme
 /**
  * State holder for the Now Playing screen.
  */
+@Immutable
 data class NowPlayingUiState(
     val bookTitle: String = "",
     val author: String = "",

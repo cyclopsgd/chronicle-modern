@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +51,7 @@ import local.oss.chronicle.ui.theme.OpusTheme
 /**
  * UI State for the Collection Details screen.
  */
+@Immutable
 data class CollectionDetailsUiState(
     val collectionTitle: String = "",
     val books: List<CollectionBook> = emptyList(),
@@ -59,6 +61,7 @@ data class CollectionDetailsUiState(
 /**
  * Book model for the Collection Details UI.
  */
+@Immutable
 data class CollectionBook(
     val id: Int,
     val title: String,

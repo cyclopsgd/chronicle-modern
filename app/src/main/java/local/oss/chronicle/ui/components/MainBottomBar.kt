@@ -66,7 +66,6 @@ fun MainBottomBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         // Mini Player (above nav bar)
         MiniPlayer(

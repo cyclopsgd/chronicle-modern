@@ -6,6 +6,7 @@ import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import local.oss.chronicle.data.sources.MediaSource
@@ -18,7 +19,15 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 @TypeConverters(ChapterListConverter::class)
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["titleSort"]),
+        Index(value = ["isCached"]),
+        Index(value = ["lastViewedAt"]),
+        Index(value = ["addedAt"]),
+        Index(value = ["author"])
+    ]
+)
 data class Audiobook(
     @PrimaryKey
     val id: Int,

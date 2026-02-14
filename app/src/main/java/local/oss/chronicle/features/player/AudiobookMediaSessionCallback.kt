@@ -201,16 +201,18 @@ class AudiobookMediaSessionCallback
             // Find the track that contains this chapter
             val trackIndex = tracks.indexOfFirst { it.id.toLong() == chapter.trackId }
 
-            if (trackIndex >= 0) {
-                // Multi-track book: seek to the track and position within it
-                trackListStateManager.updatePosition(trackIndex, chapter.startTimeOffset)
-                currentPlayer.seekTo(trackIndex, chapter.startTimeOffset)
-                Timber.i("Seeked to track $trackIndex at position ${chapter.startTimeOffset}ms")
-            } else {
-                // Single-track book (M4B): just seek to the position
-                trackListStateManager.updatePosition(0, chapter.startTimeOffset)
-                currentPlayer.seekTo(chapter.startTimeOffset)
-                Timber.i("Seeked to position ${chapter.startTimeOffset}ms (single track)")
+            serviceScope.launch {
+                if (trackIndex >= 0) {
+                    // Multi-track book: seek to the track and position within it
+                    trackListStateManager.updatePosition(trackIndex, chapter.startTimeOffset)
+                    currentPlayer.seekTo(trackIndex, chapter.startTimeOffset)
+                    Timber.i("Seeked to track $trackIndex at position ${chapter.startTimeOffset}ms")
+                } else {
+                    // Single-track book (M4B): just seek to the position
+                    trackListStateManager.updatePosition(0, chapter.startTimeOffset)
+                    currentPlayer.seekTo(chapter.startTimeOffset)
+                    Timber.i("Seeked to position ${chapter.startTimeOffset}ms (single track)")
+                }
             }
         }
 

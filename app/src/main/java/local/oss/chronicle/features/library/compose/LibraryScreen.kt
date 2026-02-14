@@ -51,6 +51,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,6 +89,7 @@ enum class ViewMode {
 /**
  * UI State for the Library screen.
  */
+@Immutable
 data class LibraryUiState(
     val books: List<LibraryBook> = emptyList(),
     val isLoading: Boolean = false,
@@ -112,6 +114,7 @@ enum class ProgressFilter(val displayName: String) {
 /**
  * Simplified book model for the library UI.
  */
+@Immutable
 data class LibraryBook(
     val id: Int,
     val title: String,
