@@ -11,7 +11,7 @@
 
         <variable
             name="audiobookClick"
-            type="local.oss.chronicle.features.library.LibraryFragment.AudiobookClick" />
+            type="local.oss.chronicle.features.library.AudiobookClick" />
 
         <variable
             name="serverConnected"

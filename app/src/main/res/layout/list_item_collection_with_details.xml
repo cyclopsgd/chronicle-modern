@@ -11,7 +11,7 @@
 
         <variable
             name="collectionClick"
-            type="local.oss.chronicle.features.collections.CollectionsFragment.CollectionClick" />
+            type="local.oss.chronicle.features.collections.CollectionClick" />
 
         <variable
             name="serverConnected"

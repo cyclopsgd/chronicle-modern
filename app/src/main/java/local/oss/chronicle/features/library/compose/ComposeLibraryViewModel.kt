@@ -4,10 +4,12 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.lifecycle.asFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import local.oss.chronicle.data.local.IBookRepository
@@ -79,16 +81,91 @@ class ComposeLibraryViewModel @Inject constructor(
     }
 
     private fun observeBooks() {
-        // Observe LiveData from repository
-        bookRepository.getAllBooks().observeForever { books ->
-            allBooks = books ?: emptyList()
-            applyFiltersAndSort()
+        // Convert LiveData to Flow and use smart update logic to prevent
+        // full re-sorts when only progress changes (which happens every 1 second during playback)
+        viewModelScope.launch {
+            bookRepository.getAllBooks()
+                .asFlow()
+                .collect { books ->
+                    val newBooks = books ?: emptyList()
+
+                    // Check if this is just a progress update (same books, same sort-relevant fields)
+                    val isProgressOnlyUpdate = if (allBooks.size == newBooks.size && allBooks.isNotEmpty()) {
+                        allBooks.zip(newBooks).all { (oldBook, newBook) ->
+                            oldBook.id == newBook.id &&
+                            oldBook.title == newBook.title &&
+                            oldBook.author == newBook.author &&
+                            oldBook.titleSort == newBook.titleSort &&
+                            oldBook.addedAt == newBook.addedAt &&
+                            oldBook.lastViewedAt == newBook.lastViewedAt &&
+                            oldBook.duration == newBook.duration &&
+                            oldBook.viewCount == newBook.viewCount &&
+                            oldBook.year == newBook.year &&
+                            oldBook.isCached == newBook.isCached
+                            // Note: we explicitly ignore 'progress' here
+                        }
+                    } else {
+                        false
+                    }
+
+                    allBooks = newBooks
+
+                    if (isProgressOnlyUpdate) {
+                        // Just update the progress values in-place without re-sorting
+                        updateProgressOnly(newBooks)
+                    } else {
+                        // Full re-sort needed (new books added, or sort-relevant fields changed)
+                        applyFiltersAndSort()
+                    }
+                }
+        }
+    }
+
+    /**
+     * Updates only the progress values of books without triggering a full re-sort.
+     * This prevents jank during playback when progress updates every second.
+     */
+    private fun updateProgressOnly(books: List<Audiobook>) {
+        val state = _uiState.value
+        val query = state.searchQuery.lowercase()
+
+        // Apply same filters as applyFiltersAndSort but preserve order
+        var filteredBooks = books
+
+        if (query.isNotEmpty()) {
+            filteredBooks = filteredBooks.filter { book ->
+                book.title.lowercase().contains(query) ||
+                        book.author.lowercase().contains(query)
+            }
+        }
+
+        filteredBooks = when (state.progressFilter) {
+            ProgressFilter.ALL -> filteredBooks
+            ProgressFilter.NOT_STARTED -> filteredBooks.filter {
+                it.progress == 0L && it.viewCount == 0L
+            }
+            ProgressFilter.IN_PROGRESS -> filteredBooks.filter {
+                it.progress > 0L && it.progress < it.duration - 120000
+            }
+            ProgressFilter.FINISHED -> filteredBooks.filter {
+                it.viewCount > 0L || (it.duration > 0 && it.progress >= it.duration - 120000)
+            }
+            ProgressFilter.DOWNLOADED -> filteredBooks.filter { it.isCached }
+        }
+
+        // Convert to UI model (this updates progress bars)
+        val libraryBooks = filteredBooks.map { it.toLibraryBook() }
+
+        _uiState.update { current ->
+            current.copy(books = libraryBooks)
         }
     }
 
     private fun observeRefreshState() {
-        librarySyncRepository.isRefreshing.observeForever { isRefreshing ->
-            _uiState.update { it.copy(isRefreshing = isRefreshing) }
+        viewModelScope.launch {
+            librarySyncRepository.isRefreshing.asFlow().collect { isRefreshing ->
+                _uiState.update { it.copy(isRefreshing = isRefreshing) }
+            }
         }
     }
 

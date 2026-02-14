@@ -168,6 +168,9 @@ class PlaybackStateController
 
                 // Persist on pause/stop to ensure position is saved
                 if (!isPlaying) {
+                    // Cancel any pending debounced writes first
+                    dbWriteJob?.cancel()
+                    // Force immediate write to ensure we don't lose position
                     persistStateToDatabase(_state.value, force = true)
                 }
             }
@@ -200,6 +203,9 @@ class PlaybackStateController
                 // Persist current position before clearing
                 val currentState = _state.value
                 if (currentState.hasMedia) {
+                    // Wait for any pending writes to complete first
+                    dbWriteJob?.join()
+                    // Then force one final write
                     persistStateToDatabase(currentState, force = true)
                 }
 
@@ -275,9 +281,6 @@ class PlaybackStateController
         // ========================
 
         private fun scheduleDatabaseWrite(state: PlaybackState) {
-            // Cancel any pending write
-            dbWriteJob?.cancel()
-
             // Check if write is needed
             val lastPersisted = lastPersistedState
             if (lastPersisted != null &&
@@ -286,7 +289,18 @@ class PlaybackStateController
                 return
             }
 
-            // Schedule debounced write
+            // If there's a pending write for a DIFFERENT book, persist it immediately
+            // to avoid losing position when switching books
+            if (lastPersisted != null && lastPersisted.audiobook?.id != state.audiobook?.id) {
+                Timber.d("$TAG: Book switch detected - forcing immediate persist of previous book")
+                // Persist the previous book's position immediately (not the new one)
+                persistStateToDatabase(lastPersisted, force = true)
+            }
+
+            // Cancel pending write for the SAME book (debounce)
+            dbWriteJob?.cancel()
+
+            // Schedule debounced write for current state
             dbWriteJob =
                 scope.launch {
                     delay(DB_WRITE_DEBOUNCE_MS)

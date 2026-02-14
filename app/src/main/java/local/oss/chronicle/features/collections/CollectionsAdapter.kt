@@ -15,7 +15,7 @@ class CollectionsAdapter(
     initialViewStyle: String,
     private val isVertical: Boolean,
     private val isSquare: Boolean,
-    private val collectionClick: CollectionsFragment.CollectionClick,
+    private val collectionClick: CollectionClick,
 ) : ListAdapter<Collection, RecyclerView.ViewHolder>(CollectionsDiffCallback()) {
     private val COVER_GRID = 1
     private val TEXT_ONLY = 2
@@ -92,7 +92,7 @@ class CollectionsAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(
             collection: Collection,
-            collectionClick: CollectionsFragment.CollectionClick,
+            collectionClick: CollectionClick,
             serverConnected: Boolean,
         ) {
             binding.isSquare = isSquare
@@ -120,7 +120,7 @@ class CollectionsAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
             collection: Collection,
-            collectionClick: CollectionsFragment.CollectionClick,
+            collectionClick: CollectionClick,
         ) {
             binding.collection = collection
             binding.collectionClick = collectionClick
@@ -144,7 +144,7 @@ class DetailsStyleViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(
         collection: Collection,
-        collectionClick: CollectionsFragment.CollectionClick,
+        collectionClick: CollectionClick,
         serverConnected: Boolean,
         isSquare: Boolean,
     ) {

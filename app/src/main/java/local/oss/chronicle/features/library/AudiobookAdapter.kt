@@ -17,7 +17,7 @@ class AudiobookAdapter(
     initialViewStyle: String,
     private val isVertical: Boolean,
     private val isSquare: Boolean,
-    private val audiobookClick: LibraryFragment.AudiobookClick,
+    private val audiobookClick: AudiobookClick,
 ) : ListAdapter<Audiobook, RecyclerView.ViewHolder>(AudiobookDiffCallback()) {
     private val COVER_GRID = 1
     private val TEXT_ONLY = 2
@@ -94,7 +94,7 @@ class AudiobookAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(
             audiobook: Audiobook,
-            audiobookClick: LibraryFragment.AudiobookClick,
+            audiobookClick: AudiobookClick,
             serverConnected: Boolean,
         ) {
             binding.isSquare = isSquare
@@ -122,7 +122,7 @@ class AudiobookAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
             audiobook: Audiobook,
-            audiobookClick: LibraryFragment.AudiobookClick,
+            audiobookClick: AudiobookClick,
         ) {
             binding.audiobook = audiobook
             binding.audiobookClick = audiobookClick
@@ -146,7 +146,7 @@ class DetailsStyleViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(
         audiobook: Audiobook,
-        audiobookClick: LibraryFragment.AudiobookClick,
+        audiobookClick: AudiobookClick,
         serverConnected: Boolean,
         isSquare: Boolean,
     ) {

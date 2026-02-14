@@ -300,6 +300,12 @@ class MediaPlayerService :
                 }
             }
         }
+
+        // Auto-restore last played book state on service creation
+        // This ensures the service knows what book to play when the mini player is tapped
+        // Without this, the mini player shows a book but the service doesn't know about it until play is pressed
+        Timber.i("Auto-restoring playback state on service creation")
+        mediaSessionCallback.onPause()
     }
 
     private fun updateAudioAttrs(exoPlayer: ExoPlayer) {

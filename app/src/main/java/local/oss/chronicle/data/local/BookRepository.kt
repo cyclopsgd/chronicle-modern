@@ -493,13 +493,28 @@ class BookRepository
 
                 Timber.i("Loaded chapters: ${chapters.map { "[${it.index}/${it.discNumber}]" }}")
 
+                // Preserve local progress unless forceNetwork is true
+                // tracks.getProgress() returns the first track's progress, which may be stale
+                // The local audiobook.progress is more reliable if we've been playing recently
+                val progressToUse = if (forceNetwork) {
+                    tracks.getProgress()
+                } else {
+                    // Use whichever is more recent: local or network
+                    // If local was viewed more recently, trust local progress
+                    if (audiobook.lastViewedAt >= networkBook.lastViewedAt) {
+                        audiobook.progress
+                    } else {
+                        tracks.getProgress()
+                    }
+                }
+
                 val merged =
                     Audiobook.merge(
                         network = networkBook,
                         local = audiobook,
                         forceNetwork = forceNetwork,
                     ).copy(
-                        progress = tracks.getProgress(),
+                        progress = progressToUse,
                         duration = tracks.getDuration(),
                         chapters = chapters,
                     )
