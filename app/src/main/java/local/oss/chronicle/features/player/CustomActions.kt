@@ -21,6 +21,12 @@ fun buildCustomActions(prefsRepo: PrefsRepo): List<PlaybackStateCompat.CustomAct
 /** Threshold to decide whether to jump to the beginning of the current chapter or to the previous chapter. */
 const val SKIP_TO_PREVIOUS_CHAPTER_THRESHOLD_SECONDS = 30L
 
+/** Custom action to seek to a specific chapter by index */
+const val SEEK_TO_CHAPTER_STRING = "SEEK_TO_CHAPTER"
+
+/** Bundle key for the chapter index when seeking to a chapter */
+const val CHAPTER_INDEX_KEY = "CHAPTER_INDEX"
+
 const val SKIP_TO_NEXT_STRING = "Skip to next"
 val SKIP_TO_NEXT: PlaybackStateCompat.CustomAction =
     PlaybackStateCompat.CustomAction.Builder(

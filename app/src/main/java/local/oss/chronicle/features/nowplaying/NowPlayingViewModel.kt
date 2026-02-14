@@ -28,6 +28,8 @@ import local.oss.chronicle.data.model.Chapter
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlaying
 import local.oss.chronicle.features.currentlyplaying.CurrentlyPlayingSingleton
 import local.oss.chronicle.features.player.MediaServiceConnection
+import local.oss.chronicle.features.player.CHAPTER_INDEX_KEY
+import local.oss.chronicle.features.player.SEEK_TO_CHAPTER_STRING
 import local.oss.chronicle.features.player.SKIP_BACKWARDS_STRING
 import local.oss.chronicle.features.player.SKIP_FORWARDS_STRING
 import local.oss.chronicle.features.player.SKIP_TO_NEXT_STRING
@@ -407,9 +409,9 @@ class NowPlayingViewModel @Inject constructor(
         if (chapterIndex >= 0) {
             Timber.d("Jumping to chapter $chapterIndex: ${chapter.title}")
             val extras = Bundle().apply {
-                putInt("CHAPTER_INDEX", chapterIndex)
+                putInt(CHAPTER_INDEX_KEY, chapterIndex)
             }
-            transportControls.sendCustomAction("SEEK_TO_CHAPTER", extras)
+            transportControls.sendCustomAction(SEEK_TO_CHAPTER_STRING, extras)
         } else {
             Timber.w("Could not find chapter index for: ${chapter.title}")
         }
